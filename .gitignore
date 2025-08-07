@@ -1,0 +1,6 @@
+# Main lock file
+/package-lock.json
+
+# Frontend dependencies and build files
+/frontend/node_modules
+/frontend/dist
