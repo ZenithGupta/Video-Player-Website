@@ -18,6 +18,8 @@ const content = {
         intro: "In our daily lives, simple activities like sitting on the floor, using Indian-style toilets, climbing stairs, bending down and getting up, walking long distances, or standing for long periods become difficult for many people. Through our THE ONE LAST MOVE training program, you can perform all these everyday actions effortlessly and pain-free.",
         subHeading: "This program is designed to help you overcome problems such as osteoarthritis, muscle tightness, muscle weakness, and spinal instability, allowing you to do what you love again—without limitations.",
         suffering: "Are you suffering from joint degeneration or osteoarthritis? You're not alone—and surgery is not the only solution.",
+        journey: "This program helps restore your movement, kickstart a healthier, happier old age, and regain your confidence in life. I am happy to be part of your joyful journey.",
+        question: "How can the One Last Move program help you overcome joint issues and move with ease in daily life?",
         principle1Title: "1. Understanding the Root Cause",
         principle1Text: "The primary reason you still experience pain is the lack of a proper understanding of what’s actually causing it. This program helps you get to the root of your problem and teaches you how to resolve it with the right movements and awareness.",
         principle2Title: "2. What Truly Deserves Attention?",
@@ -64,6 +66,8 @@ const content = {
         intro: "நமது அன்றாட வாழ்வில், தரையில் அமர்வது, இந்திய கழிப்பறைகளைப் பயன்படுத்துவது, மாடிப்படிகளில் ஏறுவது, குனிந்து எழுவது, நீண்ட தூரம் நடப்பது, அல்லது நீண்ட நேரம் நிற்பது போன்ற எளிய நடவடிக்கைகள் பலருக்கு கடினமாகிவிடுகின்றன. எங்களின் 'தி ஒன் லாஸ்ட் மூவ்' பயிற்சித் திட்டத்தின் மூலம், இந்த அனைத்து அன்றாட செயல்களையும் நீங்கள் எளிதாகவும் வலியின்றியும் செய்ய முடியும்.",
         subHeading: "இந்தத் திட்டம் ஆஸ்டியோஆர்த்ரைடிஸ், தசை இறுக்கம், தசை பலவீனம் மற்றும் முதுகெலும்பு உறுதியற்றன்மை போன்ற பிரச்சனைகளைச் சமாளிக்க உதவும் வகையில் வடிவமைக்கப்பட்டுள்ளது, இது நீங்கள் விரும்பியதை மீண்டும் வரம்புகள் இல்லாமல் செய்ய அனுமதிக்கிறது.",
         suffering: "நீங்கள் மூட்டு தேய்மானம் அல்லது கீல்வாதத்தால் பாதிக்கப்படுகிறீர்களா? நீங்கள் தனியாக இல்லை - அறுவை சிகிச்சை மட்டுமே தீர்வு அல்ல.",
+        journey: "இந்தத் திட்டம் உங்கள் இயக்கத்தை மீட்டெடுக்கவும், ஆரோக்கியமான, மகிழ்ச்சியான முதுமையைத் தொடங்கவும், வாழ்க்கையில் உங்கள் நம்பிக்கையை மீண்டும் பெறவும் உதவுகிறது. உங்கள் மகிழ்ச்சியான பயணத்தின் ஒரு பகுதியாக இருப்பதில் நான் மகிழ்ச்சியடைகிறேன்.",
+        question: "மூட்டுப் பிரச்சனைகளைச் சமாளித்து, அன்றாட வாழ்வில் எளிதாக நடமாட, 'தி ஒன் லாஸ்ட் மூவ்' திட்டம் உங்களுக்கு எப்படி உதவும்?",
         principle1Title: "1. மூல காரணத்தைப் புரிந்துகொள்வது",
         principle1Text: "நீங்கள் இன்னும் வலியை அனுபவிப்பதற்கு முக்கிய காரணம், உண்மையான காரணம் என்ன என்பதைப் பற்றிய சரியான புரிதல் இல்லாததுதான். இந்தத் திட்டம் உங்கள் பிரச்சனையின் மூல காரணத்தைக் கண்டறிந்து, சரியான இயக்கங்கள் மற்றும் விழிப்புணர்வுடன் அதை எவ்வாறு தீர்ப்பது என்று உங்களுக்குக் கற்பிக்கிறது.",
         principle2Title: "2. உண்மையிலேயே கவனம் செலுத்த வேண்டியது என்ன?",
@@ -204,6 +208,8 @@ const IntroSection = ({ language }) => (
         <p className="sub-heading mx-auto" style={{ maxWidth: '800px' }}>{content[language].intro}</p>
         <p className="lead mx-auto" style={{ maxWidth: '800px' }}>{content[language].subHeading}</p>
         <p className="fw-bold mt-3">{content[language].suffering}</p>
+        <p className="lead mx-auto mt-3" style={{ maxWidth: '800px' }}>{content[language].journey}</p>
+        <p className="sub-heading mx-auto" style={{ maxWidth: '800px' }}>{content[language].question}</p>
     </Container>
 );
 
