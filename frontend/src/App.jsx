@@ -189,10 +189,10 @@ const VideoPlayerSection = ({ course, onClose }) => (
         <div className='player-wrapper'>
             <iframe 
                 className='video-iframe'
-                src="https://player.vimeo.com/video/1108493445?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479&autoplay=1" 
-                frameBorder="0" 
-                allow="autoplay; fullscreen; picture-in-picture; clipboard-write" 
-                referrerPolicy="strict-origin-when-cross-origin" 
+                src="https://player.vimeo.com/video/1108493445?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479&autoplay=1"
+                frameBorder="0"
+                allow="autoplay; fullscreen; picture-in-picture; clipboard-write"
+
                 title={course.title}>
             </iframe>
         </div>
@@ -263,6 +263,17 @@ const PainAssessmentSection = ({ language }) => (
                 </ul>
             </Col>
         </Row>
+        <div className="google-form-container mt-5">
+            <iframe
+                src="https://docs.google.com/forms/d/e/1FAIpQLSfIaAj1pHSriX35aprHF28nDtRXEq6pDIHDVuqYd4ugXR4Peg/viewform?embedded=true"
+                width="100%"
+                height="1503"
+                frameBorder="0"
+                marginHeight="0"
+                marginWidth="0">
+                Loading…
+            </iframe>
+        </div>
     </Container>
 );
 
