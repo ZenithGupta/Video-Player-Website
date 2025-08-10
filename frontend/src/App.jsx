@@ -239,42 +239,49 @@ const HowItWorksSection = ({ language }) => (
     </Container>
 );
 
-const PainAssessmentSection = ({ language }) => (
-    <Container fluid="xl" className="py-5">
-        <h2 className="text-center main-heading mb-4">{content[language].assessmentTitle}</h2>
-        <p className="text-center sub-heading mx-auto" style={{ maxWidth: '800px' }}>{content[language].assessmentIntro}</p>
-        <Row className="justify-content-center">
-            <Col md={8}>
-                <ul className="list-unstyled">
-                    <li className="mt-3">{content[language].q1}</li>
-                    <li className="mt-3">{content[language].q2}</li>
-                    <li className="mt-3">{content[language].q3}</li>
-                    <li className="mt-3">{content[language].q4}</li>
-                    <li className="mt-3">{content[language].q5}</li>
-                    <li className="mt-3">{content[language].q6}</li>
-                    <li className="mt-3">{content[language].q7}</li>
-                    <li className="mt-3">{content[language].q8}</li>
-                    <li className="mt-3">{content[language].q9}</li>
-                    <li className="mt-3">{content[language].q10}</li>
-                    <li className="mt-3">{content[language].q11}</li>
-                    <li className="mt-3">{content[language].q12}</li>
-                    <li className="mt-3">{content[language].q13}</li>
-                </ul>
-            </Col>
-        </Row>
-        <div className="google-form-container mt-5">
-            <iframe
-                src="https://docs.google.com/forms/d/e/1FAIpQLSfIaAj1pHSriX35aprHF28nDtRXEq6pDIHDVuqYd4ugXR4Peg/viewform?embedded=true"
-                width="100%"
-                height="1503"
-                frameBorder="0"
-                marginHeight="0"
-                marginWidth="0">
-                Loading…
-            </iframe>
-        </div>
-    </Container>
-);
+const PainAssessmentSection = ({ language }) => {
+    const formUrls = {
+        en: "https://docs.google.com/forms/d/e/1FAIpQLSfIaAj1pHSriX35aprHF28nDtRXEq6pDIHDVuqYd4ugXR4Peg/viewform?embedded=true",
+        ta: "https://docs.google.com/forms/d/e/1FAIpQLSfMx1WBo2CvnSWlLBRHcd6gmrraAYt3A--jFGriFNrKkSc9uA/viewform?embedded=true"
+    };
+
+    return (
+        <Container fluid="xl" className="py-5">
+            <h2 className="text-center main-heading mb-4">{content[language].assessmentTitle}</h2>
+            <p className="text-center sub-heading mx-auto" style={{ maxWidth: '800px' }}>{content[language].assessmentIntro}</p>
+            <Row className="justify-content-center">
+                <Col md={8}>
+                    <ul className="list-unstyled">
+                        <li className="mt-3">{content[language].q1}</li>
+                        <li className="mt-3">{content[language].q2}</li>
+                        <li className="mt-3">{content[language].q3}</li>
+                        <li className="mt-3">{content[language].q4}</li>
+                        <li className="mt-3">{content[language].q5}</li>
+                        <li className="mt-3">{content[language].q6}</li>
+                        <li className="mt-3">{content[language].q7}</li>
+                        <li className="mt-3">{content[language].q8}</li>
+                        <li className="mt-3">{content[language].q9}</li>
+                        <li className="mt-3">{content[language].q10}</li>
+                        <li className="mt-3">{content[language].q11}</li>
+                        <li className="mt-3">{content[language].q12}</li>
+                        <li className="mt-3">{content[language].q13}</li>
+                    </ul>
+                </Col>
+            </Row>
+            <div className="google-form-container mt-5">
+                <iframe
+                    src={formUrls[language]}
+                    width="100%"
+                    height="750"
+                    frameBorder="0"
+                    marginHeight="0"
+                    marginWidth="0">
+                    Loading…
+                </iframe>
+            </div>
+        </Container>
+    );
+};
 
 const CtaSection = ({ language }) => (
     <Container fluid="xl" className="py-5 text-center bg-light">
