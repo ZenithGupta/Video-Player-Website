@@ -287,6 +287,7 @@ const VideoPlayerSection = ({ course, onClose }) => (
     <div className="video-player-section">
         <div className="video-player-header"><h5 className="video-player-title">{course.title}</h5><CloseButton onClick={onClose} /></div>
         <div className='player-wrapper'><iframe className='video-iframe' src={`https://player.vimeo.com/video/1108493445?badge=0&autopause=0&player_id=0&app_id=58479&autoplay=1`} frameBorder="0" allow="autoplay; fullscreen; picture-in-picture; clipboard-write" title={course.title}></iframe></div>
+
     </div>
 );
 
