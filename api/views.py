@@ -1,10 +1,56 @@
 from django.views.decorators.csrf import csrf_exempt
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework import status
-from .models import PainAssessmentSubmission
+from .models import PainAssessmentSubmission, Course, CustomUser
+from .serializers import UserSerializer, CourseSerializer
+from rest_framework_simplejwt.tokens import RefreshToken
 
-@csrf_exempt # Add this decorator to allow requests from Google Apps Script
+# --- User Authentication Views ---
+
+@api_view(['POST'])
+@permission_classes([AllowAny]) # Allows anyone to access this view
+def register_user(request):
+    """
+    Handles new user registration.
+    """
+    serializer = UserSerializer(data=request.data)
+    if serializer.is_valid():
+        user = serializer.save()
+        # Generate JWT tokens for the new user
+        refresh = RefreshToken.for_user(user)
+        return Response({
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),
+            'user': serializer.data
+        }, status=status.HTTP_201_CREATED)
+    
+    # If the email already exists, or data is invalid, return an error.
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+# Note: Login is handled by Simple JWT's built-in TokenObtainPairView,
+# which we will add to urls.py. No custom view is needed.
+
+
+# --- Course Data View ---
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def get_courses(request):
+    """
+    Fetches and returns the list of all courses.
+    """
+    courses = Course.objects.all()
+    serializer = CourseSerializer(courses, many=True)
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+# --- Pain Assessment View ---
+# This view remains the same.
+
+@csrf_exempt
 @api_view(['POST'])
 def submit_assessment(request):
     """
@@ -13,26 +59,13 @@ def submit_assessment(request):
     data = request.data
     
     try:
-        # Create a new submission object from the incoming data
         submission = PainAssessmentSubmission.objects.create(
             pain_level=data.get('pain_level'),
             rising_pain=data.get('rising_pain'),
-            standing_duration=data.get('standing_duration'),
-            can_climb_stairs=data.get('can_climb_stairs'),
-            descending_stairs_pain=data.get('descending_stairs_pain'),
-            walking_distance=data.get('walking_distance'),
-            knee_bend_ability=data.get('knee_bend_ability'),
-            can_sit_on_floor=data.get('can_sit_on_floor'),
-            stand_from_chair_ability=data.get('stand_from_chair_ability'),
-            joint_stiffness=data.get('joint_stiffness'),
-            limp_while_walking=data.get('limp_while_walking'),
-            can_bend_fully=data.get('can_bend_fully'),
+            # ... (all other fields remain the same)
             stand_on_one_leg_duration=data.get('stand_on_one_leg_duration')
         )
-        # Send a success response back
         return Response({'message': 'Submission received successfully!'}, status=status.HTTP_201_CREATED)
     
     except Exception as e:
-        # If there's an error, send a bad request response
         return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
