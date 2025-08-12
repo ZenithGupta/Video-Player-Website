@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Container, Navbar, Nav, Form, Button, Card, CloseButton, Row, Col, Modal, Alert } from 'react-bootstrap';
 import axios from 'axios';
 
@@ -6,6 +6,7 @@ import axios from 'axios';
 import './index.css'; 
 
 // --- API Base URL ---
+// Make sure your Django server is running on this address
 const API_URL = 'http://127.0.0.1:8000/api';
 
 // --- Language Content ---
@@ -137,6 +138,18 @@ const AuthModal = ({ show, handleClose, mode, onLoginSuccess, language }) => {
     const [dob, setDob] = useState('');
     const [error, setError] = useState('');
 
+    // This effect clears the form fields every time the modal is opened.
+    useEffect(() => {
+        if (show) {
+            setEmail('');
+            setPassword('');
+            setFirstName('');
+            setLastName('');
+            setDob('');
+            setError('');
+        }
+    }, [show]);
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
@@ -148,15 +161,26 @@ const AuthModal = ({ show, handleClose, mode, onLoginSuccess, language }) => {
                     last_name: lastName,
                     email: email,
                     password: password,
-                    date_of_birth: dob
+                    profile: { date_of_birth: dob }
                 });
                 onLoginSuccess(response.data);
             } catch (err) {
-                setError(err.response?.data?.email?.[0] || 'Registration failed. Please check your details.');
+                const errorData = err.response?.data;
+                if (errorData) {
+                    // Check for specific username/email error from Django
+                    if (errorData.username) {
+                        setError(errorData.username.join(' '));
+                    } else {
+                        const messages = Object.values(errorData).flat().join(' ');
+                        setError(messages || 'Registration failed. Please check your details.');
+                    }
+                } else {
+                    setError('An unknown error occurred.');
+                }
             }
         } else { // Login mode
             try {
-                const response = await axios.post(`${API_URL}/token/`, { email, password });
+                const response = await axios.post(`${API_URL}/token/`, { username: email, password });
                 onLoginSuccess(response.data);
             } catch (err) {
                 setError('Login failed. Please check your email and password.');
@@ -206,10 +230,8 @@ const AuthModal = ({ show, handleClose, mode, onLoginSuccess, language }) => {
 };
 
 const Header = ({ language, setLanguage, user, onLogout, onShowLogin, onShowSignup }) => {
-    const toggleLanguage = () => {
-        setLanguage(language === 'en' ? 'ta' : 'en');
-    };
-
+    const toggleLanguage = () => setLanguage(language === 'en' ? 'ta' : 'en');
+    
     return (
         <Navbar bg="white" expand="lg" className="app-header shadow-sm sticky-top">
             <Container fluid="xl">
@@ -218,19 +240,12 @@ const Header = ({ language, setLanguage, user, onLogout, onShowLogin, onShowSign
                 <Navbar.Collapse id="basic-navbar-nav" className="mobile-nav-bg">
                     <Nav className="me-auto">
                         <Nav.Link href="#" className="header-nav-link">{content[language].categories}</Nav.Link>
-                        <Nav.Link href="#" className="header-nav-link">{content[language].forBusiness}</Nav.Link>
-                        <Nav.Link href="#" className="header-nav-link">{content[language].teach}</Nav.Link>
                     </Nav>
                     <Form className="d-flex flex-grow-1 my-2 my-lg-0 mx-lg-4">
-                        <div className="search-wrapper">
-                            <span className="search-icon-wrapper"><SearchIcon /></span>
-                            <Form.Control type="search" placeholder={content[language].searchPlaceholder} className="search-input" />
-                        </div>
+                        <div className="search-wrapper"><span className="search-icon-wrapper"><SearchIcon /></span><Form.Control type="search" placeholder={content[language].searchPlaceholder} className="search-input" /></div>
                     </Form>
                     <Nav className="align-items-center">
-                        <Button variant="outline-dark" className="header-btn mx-2 my-1 my-lg-0" onClick={toggleLanguage}>
-                            {language === 'en' ? 'தமிழ்' : 'English'}
-                        </Button>
+                        <Button variant="outline-dark" className="header-btn mx-2 my-1 my-lg-0" onClick={toggleLanguage}>{language === 'en' ? 'தமிழ்' : 'English'}</Button>
                         {user ? (
                             <>
                                 <Navbar.Text className="me-2">{content[language].welcome}, {user.first_name}</Navbar.Text>
@@ -257,9 +272,9 @@ const CourseCard = ({ course, onCourseSelect }) => (
                 <Card.Title className="course-card-title">{course.title}</Card.Title>
                 <Card.Text className="course-card-instructor">{course.instructor}</Card.Text>
                 <div className="d-flex align-items-center">
-                    <span className="course-card-rating">{course.rating.toFixed(1)}</span>
+                    <span className="course-card-rating">{course.rating}</span>
                     <div className="d-flex me-1"><StarIcon filled /><StarIcon filled /><StarIcon filled /><StarIcon filled /><StarIcon /></div>
-                    <span className="course-card-reviews">({course.reviews.toLocaleString()})</span>
+                    <span className="course-card-reviews">({course.reviews})</span>
                 </div>
                 <p className="course-card-price">₹{course.price}</p>
                 {course.bestseller && <div className="badge bestseller-badge">Bestseller</div>}
@@ -270,31 +285,12 @@ const CourseCard = ({ course, onCourseSelect }) => (
 
 const VideoPlayerSection = ({ course, onClose }) => (
     <div className="video-player-section">
-        <div className="video-player-header">
-            <h5 className="video-player-title">{course.title}</h5>
-            <CloseButton onClick={onClose} />
-        </div>
-        <div className='player-wrapper'>
-            <iframe
-                className='video-iframe'
-                src="https://player.vimeo.com/video/1108493445?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479&autoplay=1"
-                frameBorder="0"
-                allow="autoplay; fullscreen; picture-in-picture; clipboard-write"
-                title={course.title}>
-            </iframe>
-        </div>
+        <div className="video-player-header"><h5 className="video-player-title">{course.title}</h5><CloseButton onClick={onClose} /></div>
+        <div className='player-wrapper'><iframe className='video-iframe' src={`https://player.vimeo.com/video/1108493445?badge=0&autopause=0&player_id=0&app_id=58479&autoplay=1`} frameBorder="0" allow="autoplay; fullscreen; picture-in-picture; clipboard-write" title={course.title}></iframe></div>
     </div>
 );
 
-const IntroSection = ({ language }) => (
-    <Container fluid="xl" className="py-5 text-center">
-        <h1 className="main-heading">{content[language].mainHeading}</h1>
-        <p className="sub-heading mx-auto" style={{ maxWidth: '800px' }}>{content[language].intro}</p>
-        <p className="lead mx-auto" style={{ maxWidth: '800px' }}>{content[language].subHeading}</p>
-        <p className="fw-bold mt-3">{content[language].suffering}</p>
-        <p className="lead mx-auto mt-3" style={{ maxWidth: '800px' }}>{content[language].journey}</p>
-    </Container>
-);
+const IntroSection = ({ language }) => ( <Container fluid="xl" className="py-5 text-center"> <h1 className="main-heading">{content[language].mainHeading}</h1> <p className="sub-heading mx-auto" style={{ maxWidth: '800px' }}>{content[language].intro}</p> <p className="lead mx-auto" style={{ maxWidth: '800px' }}>{content[language].subHeading}</p> <p className="fw-bold mt-3">{content[language].suffering}</p> <p className="lead mx-auto mt-3" style={{ maxWidth: '800px' }}>{content[language].journey}</p> </Container> );
 
 const PrinciplesSection = ({ language }) => (
     <Container fluid="xl" className="py-5 bg-light">
@@ -425,6 +421,27 @@ const CoursesSection = ({ onCourseSelect, language }) => {
 export default function App() {
     const [selectedCourse, setSelectedCourse] = useState(null);
     const [language, setLanguage] = useState('en');
+    const [showModal, setShowModal] = useState(false);
+    const [modalMode, setModalMode] = useState('login'); // 'login' or 'signup'
+    const [authToken, setAuthToken] = useState(null);
+    const [currentUser, setCurrentUser] = useState(null);
+
+    const handleShowLogin = () => { setModalMode('login'); setShowModal(true); };
+    const handleShowSignup = () => { setModalMode('signup'); setShowModal(true); };
+    const handleCloseModal = () => setShowModal(false);
+
+    const handleLoginSuccess = (data) => {
+        setAuthToken(data.access);
+        // In a real app, you would decode the JWT to get user info,
+        // but for now we'll just set a placeholder.
+        setCurrentUser({ first_name: 'User' }); 
+        handleCloseModal();
+    };
+
+    const handleLogout = () => {
+        setAuthToken(null);
+        setCurrentUser(null);
+    };
 
     const handleCourseSelect = (course) => {
         setSelectedCourse(course);
@@ -437,7 +454,21 @@ export default function App() {
 
     return (
         <div className="app-container">
-            <Header language={language} setLanguage={setLanguage} />
+            <Header 
+                language={language} 
+                setLanguage={setLanguage} 
+                user={currentUser} 
+                onLogout={handleLogout}
+                onShowLogin={handleShowLogin}
+                onShowSignup={handleShowSignup}
+            />
+            <AuthModal 
+                show={showModal} 
+                handleClose={handleCloseModal} 
+                mode={modalMode} 
+                onLoginSuccess={handleLoginSuccess}
+                language={language}
+            />
             <main>
                 {selectedCourse && <VideoPlayerSection key={selectedCourse.id} course={selectedCourse} onClose={handleClosePlayer} />}
                 <IntroSection language={language} />
