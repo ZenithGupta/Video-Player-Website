@@ -1,8 +1,12 @@
 import React, { useState, useRef } from 'react';
-import { Container, Navbar, Nav, Form, Button, Card, CloseButton, Row, Col } from 'react-bootstrap';
+import { Container, Navbar, Nav, Form, Button, Card, CloseButton, Row, Col, Modal, Alert } from 'react-bootstrap';
+import axios from 'axios';
 
 // This imports the styles from your main CSS file.
 import './index.css'; 
+
+// --- API Base URL ---
+const API_URL = 'http://127.0.0.1:8000/api';
 
 // --- Language Content ---
 const content = {
@@ -14,6 +18,8 @@ const content = {
         teach: "Teach",
         login: "Log In",
         signup: "Sign Up",
+        logout: "Log Out",
+        welcome: "Welcome",
         mainHeading: "The One Last Move Program: Move Without Pain",
         intro: "In our daily lives, simple activities like sitting on the floor, using Indian-style toilets, climbing stairs, bending down and getting up, walking long distances, or standing for long periods become difficult for many people. Through our THE ONE LAST MOVE training program, you can perform all these everyday actions effortlessly and pain-free.",
         subHeading: "This program is designed to help you overcome problems such as osteoarthritis, muscle tightness, muscle weakness, and spinal instability, allowing you to do what you love again—without limitations.",
@@ -61,6 +67,8 @@ const content = {
         teach: "கற்பிக்க",
         login: "உள்நுழை",
         signup: "பதிவு செய்க",
+        logout: "வெளியேறு",
+        welcome: "வருக",
         mainHeading: "தி ஒன் லாஸ்ட் மூவ் புரோகிராம்: வலியின்றி நகரவும்",
         intro: "நமது அன்றாட வாழ்வில், தரையில் அமர்வது, இந்திய கழிப்பறைகளைப் பயன்படுத்துவது, மாடிப்படிகளில் ஏறுவது, குனிந்து எழுவது, நீண்ட தூரம் நடப்பது, அல்லது நீண்ட நேரம் நிற்பது போன்ற எளிய நடவடிக்கைகள் பலருக்கு கடினமாகிவிடுகின்றன. எங்களின் 'தி ஒன் லாஸ்ட் மூவ்' பயிற்சித் திட்டத்தின் மூலம், இந்த அனைத்து அன்றாட செயல்களையும் நீங்கள் எளிதாகவும் வலியின்றியும் செய்ய முடியும்.",
         subHeading: "இந்தத் திட்டம் ஆஸ்டியோஆர்த்ரைடிஸ், தசை இறுக்கம், தசை பலவீனம் மற்றும் முதுகெலும்பு உறுதியற்றன்மை போன்ற பிரச்சனைகளைச் சமாளிக்க உதவும் வகையில் வடிவமைக்கப்பட்டுள்ளது, இது நீங்கள் விரும்பியதை மீண்டும் வரம்புகள் இல்லாமல் செய்ய அனுமதிக்கிறது.",
@@ -102,13 +110,8 @@ const content = {
     }
 };
 
-
 // --- SVG Icons ---
-const StarIcon = ({ filled }) => (
-    <svg className="star-icon" style={{ color: filled ? '#e59819' : '#d1d7dc' }} fill="currentColor" viewBox="0 0 20 20">
-        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.957a1 1 0 00.95.69h4.162c.969 0 1.371 1.24.588 1.81l-3.368 2.448a1 1 0 00-.364 1.118l1.287 3.957c.3.921-.755 1.688-1.54 1.118l-3.368-2.448a1 1 0 00-1.175 0l-3.368 2.448c-.784.57-1.838-.197-1.539-1.118l1.287-3.957a1 1 0 00-.364-1.118L2.25 9.384c-.783-.57-.38-1.81.588-1.81h4.162a1 1 0 00.95-.69L9.049 2.927z" />
-    </svg>
-);
+const StarIcon = ({ filled }) => ( <svg className="star-icon" style={{ color: filled ? '#e59819' : '#d1d7dc' }} fill="currentColor" viewBox="0 0 20 20"> <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.957a1 1 0 00.95.69h4.162c.969 0 1.371 1.24.588 1.81l-3.368 2.448a1 1 0 00-.364 1.118l1.287 3.957c.3.921-.755 1.688-1.54 1.118l-3.368-2.448a1 1 0 00-1.175 0l-3.368 2.448c-.784.57-1.838-.197-1.539-1.118l1.287-3.957a1 1 0 00-.364-1.118L2.25 9.384c-.783-.57-.38-1.81.588-1.81h4.162a1 1 0 00.95-.69L9.049 2.927z" /> </svg> );
 const SearchIcon = () => <svg className="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>;
 const ChevronLeftIcon = () => <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" /></svg>;
 const ChevronRightIcon = () => <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" /></svg>;
@@ -126,7 +129,83 @@ const coursesData = [
 
 
 // --- Components ---
-const Header = ({ language, setLanguage }) => {
+const AuthModal = ({ show, handleClose, mode, onLoginSuccess, language }) => {
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [firstName, setFirstName] = useState('');
+    const [lastName, setLastName] = useState('');
+    const [dob, setDob] = useState('');
+    const [error, setError] = useState('');
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setError('');
+
+        if (mode === 'signup') {
+            try {
+                const response = await axios.post(`${API_URL}/register/`, {
+                    first_name: firstName,
+                    last_name: lastName,
+                    email: email,
+                    password: password,
+                    date_of_birth: dob
+                });
+                onLoginSuccess(response.data);
+            } catch (err) {
+                setError(err.response?.data?.email?.[0] || 'Registration failed. Please check your details.');
+            }
+        } else { // Login mode
+            try {
+                const response = await axios.post(`${API_URL}/token/`, { email, password });
+                onLoginSuccess(response.data);
+            } catch (err) {
+                setError('Login failed. Please check your email and password.');
+            }
+        }
+    };
+
+    return (
+        <Modal show={show} onHide={handleClose} centered>
+            <Modal.Header closeButton>
+                <Modal.Title>{mode === 'signup' ? content[language].signup : content[language].login}</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+                {error && <Alert variant="danger">{error}</Alert>}
+                <Form onSubmit={handleSubmit}>
+                    {mode === 'signup' && (
+                        <>
+                            <Form.Group className="mb-3">
+                                <Form.Label>First Name</Form.Label>
+                                <Form.Control type="text" value={firstName} onChange={(e) => setFirstName(e.target.value)} required />
+                            </Form.Group>
+                            <Form.Group className="mb-3">
+                                <Form.Label>Last Name</Form.Label>
+                                <Form.Control type="text" value={lastName} onChange={(e) => setLastName(e.target.value)} required />
+                            </Form.Group>
+                            <Form.Group className="mb-3">
+                                <Form.Label>Date of Birth</Form.Label>
+                                <Form.Control type="date" value={dob} onChange={(e) => setDob(e.target.value)} required />
+                            </Form.Group>
+                        </>
+                    )}
+                    <Form.Group className="mb-3">
+                        <Form.Label>Email</Form.Label>
+                        <Form.Control type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+                    </Form.Group>
+                    <Form.Group className="mb-3">
+                        <Form.Label>Password</Form.Label>
+                        <Form.Control type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+                    </Form.Group>
+                    <Button variant="dark" type="submit" className="w-100">
+                        {mode === 'signup' ? content[language].signup : content[language].login}
+                    </Button>
+                </Form>
+            </Modal.Body>
+        </Modal>
+    );
+};
+
+const Header = ({ language, setLanguage, user, onLogout, onShowLogin, onShowSignup }) => {
     const toggleLanguage = () => {
         setLanguage(language === 'en' ? 'ta' : 'en');
     };
@@ -152,8 +231,17 @@ const Header = ({ language, setLanguage }) => {
                         <Button variant="outline-dark" className="header-btn mx-2 my-1 my-lg-0" onClick={toggleLanguage}>
                             {language === 'en' ? 'தமிழ்' : 'English'}
                         </Button>
-                        <Button variant="outline-dark" className="header-btn my-1 my-lg-0">{content[language].login}</Button>
-                        <Button variant="dark" className="header-btn ms-lg-2 my-1 my-lg-0">{content[language].signup}</Button>
+                        {user ? (
+                            <>
+                                <Navbar.Text className="me-2">{content[language].welcome}, {user.first_name}</Navbar.Text>
+                                <Button variant="outline-dark" className="header-btn my-1 my-lg-0" onClick={onLogout}>{content[language].logout}</Button>
+                            </>
+                        ) : (
+                            <>
+                                <Button variant="outline-dark" className="header-btn my-1 my-lg-0" onClick={onShowLogin}>{content[language].login}</Button>
+                                <Button variant="dark" className="header-btn ms-lg-2 my-1 my-lg-0" onClick={onShowSignup}>{content[language].signup}</Button>
+                            </>
+                        )}
                     </Nav>
                 </Navbar.Collapse>
             </Container>
