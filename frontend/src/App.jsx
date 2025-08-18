@@ -165,15 +165,14 @@ const AuthModal = ({ show, handleClose, mode, onLoginSuccess, language }) => {
                 });
                 onLoginSuccess(response.data);
             } catch (err) {
+                // This logic is now updated to handle the new error format
                 const errorData = err.response?.data;
-                if (errorData) {
-                    // Check for specific username/email error from Django
-                    if (errorData.username) {
-                        setError(errorData.username.join(' '));
-                    } else {
-                        const messages = Object.values(errorData).flat().join(' ');
-                        setError(messages || 'Registration failed. Please check your details.');
-                    }
+                if (errorData && errorData.email) {
+                    setError(errorData.email[0]); // Display the specific email error
+                } else if (errorData) {
+                    // Fallback for other potential validation errors
+                    const messages = Object.values(errorData).flat().join(' ');
+                    setError(messages || 'Registration failed. Please check your details.');
                 } else {
                     setError('An unknown error occurred.');
                 }
