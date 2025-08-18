@@ -6,6 +6,7 @@ from rest_framework import status
 from .models import PainAssessmentSubmission, Course 
 from .serializers import UserSerializer, CourseSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
+from django.db import IntegrityError # Import IntegrityError
 
 # --- User Authentication Views ---
 
@@ -17,16 +18,23 @@ def register_user(request):
     """
     serializer = UserSerializer(data=request.data)
     if serializer.is_valid():
-        user = serializer.save()
-        # Generate JWT tokens for the new user
-        refresh = RefreshToken.for_user(user)
-        return Response({
-            'refresh': str(refresh),
-            'access': str(refresh.access_token),
-            'user': serializer.data
-        }, status=status.HTTP_201_CREATED)
+        try:
+            user = serializer.save()
+            # Generate JWT tokens for the new user
+            refresh = RefreshToken.for_user(user)
+            return Response({
+                'refresh': str(refresh),
+                'access': str(refresh.access_token),
+                'user': serializer.data
+            }, status=status.HTTP_201_CREATED)
+        except IntegrityError:
+            # This will now catch the duplicate email/username error
+            return Response(
+                {'email': ['An account with this email already exists.']}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
     
-    # If the email already exists, or data is invalid, return an error.
+    # If the initial data is invalid, return the serializer's errors.
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 

@@ -165,15 +165,14 @@ const AuthModal = ({ show, handleClose, mode, onLoginSuccess, language }) => {
                 });
                 onLoginSuccess(response.data);
             } catch (err) {
+                // This logic is now updated to handle the new error format
                 const errorData = err.response?.data;
-                if (errorData) {
-                    // Check for specific username/email error from Django
-                    if (errorData.username) {
-                        setError(errorData.username.join(' '));
-                    } else {
-                        const messages = Object.values(errorData).flat().join(' ');
-                        setError(messages || 'Registration failed. Please check your details.');
-                    }
+                if (errorData && errorData.email) {
+                    setError(errorData.email[0]); // Display the specific email error
+                } else if (errorData) {
+                    // Fallback for other potential validation errors
+                    const messages = Object.values(errorData).flat().join(' ');
+                    setError(messages || 'Registration failed. Please check your details.');
                 } else {
                     setError('An unknown error occurred.');
                 }
@@ -287,6 +286,7 @@ const VideoPlayerSection = ({ course, onClose }) => (
     <div className="video-player-section">
         <div className="video-player-header"><h5 className="video-player-title">{course.title}</h5><CloseButton onClick={onClose} /></div>
         <div className='player-wrapper'><iframe className='video-iframe' src={`https://player.vimeo.com/video/1108493445?badge=0&autopause=0&player_id=0&app_id=58479&autoplay=1`} frameBorder="0" allow="autoplay; fullscreen; picture-in-picture; clipboard-write" title={course.title}></iframe></div>
+
     </div>
 );
 
