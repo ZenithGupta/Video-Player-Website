@@ -3,10 +3,9 @@ import { Container, Navbar, Nav, Form, Button, Card, CloseButton, Row, Col, Moda
 import axios from 'axios';
 
 // This imports the styles from your main CSS file.
-import './index.css'; 
+import './index.css';
 
 // --- API Base URL ---
-// Make sure your Django server is running on this address
 const API_URL = 'http://127.0.0.1:8000/api';
 
 // --- Language Content ---
@@ -117,18 +116,6 @@ const SearchIcon = () => <svg className="search-icon" fill="none" stroke="curren
 const ChevronLeftIcon = () => <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" /></svg>;
 const ChevronRightIcon = () => <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" /></svg>;
 
-
-// --- Mock Data ---
-const courseCategories = ["Pain Relief", "Strength Training", "Mobility & Flexibility", "Posture Correction", "Sports Injury"];
-const coursesData = [
-    { id: 1, title: "The Complete Guide to Knee Pain Relief", instructor: "Dr. Eva Rostova", rating: 4.8, reviews: 1987, price: "2,799", image: "https://placehold.co/240x135/749BC2/FFFFFF?text=Knee+Pain", bestseller: true },
-    { id: 2, title: "Yoga for a Healthy Back: 21 Day Program", instructor: "Dr. Ben Carter", rating: 4.9, reviews: 4812, price: "3,199", image: "https://placehold.co/240x135/4682A9/FFFFFF?text=Yoga", premium: true },
-    { id: 3, title: "Core Strength Masterclass for Beginners", instructor: "Dr. Frank Miller", rating: 4.8, reviews: 3105, price: "899", image: "https://placehold.co/240x135/91C8E4/FFFFFF?text=Core", premium: true },
-    { id: 4, title: "Full Body Home Workout: No Equipment", instructor: "Dr. Chloe Davis", rating: 4.6, reviews: 1890, price: "799", image: "https://placehold.co/240x135/749BC2/FFFFFF?text=Workout" },
-    { id: 5, title: "Ultimate Flexibility Guide: Unlock Your Body", instructor: "Dr. Angela Wyatt", rating: 4.7, reviews: 1523, price: "1,299", image: "https://placehold.co/240x135/4682A9/FFFFFF?text=Flexibility" },
-];
-
-
 // --- Components ---
 const AuthModal = ({ show, handleClose, mode, onLoginSuccess, language }) => {
     const [email, setEmail] = useState('');
@@ -136,9 +123,9 @@ const AuthModal = ({ show, handleClose, mode, onLoginSuccess, language }) => {
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
     const [dob, setDob] = useState('');
+    const [gender, setGender] = useState('');
     const [error, setError] = useState('');
 
-    // This effect clears the form fields every time the modal is opened.
     useEffect(() => {
         if (show) {
             setEmail('');
@@ -146,6 +133,7 @@ const AuthModal = ({ show, handleClose, mode, onLoginSuccess, language }) => {
             setFirstName('');
             setLastName('');
             setDob('');
+            setGender('');
             setError('');
         }
     }, [show]);
@@ -161,16 +149,15 @@ const AuthModal = ({ show, handleClose, mode, onLoginSuccess, language }) => {
                     last_name: lastName,
                     email: email,
                     password: password,
-                    profile: { date_of_birth: dob }
+                    date_of_birth: dob,
+                    gender: gender,
                 });
                 onLoginSuccess(response.data);
             } catch (err) {
-                // This logic is now updated to handle the new error format
                 const errorData = err.response?.data;
                 if (errorData && errorData.email) {
-                    setError(errorData.email[0]); // Display the specific email error
+                    setError(errorData.email[0]);
                 } else if (errorData) {
-                    // Fallback for other potential validation errors
                     const messages = Object.values(errorData).flat().join(' ');
                     setError(messages || 'Registration failed. Please check your details.');
                 } else {
@@ -209,6 +196,15 @@ const AuthModal = ({ show, handleClose, mode, onLoginSuccess, language }) => {
                                 <Form.Label>Date of Birth</Form.Label>
                                 <Form.Control type="date" value={dob} onChange={(e) => setDob(e.target.value)} required />
                             </Form.Group>
+                            <Form.Group className="mb-3">
+                                <Form.Label>Gender</Form.Label>
+                                <Form.Control as="select" value={gender} onChange={(e) => setGender(e.target.value)}>
+                                    <option value="">Select Gender</option>
+                                    <option value="M">Male</option>
+                                    <option value="F">Female</option>
+                                    <option value="O">Other</option>
+                                </Form.Control>
+                            </Form.Group>
                         </>
                     )}
                     <Form.Group className="mb-3">
@@ -227,7 +223,6 @@ const AuthModal = ({ show, handleClose, mode, onLoginSuccess, language }) => {
         </Modal>
     );
 };
-
 const Header = ({ language, setLanguage, user, onLogout, onShowLogin, onShowSignup }) => {
     const toggleLanguage = () => setLanguage(language === 'en' ? 'ta' : 'en');
     
@@ -262,34 +257,85 @@ const Header = ({ language, setLanguage, user, onLogout, onShowLogin, onShowSign
         </Navbar>
     );
 };
+const CourseCard = ({ course, onCourseSelect }) => {
+    const firstVideo = course.playlists?.[0]?.videos?.[0];
 
-const CourseCard = ({ course, onCourseSelect }) => (
-    <div className="course-card" onClick={() => onCourseSelect(course)}>
-        <Card className="border-0 h-100 bg-transparent">
-            <Card.Img variant="top" src={course.image} className="course-card-img" />
-            <Card.Body className="p-0 pt-2">
-                <Card.Title className="course-card-title">{course.title}</Card.Title>
-                <Card.Text className="course-card-instructor">{course.instructor}</Card.Text>
-                <div className="d-flex align-items-center">
-                    <span className="course-card-rating">{course.rating}</span>
-                    <div className="d-flex me-1"><StarIcon filled /><StarIcon filled /><StarIcon filled /><StarIcon filled /><StarIcon /></div>
-                    <span className="course-card-reviews">({course.reviews})</span>
-                </div>
-                <p className="course-card-price">₹{course.price}</p>
-                {course.bestseller && <div className="badge bestseller-badge">Bestseller</div>}
-            </Card.Body>
-        </Card>
-    </div>
-);
+    return (
+        <div className="course-card" onClick={() => onCourseSelect(course)}>
+            <Card className="border-0 h-100 bg-transparent">
+                <Card.Img 
+                    variant="top" 
+                    src={firstVideo?.image || 'https://placehold.co/240x135/749BC2/FFFFFF?text=Course'} 
+                    className="course-card-img" 
+                />
+                <Card.Body className="p-0 pt-2">
+                    <Card.Title className="course-card-title">{course.title}</Card.Title>
+                    <Card.Text className="course-card-instructor">{firstVideo?.instructor || 'Dr. Physio'}</Card.Text>
+                    <div className="d-flex align-items-center">
+                        <span className="course-card-rating">{firstVideo?.rating || '4.5'}</span>
+                        {/* Star icons can be made dynamic based on rating */}
+                        <span className="course-card-reviews">({firstVideo?.reviews || '1234'})</span>
+                    </div>
+                    <p className="course-card-price">₹{course.price}</p>
+                    {course.bestseller && <div className="badge bestseller-badge">Bestseller</div>}
+                </Card.Body>
+            </Card>
+        </div>
+    );
+};
 
-const VideoPlayerSection = ({ course, onClose }) => (
-    <div className="video-player-section">
-        <div className="video-player-header"><h5 className="video-player-title">{course.title}</h5><CloseButton onClick={onClose} /></div>
-        <div className='player-wrapper'><iframe className='video-iframe' src={`https://player.vimeo.com/video/1108493445?badge=0&autopause=0&player_id=0&app_id=58479&autoplay=1`} frameBorder="0" allow="autoplay; fullscreen; picture-in-picture; clipboard-write" title={course.title}></iframe></div>
+const VideoPlayerSection = ({ course, onClose }) => {
+    const videoToPlay = course.playlists?.[0]?.videos?.[0];
 
-    </div>
-);
+    const getEmbedUrl = (url) => {
+        if (!url) return '';
+        try {
+            const videoUrl = new URL(url);
+            const pathParts = videoUrl.pathname.split('/').filter(Boolean);
+            if (pathParts.length === 0) return '';
 
+            const videoId = pathParts[0];
+            const privacyHash = pathParts[1];
+            
+            if (privacyHash) {
+                return `https://player.vimeo.com/video/${videoId}?h=${privacyHash}&autoplay=1`;
+            }
+            return `https://player.vimeo.com/video/${videoId}?autoplay=1`;
+        } catch (e) {
+            console.error("Invalid Vimeo URL:", url, e);
+            return ""; 
+        }
+    };
+
+    const embedUrl = getEmbedUrl(videoToPlay?.vimeo_url);
+
+    if (!videoToPlay || !embedUrl) {
+        return (
+            <div className="video-player-section">
+                <Alert variant="warning">No video available for this course.</Alert>
+                <Button onClick={onClose}>Close</Button>
+            </div>
+        );
+    }
+
+    return (
+        <div className="video-player-section">
+            <div className="video-player-header">
+                <h5 className="video-player-title">{videoToPlay.title}</h5>
+                <CloseButton onClick={onClose} />
+            </div>
+            <div className='player-wrapper'>
+                <iframe
+                    className='video-iframe'
+                    src={embedUrl}
+                    frameBorder="0"
+                    allow="autoplay; fullscreen; picture-in-picture; clipboard-write"
+                    title={videoToPlay.title}>
+                </iframe>
+            </div>
+        </div>
+    );
+};
 const IntroSection = ({ language }) => ( <Container fluid="xl" className="py-5 text-center"> <h1 className="main-heading">{content[language].mainHeading}</h1> <p className="sub-heading mx-auto" style={{ maxWidth: '800px' }}>{content[language].intro}</p> <p className="lead mx-auto" style={{ maxWidth: '800px' }}>{content[language].subHeading}</p> <p className="fw-bold mt-3">{content[language].suffering}</p> <p className="lead mx-auto mt-3" style={{ maxWidth: '800px' }}>{content[language].journey}</p> </Container> );
 
 const PrinciplesSection = ({ language }) => (
@@ -377,10 +423,23 @@ const CtaSection = ({ language }) => (
     </Container>
 );
 
-
 const CoursesSection = ({ onCourseSelect, language }) => {
-    const [activeTab, setActiveTab] = useState(courseCategories[0]);
+    const [courses, setCourses] = useState([]);
+    const [activeTab, setActiveTab] = useState('Pain Relief');
     const scrollContainerRef = useRef(null);
+
+    useEffect(() => {
+        const fetchCourses = async () => {
+            try {
+                const response = await axios.get(`${API_URL}/courses/`);
+                setCourses(response.data);
+            } catch (error) {
+                console.error("Failed to fetch courses:", error);
+            }
+        };
+        fetchCourses();
+    }, []);
+
     const scroll = (direction) => {
         if (scrollContainerRef.current) {
             const scrollAmount = direction === 'left' ? -scrollContainerRef.current.offsetWidth + 50 : scrollContainerRef.current.offsetWidth - 50;
@@ -395,7 +454,7 @@ const CoursesSection = ({ onCourseSelect, language }) => {
             </div>
 
             <Nav variant="tabs" activeKey={activeTab} onSelect={(k) => setActiveTab(k)} className="course-tabs">
-                {courseCategories.map(category => (
+                {["Pain Relief", "Strength Training", "Mobility & Flexibility", "Posture Correction", "Sports Injury"].map(category => (
                     <Nav.Item key={category}>
                         <Nav.Link eventKey={category}>{category}</Nav.Link>
                     </Nav.Item>
@@ -409,7 +468,7 @@ const CoursesSection = ({ onCourseSelect, language }) => {
                 <div className="carousel-wrapper mt-4">
                    <Button onClick={() => scroll('left')} variant="light" className="scroll-btn scroll-btn-left"><ChevronLeftIcon/></Button>
                     <div ref={scrollContainerRef} className="course-carousel">
-                        {coursesData.map(course => <CourseCard key={course.id} course={course} onCourseSelect={onCourseSelect} />)}
+                        {courses.map(course => <CourseCard key={course.id} course={course} onCourseSelect={onCourseSelect} />)}
                     </div>
                    <Button onClick={() => scroll('right')} variant="light" className="scroll-btn scroll-btn-right"><ChevronRightIcon/></Button>
                 </div>
@@ -417,7 +476,6 @@ const CoursesSection = ({ onCourseSelect, language }) => {
         </Container>
     );
 };
-
 export default function App() {
     const [selectedCourse, setSelectedCourse] = useState(null);
     const [language, setLanguage] = useState('en');
@@ -432,9 +490,7 @@ export default function App() {
 
     const handleLoginSuccess = (data) => {
         setAuthToken(data.access);
-        // In a real app, you would decode the JWT to get user info,
-        // but for now we'll just set a placeholder.
-        setCurrentUser({ first_name: 'User' }); 
+        setCurrentUser(data.user);
         handleCloseModal();
     };
 
