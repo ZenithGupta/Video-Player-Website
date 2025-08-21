@@ -166,7 +166,7 @@ const AuthModal = ({ show, handleClose, mode, onLoginSuccess, language }) => {
             }
         } else { // Login mode
             try {
-                const response = await axios.post(`${API_URL}/token/`, { username: email, password });
+                const response = await axios.post(`${API_URL}/token/`, { email: email, password });
                 onLoginSuccess(response.data);
             } catch (err) {
                 setError('Login failed. Please check your email and password.');
@@ -488,10 +488,19 @@ export default function App() {
     const handleShowSignup = () => { setModalMode('signup'); setShowModal(true); };
     const handleCloseModal = () => setShowModal(false);
 
-    const handleLoginSuccess = (data) => {
+    const handleLoginSuccess = async (data) => {
         setAuthToken(data.access);
-        setCurrentUser(data.user);
-        handleCloseModal();
+        // After getting the token, fetch the user's details
+        try {
+            const userResponse = await axios.get(`${API_URL}/user/`, {
+                headers: { Authorization: `Bearer ${data.access}` }
+            });
+            setCurrentUser(userResponse.data);
+            handleCloseModal();
+        } catch (error) {
+            console.error("Failed to fetch user data after login:", error);
+            // Handle error - maybe log the user out
+        }
     };
 
     const handleLogout = () => {
