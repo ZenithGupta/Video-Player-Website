@@ -1,18 +1,32 @@
 from rest_framework import serializers
 from .models import User, Course, Playlist, Video, UserCourse
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+
+class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+
+        # Add custom claims
+        token['email'] = user.email
+        token['full_name'] = user.get_full_name()
+        token['username'] = user.username 
+
+
+        return token
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('id', 'username', 'email', 'first_name', 'last_name', 'password', 'date_of_birth', 'gender')
+        fields = ('id', 'email', 'first_name', 'last_name', 'password', 'date_of_birth', 'gender') # Remove 'username' from here
         extra_kwargs = {
             'password': {'write_only': True},
-            'username': {'read_only': True}
         }
 
     def create(self, validated_data):
+        # This now correctly calls your CustomUserManager's create_user method.
+        # It passes email, password, and the rest of the data as extra_fields.
         user = User.objects.create_user(
-            username=validated_data['email'],
             email=validated_data['email'],
             password=validated_data['password'],
             first_name=validated_data.get('first_name', ''),

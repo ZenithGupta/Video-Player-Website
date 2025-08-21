@@ -1,17 +1,22 @@
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated # Import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
-from .models import PainAssessmentSubmission, Course 
+from .models import PainAssessmentSubmission, Course
 from .serializers import UserSerializer, CourseSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
-from django.db import IntegrityError # Import IntegrityError
+from django.db import IntegrityError
+from rest_framework_simplejwt.views import TokenObtainPairView
+from .serializers import MyTokenObtainPairSerializer # Import your new serializer
+
+class MyTokenObtainPairView(TokenObtainPairView):
+    serializer_class = MyTokenObtainPairSerializer
 
 # --- User Authentication Views ---
 
 @api_view(['POST'])
-@permission_classes([AllowAny]) # Allows anyone to access this view
+@permission_classes([AllowAny])
 def register_user(request):
     """
     Handles new user registration.
@@ -20,7 +25,6 @@ def register_user(request):
     if serializer.is_valid():
         try:
             user = serializer.save()
-            # Generate JWT tokens for the new user
             refresh = RefreshToken.for_user(user)
             return Response({
                 'refresh': str(refresh),
@@ -28,14 +32,22 @@ def register_user(request):
                 'user': serializer.data
             }, status=status.HTTP_201_CREATED)
         except IntegrityError:
-            # This will now catch the duplicate email/username error
             return Response(
-                {'email': ['An account with this email already exists.']}, 
+                {'email': ['An account with this email already exists.']},
                 status=status.HTTP_400_BAD_REQUEST
             )
-    
-    # If the initial data is invalid, return the serializer's errors.
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+# --- New view to get the current user ---
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_current_user(request):
+    """
+    Fetches and returns the currently authenticated user's data.
+    """
+    serializer = UserSerializer(request.user)
+    return Response(serializer.data)
+
 
 
 # Note: Login is handled by Simple JWT's built-in TokenObtainPairView,
