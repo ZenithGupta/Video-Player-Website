@@ -13,6 +13,7 @@ urlpatterns = [
 
     # Course Data Endpoint
     path('courses/', views.get_courses, name='get_courses'),
+    path('courses/<int:pk>/', views.get_course_detail, name='get_course_detail'),
 
     # User Authentication Endpoints
     path('register/', views.register_user, name='register_user'),

@@ -3,7 +3,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated # Import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
-from .models import PainAssessmentSubmission, Course
+from .models import PainAssessmentSubmission, Course, Video, Playlist
 from .serializers import UserSerializer, CourseSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.db import IntegrityError
@@ -65,6 +65,19 @@ def get_courses(request):
     courses = Course.objects.all()
     serializer = CourseSerializer(courses, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def get_course_detail(request, pk):
+    """
+    Fetches and returns a single course by its ID.
+    """
+    try:
+        course = Course.objects.get(pk=pk)
+        serializer = CourseSerializer(course)
+        return Response(serializer.data)
+    except Course.DoesNotExist:
+        return Response({'error': 'Course not found'}, status=status.HTTP_404_NOT_FOUND)
 
 
 # --- Pain Assessment View ---
