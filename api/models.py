@@ -101,6 +101,7 @@ class Course(models.Model):
 
 # --- Playlist Model ---
 class Playlist(models.Model):
+    playlist_id = models.IntegerField(primary_key=True)
     title = models.CharField(max_length=200)
     course = models.ForeignKey(Course, related_name='playlists', on_delete=models.CASCADE)
     videos = models.ManyToManyField(Video, related_name='playlists')
@@ -115,6 +116,7 @@ class UserCourse(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     start_time = models.DateTimeField(auto_now_add=True)
     end_time = models.DateTimeField()
+    playlist = models.ForeignKey(Playlist, on_delete=models.CASCADE)
 
     def save(self, *args, **kwargs):
         if not self.id:

@@ -1,6 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Container, Navbar, Nav, Form, Button, Card, CloseButton, Row, Col, Modal, Alert } from 'react-bootstrap';
 import axios from 'axios';
+import { Routes, Route, Link } from 'react-router-dom';
+// --- Import your new page component ---
+import VideoPlayerPage from './VideoPlayerPage.jsx';
 
 // This imports the styles from your main CSS file.
 import './index.css';
@@ -261,13 +264,14 @@ const CourseCard = ({ course, onCourseSelect }) => {
     const firstVideo = course.playlists?.[0]?.videos?.[0];
 
     return (
-        <div className="course-card" onClick={() => onCourseSelect(course)}>
-            <Card className="border-0 h-100 bg-transparent">
-                <Card.Img 
-                    variant="top" 
-                    src={firstVideo?.image || 'https://placehold.co/240x135/749BC2/FFFFFF?text=Course'} 
-                    className="course-card-img" 
-                />
+         <Link to={`/course/${course.id}`} className="course-card-link">
+            <div className="course-card">
+                <Card className="border-0 h-100 bg-transparent">
+                    <Card.Img 
+                        variant="top" 
+                        src={firstVideo?.image || 'https://placehold.co/240x135/749BC2/FFFFFF?text=Course'} 
+                        className="course-card-img" 
+                    />
                 <Card.Body className="p-0 pt-2">
                     <Card.Title className="course-card-title">{course.title}</Card.Title>
                     <Card.Text className="course-card-instructor">{firstVideo?.instructor || 'Dr. Physio'}</Card.Text>
@@ -280,7 +284,8 @@ const CourseCard = ({ course, onCourseSelect }) => {
                     {course.bestseller && <div className="badge bestseller-badge">Bestseller</div>}
                 </Card.Body>
             </Card>
-        </div>
+            </div>
+        </Link>
     );
 };
 
@@ -476,11 +481,14 @@ const CoursesSection = ({ onCourseSelect, language }) => {
         </Container>
     );
 };
+// --- FINAL App Component ---
 export default function App() {
-    const [selectedCourse, setSelectedCourse] = useState(null);
+    // --- OLD State REMOVED ---
+    // const [selectedCourse, setSelectedCourse] = useState(null);
+
     const [language, setLanguage] = useState('en');
     const [showModal, setShowModal] = useState(false);
-    const [modalMode, setModalMode] = useState('login'); // 'login' or 'signup'
+    const [modalMode, setModalMode] = useState('login');
     const [authToken, setAuthToken] = useState(null);
     const [currentUser, setCurrentUser] = useState(null);
 
@@ -490,7 +498,6 @@ export default function App() {
 
     const handleLoginSuccess = async (data) => {
         setAuthToken(data.access);
-        // After getting the token, fetch the user's details
         try {
             const userResponse = await axios.get(`${API_URL}/user/`, {
                 headers: { Authorization: `Bearer ${data.access}` }
@@ -499,7 +506,6 @@ export default function App() {
             handleCloseModal();
         } catch (error) {
             console.error("Failed to fetch user data after login:", error);
-            // Handle error - maybe log the user out
         }
     };
 
@@ -507,41 +513,46 @@ export default function App() {
         setAuthToken(null);
         setCurrentUser(null);
     };
-
-    const handleCourseSelect = (course) => {
-        setSelectedCourse(course);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    };
-
-    const handleClosePlayer = () => {
-        setSelectedCourse(null);
-    };
+    
+    // --- OLD Handlers REMOVED ---
+    // const handleCourseSelect = (course) => { ... };
+    // const handleClosePlayer = () => { ... };
 
     return (
         <div className="app-container">
-            <Header 
-                language={language} 
-                setLanguage={setLanguage} 
-                user={currentUser} 
+            <Header
+                language={language}
+                setLanguage={setLanguage}
+                user={currentUser}
                 onLogout={handleLogout}
                 onShowLogin={handleShowLogin}
                 onShowSignup={handleShowSignup}
             />
-            <AuthModal 
-                show={showModal} 
-                handleClose={handleCloseModal} 
-                mode={modalMode} 
+            <AuthModal
+                show={showModal}
+                handleClose={handleCloseModal}
+                mode={modalMode}
                 onLoginSuccess={handleLoginSuccess}
                 language={language}
             />
             <main>
-                {selectedCourse && <VideoPlayerSection key={selectedCourse.id} course={selectedCourse} onClose={handleClosePlayer} />}
-                <IntroSection language={language} />
-                <PrinciplesSection language={language} />
-                <HowItWorksSection language={language} />
-                <CoursesSection onCourseSelect={handleCourseSelect} language={language} />
-                <CtaSection language={language} />
-                <PainAssessmentSection language={language} />
+                {/* --- NEW Routing Logic --- */}
+                <Routes>
+                    {/* Route for the Home Page */}
+                    <Route path="/" element={
+                        <>
+                            <IntroSection language={language} />
+                            <PrinciplesSection language={language} />
+                            <HowItWorksSection language={language} />
+                            <CoursesSection language={language} />
+                            <CtaSection language={language} />
+                            <PainAssessmentSection language={language} />
+                        </>
+                    } />
+
+                    {/* Route for the Video Player Page */}
+                    <Route path="/course/:courseId" element={<VideoPlayerPage />} />
+                </Routes>
             </main>
         </div>
     );

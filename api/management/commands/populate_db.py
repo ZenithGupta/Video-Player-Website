@@ -1,60 +1,110 @@
 import random
 from django.core.management.base import BaseCommand
-from api.models import Video, Playlist, Course
+from api.models import User, Course, Playlist, Video, UserCourse
 
 class Command(BaseCommand):
-    help = 'Populates the database with sample videos, playlists, and courses.'
+    help = 'Populates the database with sample data'
 
-    def handle(self, *args, **options):
-        self.stdout.write(self.style.SUCCESS('Starting database population...'))
+    def handle(self, *args, **kwargs):
+        self.stdout.write("Deleting old data...")
+        # Order of deletion matters to avoid foreign key constraint errors
+        UserCourse.objects.all().delete()
+        Playlist.objects.all().delete()
+        Video.objects.all().delete()
+        Course.objects.all().delete()
+        User.objects.exclude(is_superuser=True).delete() # Keep superusers
 
-        # --- Create Videos ---
-        videos_data = [
-            {'title': 'Complete Guide to Knee Pain Relief', 'vimeo_url': 'https://vimeo.com/1111049635/235a23f8a0'},
-            {'title': 'Yoga for a Healthy Back', 'vimeo_url': 'https://vimeo.com/1111050393/ec9e054769'},
-            {'title': 'Core Strength Masterclass', 'vimeo_url': 'https://vimeo.com/1111050062/cbaa063839'},
-            {'title': 'Full Body Home Workout', 'vimeo_url': 'https://vimeo.com/1108493445/5e071e7c0e'},
-            {'title': 'Ultimate Flexibility Guide', 'vimeo_url': 'https://vimeo.com/1110539886/3f14f6333c'},
-        ]
+        self.stdout.write("Creating new data...")
 
-        videos = []
-        for video_data in videos_data:
-            video, created = Video.objects.get_or_create(
-                vimeo_url=video_data['vimeo_url'],
-                defaults={
-                    'title': video_data['title'],
-                    'instructor': 'Dr. Physio',
-                    'description': 'A sample description.',
-                    'image': 'https://placehold.co/240x135/749BC2/FFFFFF?text=Video',
-                    'category': random.choice([choice[0] for choice in Video.CATEGORY_CHOICES]),
-                    'rating': round(random.uniform(4.0, 5.0), 1),
-                }
+        # --- 1. Create Sample Videos ---
+        video1 = Video.objects.create(
+            title="Introduction to Pain Relief",
+            instructor="Dr. Anya Sharma",
+            description="A beginner's guide to understanding and managing joint pain.",
+            vimeo_url="https://vimeo.com/1111049635/235a23f8a0",
+            image="https://placehold.co/240x135/FFC107/FFFFFF?text=Video1",
+            category="Pain Relief",
+            rating=4.8
+        )
+        video2 = Video.objects.create(
+            title="Advanced Core Strengthening",
+            instructor="Mr. Rohan Verma",
+            description="Build a rock-solid core to support your spine and improve posture.",
+            vimeo_url="https://vimeo.com/1111050393/ec9e054769",
+            image="https://placehold.co/240x135/4CAF50/FFFFFF?text=Video2",
+            category="Strength Training",
+            rating=4.9
+        )
+        # Add more videos as needed...
+
+        # --- 2. Create Sample Courses ---
+        course1 = Course.objects.create(
+            title="Knee Pain Recovery Program",
+            validity_days=45,
+            bestseller=True,
+            price="1499"
+        )
+        course2 = Course.objects.create(
+            title="Full Body Strength & Mobility",
+            validity_days=60,
+            bestseller=False,
+            price="2999"
+        )
+
+        # --- 3. Create Sample Playlists with specific IDs ---
+        playlist1 = Playlist.objects.create(
+            playlist_id=101,  # Assign a specific ID
+            title="Week 1: Foundations",
+            course=course1
+        )
+        playlist1.videos.add(video1)
+
+        playlist2 = Playlist.objects.create(
+            playlist_id=102, # Assign a specific ID
+            title="Week 2: Building Strength",
+            course=course1
+        )
+        playlist2.videos.add(video2)
+        
+        playlist3 = Playlist.objects.create(
+            playlist_id=201, # Assign a specific ID
+            title="Phase 1: Mobility",
+            course=course2
+        )
+        playlist3.videos.add(video1, video2)
+
+
+        # --- 4. Create Sample Users ---
+        self.stdout.write("Creating sample users...")
+        user1 = User.objects.create_user(
+            email='alice@example.com',
+            password='password123',
+            first_name='Alice',
+            last_name='Smith'
+        )
+        user2 = User.objects.create_user(
+            email='bob@example.com',
+            password='password123',
+            first_name='Bob',
+            last_name='Johnson'
+        )
+
+        # --- 5. Link Users to Courses and Playlists ---
+        self.stdout.write("Creating UserCourse entries...")
+        all_courses = list(Course.objects.all())
+        all_playlists = list(Playlist.objects.all())
+        all_users = [user1, user2]
+
+        for user in all_users:
+            # Assign a random course and playlist to each user
+            random_course = random.choice(all_courses)
+            # Ensure the chosen playlist belongs to the chosen course
+            random_playlist = random.choice(list(random_course.playlists.all()))
+
+            UserCourse.objects.create(
+                user=user,
+                course=random_course,
+                playlist=random_playlist # Use 'playlist' as per your updated model
             )
-            videos.append(video)
-            if created:
-                self.stdout.write(self.style.SUCCESS(f'Successfully created video: {video.title}'))
 
-        # --- Create Courses and Playlists ---
-        for i in range(3): # Create 3 courses
-            course, created = Course.objects.get_or_create(
-                title=f'Sample Course {i + 1}',
-                defaults={
-                    'validity_days': random.randint(30, 90),
-                    'bestseller': random.choice([True, False]),
-                    'price': str(random.randint(1000, 5000)),
-                }
-            )
-            if created:
-                self.stdout.write(self.style.SUCCESS(f'Successfully created course: {course.title}'))
-
-            for j in range(2): # Create 2 playlists per course
-                playlist, created = Playlist.objects.get_or_create(
-                    title=f'Playlist {j + 1} for Course {course.title}',
-                    course=course
-                )
-                if created:
-                    # Add 2-3 random videos to the playlist
-                    playlist.videos.set(random.sample(videos, k=random.randint(2, 3)))
-                    self.stdout.write(self.style.SUCCESS(f'Successfully created playlist: {playlist.title}'))
-
-        self.stdout.write(self.style.SUCCESS('Database population complete.'))
+        self.stdout.write(self.style.SUCCESS('Database has been populated successfully!'))
