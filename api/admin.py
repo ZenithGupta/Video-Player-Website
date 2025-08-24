@@ -7,7 +7,7 @@ class PlaylistAdmin(admin.ModelAdmin):
 
 # Custom admin view for the UserCourse model
 class UserCourseAdmin(admin.ModelAdmin):
-    list_display = ('user', 'course', 'start_time', 'end_time') # 'validity_days' has been removed
+    list_display = ('user', 'course', 'start_time', 'end_time', 'playlist_id') # 'validity_days' has been removed
     readonly_fields = ('start_time', 'end_time')
 
 # Register your models here
