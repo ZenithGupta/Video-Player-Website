@@ -9,6 +9,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from django.db import IntegrityError
 from rest_framework_simplejwt.views import TokenObtainPairView
 from .serializers import MyTokenObtainPairSerializer # Import your new serializer
+from .permissions import HasGoogleAppsScriptSecret
 
 class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
@@ -83,8 +84,9 @@ def get_course_detail(request, pk):
 # --- Pain Assessment View ---
 # This view remains the same.
 
-@csrf_exempt
 @api_view(['POST'])
+@permission_classes([HasGoogleAppsScriptSecret]) 
+@csrf_exempt
 def submit_assessment(request):
     """
     Receives pain assessment data from the Google Form and saves it.
@@ -92,13 +94,25 @@ def submit_assessment(request):
     data = request.data
     
     try:
+        # --- This is the corrected and complete create() call ---
         submission = PainAssessmentSubmission.objects.create(
             pain_level=data.get('pain_level'),
             rising_pain=data.get('rising_pain'),
-            # ... (all other fields remain the same)
+            standing_duration=data.get('standing_duration'),
+            can_climb_stairs=data.get('can_climb_stairs'),
+            descending_stairs_pain=data.get('descending_stairs_pain'),
+            walking_distance=data.get('walking_distance'),
+            knee_bend_ability=data.get('knee_bend_ability'),
+            can_sit_on_floor=data.get('can_sit_on_floor'),
+            stand_from_chair_ability=data.get('stand_from_chair_ability'),
+            joint_stiffness=data.get('joint_stiffness'),
+            limp_while_walking=data.get('limp_while_walking'),
+            can_bend_fully=data.get('can_bend_fully'),
             stand_on_one_leg_duration=data.get('stand_on_one_leg_duration')
         )
         return Response({'message': 'Submission received successfully!'}, status=status.HTTP_201_CREATED)
     
     except Exception as e:
+        # Log the error for better debugging
+        print(f"Error saving submission: {e}") 
         return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)

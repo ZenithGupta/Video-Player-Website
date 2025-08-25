@@ -137,3 +137,5 @@ REST_FRAMEWORK = {
 }
 
 AUTH_USER_MODEL = 'api.User'
+
+GOOGLE_APPS_SCRIPT_SECRET = 'ThisIsMySecureKeyForGoogleForms123'
