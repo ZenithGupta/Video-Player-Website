@@ -1,18 +1,19 @@
 import random
 from django.core.management.base import BaseCommand
-from api.models import User, Course, Playlist, Video, UserCourse
+from api.models import User, Course, Week, Video, UserCourse, Phase, Day
 
 class Command(BaseCommand):
     help = 'Populates the database with sample data'
 
     def handle(self, *args, **kwargs):
         self.stdout.write("Deleting old data...")
-        # Order of deletion matters to avoid foreign key constraint errors
         UserCourse.objects.all().delete()
-        Playlist.objects.all().delete()
+        Phase.objects.all().delete()
+        Week.objects.all().delete()
+        Day.objects.all().delete()
         Video.objects.all().delete()
         Course.objects.all().delete()
-        User.objects.exclude(is_superuser=True).delete() # Keep superusers
+        User.objects.exclude(is_superuser=True).delete()
 
         self.stdout.write("Creating new data...")
 
@@ -35,46 +36,50 @@ class Command(BaseCommand):
             category="Strength Training",
             rating=4.9
         )
-        # Add more videos as needed...
 
-        # --- 2. Create Sample Courses ---
+        # --- 2. Create a single set of Day objects ---
+        self.stdout.write("Creating a reusable 7-day schedule...")
+        day1 = Day.objects.create(title="Day 1", day_number=1)
+        day1.videos.add(video1)
+        
+        day2 = Day.objects.create(title="Day 2", day_number=2)
+        day2.videos.add(video2)
+
+        day3 = Day.objects.create(title="Day 3", day_number=3)
+        day3.videos.add(video1)
+
+        day4 = Day.objects.create(title="Day 4 (Rest)", day_number=4, is_rest_day=True)
+        
+        day5 = Day.objects.create(title="Day 5", day_number=5)
+        day5.videos.add(video2)
+
+        day6 = Day.objects.create(title="Day 6", day_number=6)
+        day6.videos.add(video1)
+        
+        day7 = Day.objects.create(title="Day 7 (Rest)", day_number=7, is_rest_day=True)
+
+        daily_schedule = [day1, day2, day3, day4, day5, day6, day7]
+
+        # --- 3. Create Weeks and reuse the Day objects ---
+        self.stdout.write("Creating weeks...")
+        created_weeks = []
+        for i in range(1, 5): # Create 4 weeks
+            week = Week.objects.create(title=f"Week {i}", week_number=i)
+            week.days.set(daily_schedule)
+            created_weeks.append(week)
+
+        # --- 4. Create Courses and Phases ---
         course1 = Course.objects.create(
             title="Knee Pain Recovery Program",
             validity_days=45,
             bestseller=True,
             price="1499"
         )
-        course2 = Course.objects.create(
-            title="Full Body Strength & Mobility",
-            validity_days=60,
-            bestseller=False,
-            price="2999"
-        )
-
-        # --- 3. Create Sample Playlists with specific IDs ---
-        playlist1 = Playlist.objects.create(
-            playlist_id=101,  # Assign a specific ID
-            title="Week 1: Foundations",
-            course=course1
-        )
-        playlist1.videos.add(video1)
-
-        playlist2 = Playlist.objects.create(
-            playlist_id=102, # Assign a specific ID
-            title="Week 2: Building Strength",
-            course=course1
-        )
-        playlist2.videos.add(video2)
         
-        playlist3 = Playlist.objects.create(
-            playlist_id=201, # Assign a specific ID
-            title="Phase 1: Mobility",
-            course=course2
-        )
-        playlist3.videos.add(video1, video2)
+        phase1 = Phase.objects.create(title="Phase 1: Foundation and Recovery", course=course1, phase_number=1)
+        phase1.weeks.set(created_weeks)
 
-
-        # --- 4. Create Sample Users ---
+        # --- 5. Create Sample Users ---
         self.stdout.write("Creating sample users...")
         user1 = User.objects.create_user(
             email='alice@example.com',
@@ -82,29 +87,13 @@ class Command(BaseCommand):
             first_name='Alice',
             last_name='Smith'
         )
-        user2 = User.objects.create_user(
-            email='bob@example.com',
-            password='password123',
-            first_name='Bob',
-            last_name='Johnson'
-        )
 
-        # --- 5. Link Users to Courses and Playlists ---
+        # --- 6. Link User to Course ---
         self.stdout.write("Creating UserCourse entries...")
-        all_courses = list(Course.objects.all())
-        all_playlists = list(Playlist.objects.all())
-        all_users = [user1, user2]
-
-        for user in all_users:
-            # Assign a random course and playlist to each user
-            random_course = random.choice(all_courses)
-            # Ensure the chosen playlist belongs to the chosen course
-            random_playlist = random.choice(list(random_course.playlists.all()))
-
-            UserCourse.objects.create(
-                user=user,
-                course=random_course,
-                playlist=random_playlist # Use 'playlist' as per your updated model
-            )
+        UserCourse.objects.create(
+            user=user1,
+            course=course1,
+            current_phase=phase1
+        )
 
         self.stdout.write(self.style.SUCCESS('Database has been populated successfully!'))

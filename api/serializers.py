@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User, Course, Playlist, Video, UserCourse
+from .models import User, Course, Week, Video, UserCourse, Phase, Day
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -18,14 +18,12 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('id', 'email', 'first_name', 'last_name', 'password', 'date_of_birth', 'gender') # Remove 'username' from here
+        fields = ('id', 'email', 'first_name', 'last_name', 'password', 'date_of_birth', 'gender')
         extra_kwargs = {
             'password': {'write_only': True},
         }
 
     def create(self, validated_data):
-        # This now correctly calls your CustomUserManager's create_user method.
-        # It passes email, password, and the rest of the data as extra_fields.
         user = User.objects.create_user(
             email=validated_data['email'],
             password=validated_data['password'],
@@ -41,15 +39,30 @@ class VideoSerializer(serializers.ModelSerializer):
         model = Video
         fields = '__all__'
 
-class PlaylistSerializer(serializers.ModelSerializer):
+class DaySerializer(serializers.ModelSerializer):
     videos = VideoSerializer(many=True, read_only=True)
 
     class Meta:
-        model = Playlist
+        model = Day
         fields = '__all__'
 
+class WeekSerializer(serializers.ModelSerializer):
+    days = DaySerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Week
+        fields = '__all__'
+
+class PhaseSerializer(serializers.ModelSerializer):
+    weeks = WeekSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Phase
+        fields = '__all__'
+
+
 class CourseSerializer(serializers.ModelSerializer):
-    playlists = PlaylistSerializer(many=True, read_only=True)
+    phases = PhaseSerializer(many=True, read_only=True)
 
     class Meta:
         model = Course

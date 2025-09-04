@@ -1,4 +1,4 @@
-from django.contrib.auth.models import AbstractUser, Group, Permission, BaseUserManager 
+from django.contrib.auth.models import AbstractUser, Group, Permission, BaseUserManager
 from django.db import models
 from django.utils import timezone
 from datetime import timedelta
@@ -49,7 +49,7 @@ class User(AbstractUser):
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
-    objects = CustomUserManager() 
+    objects = CustomUserManager()
 
     groups = models.ManyToManyField(
         Group,
@@ -94,20 +94,48 @@ class Course(models.Model):
     title = models.CharField(max_length=200)
     validity_days = models.IntegerField(default=35)
     bestseller = models.BooleanField(default=False)
-    price = models.CharField(max_length=20, default="0") # Added price field
+    price = models.CharField(max_length=20, default="0")
 
     def __str__(self):
         return self.title
 
-# --- Playlist Model ---
-class Playlist(models.Model):
-    playlist_id = models.IntegerField(primary_key=True)
-    title = models.CharField(max_length=200)
-    course = models.ForeignKey(Course, related_name='playlists', on_delete=models.CASCADE)
-    videos = models.ManyToManyField(Video, related_name='playlists')
+# --- Day Model ---
+class Day(models.Model):
+    title = models.CharField(max_length=100) # e.g., "Day 1", "Rest Day"
+    day_number = models.IntegerField()
+    videos = models.ManyToManyField(Video, blank=True)
+    is_rest_day = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ['day_number']
 
     def __str__(self):
-        return f"{self.title} (in {self.course.title})"
+        return f"{self.title} (Day {self.day_number})"
+
+# --- Week Model (previously WeekPlaylist) ---
+class Week(models.Model):
+    title = models.CharField(max_length=200)
+    week_number = models.IntegerField()
+    days = models.ManyToManyField(Day)
+
+    class Meta:
+        ordering = ['week_number']
+
+    def __str__(self):
+        return f"{self.title} (Week {self.week_number})"
+
+# --- Phase Model ---
+class Phase(models.Model):
+    title = models.CharField(max_length=200)
+    course = models.ForeignKey(Course, related_name='phases', on_delete=models.CASCADE)
+    weeks = models.ManyToManyField(Week)
+    phase_number = models.IntegerField(default=1)
+
+    class Meta:
+        ordering = ['phase_number']
+
+    def __str__(self):
+        return f"{self.title} (Phase {self.phase_number} of {self.course.title})"
 
 
 # --- UserCourse Model ---
@@ -116,7 +144,7 @@ class UserCourse(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     start_time = models.DateTimeField(auto_now_add=True)
     end_time = models.DateTimeField()
-    playlist = models.ForeignKey(Playlist, on_delete=models.CASCADE)
+    current_phase = models.ForeignKey(Phase, on_delete=models.SET_NULL, null=True, blank=True)
 
     def save(self, *args, **kwargs):
         if not self.id:
@@ -124,11 +152,10 @@ class UserCourse(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.user.username} - {self.course.title}"
+        return f"{self.user.email} - {self.course.title}"
 
 # --- Pain Assessment Model ---
 class PainAssessmentSubmission(models.Model):
-    # ... (fields remain the same) ...
     pain_level = models.IntegerField(help_text="Question 1: Current level of pain")
     rising_pain = models.IntegerField(help_text="Question 2: Pain when rising from a seated position")
     standing_duration = models.IntegerField(help_text="Question 3: How long can you stand without pain?")

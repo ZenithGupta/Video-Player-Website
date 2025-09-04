@@ -3,7 +3,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated # Import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
-from .models import PainAssessmentSubmission, Course, Video, Playlist
+from .models import PainAssessmentSubmission, Course, Video
 from .serializers import UserSerializer, CourseSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.db import IntegrityError
@@ -85,7 +85,7 @@ def get_course_detail(request, pk):
 # This view remains the same.
 
 @api_view(['POST'])
-@permission_classes([HasGoogleAppsScriptSecret]) 
+@permission_classes([HasGoogleAppsScriptSecret])
 @csrf_exempt
 def submit_assessment(request):
     """
@@ -114,5 +114,5 @@ def submit_assessment(request):
     
     except Exception as e:
         # Log the error for better debugging
-        print(f"Error saving submission: {e}") 
+        print(f"Error saving submission: {e}")
         return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)

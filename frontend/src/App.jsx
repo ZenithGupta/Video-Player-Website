@@ -234,14 +234,17 @@ const Header = ({ language, setLanguage, user, onLogout, onShowLogin, onShowSign
             <Container fluid="xl">
                 <Navbar.Brand href="#" className="header-brand">{content[language].brand}</Navbar.Brand>
                 <Navbar.Toggle aria-controls="basic-navbar-nav" />
-                <Navbar.Collapse id="basic-navbar-nav" className="mobile-nav-bg">
+                <Navbar.Collapse id="basic-navbar-nav">
                     <Nav className="me-auto">
                         <Nav.Link href="#" className="header-nav-link">{content[language].categories}</Nav.Link>
                     </Nav>
                     <Form className="d-flex flex-grow-1 my-2 my-lg-0 mx-lg-4">
-                        <div className="search-wrapper"><span className="search-icon-wrapper"><SearchIcon /></span><Form.Control type="search" placeholder={content[language].searchPlaceholder} className="search-input" /></div>
+                        <div className="search-wrapper">
+                            <span className="search-icon-wrapper"><SearchIcon /></span>
+                            <Form.Control type="search" placeholder={content[language].searchPlaceholder} className="search-input" />
+                        </div>
                     </Form>
-                    <Nav className="align-items-center">
+                    <Nav>
                         <Button variant="outline-dark" className="header-btn mx-2 my-1 my-lg-0" onClick={toggleLanguage}>{language === 'en' ? 'தமிழ்' : 'English'}</Button>
                         {user ? (
                             <>
@@ -260,8 +263,9 @@ const Header = ({ language, setLanguage, user, onLogout, onShowLogin, onShowSign
         </Navbar>
     );
 };
-const CourseCard = ({ course, onCourseSelect }) => {
-    const firstVideo = course.playlists?.[0]?.videos?.[0];
+
+const CourseCard = ({ course }) => {
+    const firstVideo = course.phases?.[0]?.weeks?.[0]?.days?.[0]?.videos?.[0];
 
     return (
          <Link to={`/course/${course.id}`} className="course-card-link">
@@ -289,58 +293,6 @@ const CourseCard = ({ course, onCourseSelect }) => {
     );
 };
 
-const VideoPlayerSection = ({ course, onClose }) => {
-    const videoToPlay = course.playlists?.[0]?.videos?.[0];
-
-    const getEmbedUrl = (url) => {
-        if (!url) return '';
-        try {
-            const videoUrl = new URL(url);
-            const pathParts = videoUrl.pathname.split('/').filter(Boolean);
-            if (pathParts.length === 0) return '';
-
-            const videoId = pathParts[0];
-            const privacyHash = pathParts[1];
-            
-            if (privacyHash) {
-                return `https://player.vimeo.com/video/${videoId}?h=${privacyHash}&autoplay=1`;
-            }
-            return `https://player.vimeo.com/video/${videoId}?autoplay=1`;
-        } catch (e) {
-            console.error("Invalid Vimeo URL:", url, e);
-            return ""; 
-        }
-    };
-
-    const embedUrl = getEmbedUrl(videoToPlay?.vimeo_url);
-
-    if (!videoToPlay || !embedUrl) {
-        return (
-            <div className="video-player-section">
-                <Alert variant="warning">No video available for this course.</Alert>
-                <Button onClick={onClose}>Close</Button>
-            </div>
-        );
-    }
-
-    return (
-        <div className="video-player-section">
-            <div className="video-player-header">
-                <h5 className="video-player-title">{videoToPlay.title}</h5>
-                <CloseButton onClick={onClose} />
-            </div>
-            <div className='player-wrapper'>
-                <iframe
-                    className='video-iframe'
-                    src={embedUrl}
-                    frameBorder="0"
-                    allow="autoplay; fullscreen; picture-in-picture; clipboard-write"
-                    title={videoToPlay.title}>
-                </iframe>
-            </div>
-        </div>
-    );
-};
 const IntroSection = ({ language }) => ( <Container fluid="xl" className="py-5 text-center"> <h1 className="main-heading">{content[language].mainHeading}</h1> <p className="sub-heading mx-auto" style={{ maxWidth: '800px' }}>{content[language].intro}</p> <p className="lead mx-auto" style={{ maxWidth: '800px' }}>{content[language].subHeading}</p> <p className="fw-bold mt-3">{content[language].suffering}</p> <p className="lead mx-auto mt-3" style={{ maxWidth: '800px' }}>{content[language].journey}</p> </Container> );
 
 const PrinciplesSection = ({ language }) => (
@@ -428,7 +380,7 @@ const CtaSection = ({ language }) => (
     </Container>
 );
 
-const CoursesSection = ({ onCourseSelect, language }) => {
+const CoursesSection = ({ language }) => {
     const [courses, setCourses] = useState([]);
     const [activeTab, setActiveTab] = useState('Pain Relief');
     const scrollContainerRef = useRef(null);
@@ -473,7 +425,7 @@ const CoursesSection = ({ onCourseSelect, language }) => {
                 <div className="carousel-wrapper mt-4">
                    <Button onClick={() => scroll('left')} variant="light" className="scroll-btn scroll-btn-left"><ChevronLeftIcon/></Button>
                     <div ref={scrollContainerRef} className="course-carousel">
-                        {courses.map(course => <CourseCard key={course.id} course={course} onCourseSelect={onCourseSelect} />)}
+                        {courses.map(course => <CourseCard key={course.id} course={course} />)}
                     </div>
                    <Button onClick={() => scroll('right')} variant="light" className="scroll-btn scroll-btn-right"><ChevronRightIcon/></Button>
                 </div>
@@ -483,9 +435,6 @@ const CoursesSection = ({ onCourseSelect, language }) => {
 };
 // --- FINAL App Component ---
 export default function App() {
-    // --- OLD State REMOVED ---
-    // const [selectedCourse, setSelectedCourse] = useState(null);
-
     const [language, setLanguage] = useState('en');
     const [showModal, setShowModal] = useState(false);
     const [modalMode, setModalMode] = useState('login');
@@ -514,10 +463,6 @@ export default function App() {
         setCurrentUser(null);
     };
     
-    // --- OLD Handlers REMOVED ---
-    // const handleCourseSelect = (course) => { ... };
-    // const handleClosePlayer = () => { ... };
-
     return (
         <div className="app-container">
             <Header
@@ -528,15 +473,7 @@ export default function App() {
                 onShowLogin={handleShowLogin}
                 onShowSignup={handleShowSignup}
             />
-            <AuthModal
-                show={showModal}
-                handleClose={handleCloseModal}
-                mode={modalMode}
-                onLoginSuccess={handleLoginSuccess}
-                language={language}
-            />
             <main>
-                {/* --- NEW Routing Logic --- */}
                 <Routes>
                     {/* Route for the Home Page */}
                     <Route path="/" element={
