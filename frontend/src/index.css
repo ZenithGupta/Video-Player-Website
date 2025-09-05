@@ -167,3 +167,21 @@ body {
 .video-page-wrapper {
   padding-top: 72px; /* Height of the sticky navbar */
 }
+
+/* --- New Course Page Styles --- */
+.course-page-wrapper {
+    padding-top: 72px; /* Navbar height */
+}
+
+.course-header-dark {
+    background-color: #1c1d1f;
+}
+
+.course-action-card {
+    border: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.course-action-card .player-wrapper {
+    background-color: #000;
+}
