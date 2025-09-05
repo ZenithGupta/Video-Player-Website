@@ -4,6 +4,7 @@ import axios from 'axios';
 import { Routes, Route, Link } from 'react-router-dom';
 // --- Import your new page component ---
 import VideoPlayerPage from './VideoPlayerPage.jsx';
+import CoursePage from './CoursePage.jsx';
 
 // This imports the styles from your main CSS file.
 import './index.css';
@@ -438,27 +439,43 @@ export default function App() {
     const [language, setLanguage] = useState('en');
     const [showModal, setShowModal] = useState(false);
     const [modalMode, setModalMode] = useState('login');
-    const [authToken, setAuthToken] = useState(null);
+    const [authToken, setAuthToken] = useState(localStorage.getItem('authToken'));
     const [currentUser, setCurrentUser] = useState(null);
+
+    // This hook runs on initial load and whenever the authToken changes.
+    // It fetches the logged-in user's data if a token exists.
+    useEffect(() => {
+        const fetchUser = async () => {
+            if (authToken) {
+                try {
+                    // Set the auth header for all future requests in this session
+                    axios.defaults.headers.common['Authorization'] = `Bearer ${authToken}`;
+                    const userResponse = await axios.get(`${API_URL}/user/`);
+                    setCurrentUser(userResponse.data);
+                } catch (error) {
+                    // If the token is invalid (e.g., expired), log the user out
+                    handleLogout();
+                }
+            }
+        };
+        fetchUser();
+    }, [authToken]);
 
     const handleShowLogin = () => { setModalMode('login'); setShowModal(true); };
     const handleShowSignup = () => { setModalMode('signup'); setShowModal(true); };
     const handleCloseModal = () => setShowModal(false);
 
-    const handleLoginSuccess = async (data) => {
+    // This function now only needs to save the token. The useEffect will handle fetching user data.
+    const handleLoginSuccess = (data) => {
+        localStorage.setItem('authToken', data.access);
         setAuthToken(data.access);
-        try {
-            const userResponse = await axios.get(`${API_URL}/user/`, {
-                headers: { Authorization: `Bearer ${data.access}` }
-            });
-            setCurrentUser(userResponse.data);
-            handleCloseModal();
-        } catch (error) {
-            console.error("Failed to fetch user data after login:", error);
-        }
+        handleCloseModal();
     };
 
     const handleLogout = () => {
+        localStorage.removeItem('authToken');
+        // Clear the auth header from axios defaults
+        delete axios.defaults.headers.common['Authorization'];
         setAuthToken(null);
         setCurrentUser(null);
     };
@@ -473,9 +490,16 @@ export default function App() {
                 onShowLogin={handleShowLogin}
                 onShowSignup={handleShowSignup}
             />
+            <AuthModal
+                show={showModal}
+                handleClose={handleCloseModal}
+                mode={modalMode}
+                onLoginSuccess={handleLoginSuccess}
+                language={language}
+            />
             <main>
                 <Routes>
-                    {/* Route for the Home Page */}
+                    {/* Your original Home Page route with all sections */}
                     <Route path="/" element={
                         <>
                             <IntroSection language={language} />
@@ -487,8 +511,14 @@ export default function App() {
                         </>
                     } />
 
-                    {/* Route for the Video Player Page */}
-                    <Route path="/course/:courseId" element={<VideoPlayerPage />} />
+                    {/* New route for the Course Home/Payment Page */}
+                    <Route 
+                        path="/course/:courseId" 
+                        element={<CoursePage user={currentUser} token={authToken} showLogin={handleShowLogin} />} 
+                    />
+                    
+                    {/* New, dedicated route for the Video Player with phase selection */}
+                    <Route path="/player/:courseId/phase/:phaseId" element={<VideoPlayerPage />} />
                 </Routes>
             </main>
         </div>

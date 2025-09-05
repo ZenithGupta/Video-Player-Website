@@ -4,14 +4,7 @@ from django.utils import timezone
 from datetime import timedelta
 
 class CustomUserManager(BaseUserManager):
-    """
-    Custom user model manager where email is the unique identifiers
-    for authentication instead of usernames.
-    """
     def create_user(self, email, password, **extra_fields):
-        """
-        Create and save a User with the given email and password.
-        """
         if not email:
             raise ValueError('The Email must be set')
         email = self.normalize_email(email)
@@ -21,54 +14,27 @@ class CustomUserManager(BaseUserManager):
         return user
 
     def create_superuser(self, email, password, **extra_fields):
-        """
-        Create and save a SuperUser with the given email and password.
-        """
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
         extra_fields.setdefault('is_active', True)
-
         if extra_fields.get('is_staff') is not True:
             raise ValueError('Superuser must have is_staff=True.')
         if extra_fields.get('is_superuser') is not True:
             raise ValueError('Superuser must have is_superuser=True.')
         return self.create_user(email, password, **extra_fields)
 
-# --- Custom User Model ---
 class User(AbstractUser):
     username = None
     email = models.EmailField(unique=True)
-    
-    GENDER_CHOICES = [
-        ('M', 'Male'),
-        ('F', 'Female'),
-        ('O', 'Other'),
-    ]
+    GENDER_CHOICES = [('M', 'Male'), ('F', 'Female'), ('O', 'Other')]
     date_of_birth = models.DateField(null=True, blank=True)
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES, null=True, blank=True)
-
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
     objects = CustomUserManager()
+    groups = models.ManyToManyField(Group, verbose_name='groups', blank=True, related_name="api_user_set", related_query_name="user")
+    user_permissions = models.ManyToManyField(Permission, verbose_name='user permissions', blank=True, related_name="api_user_permissions_set", related_query_name="user")
 
-    groups = models.ManyToManyField(
-        Group,
-        verbose_name='groups',
-        blank=True,
-        help_text='The groups this user belongs to. A user will get all permissions granted to each of their groups.',
-        related_name="api_user_set",
-        related_query_name="user",
-    )
-    user_permissions = models.ManyToManyField(
-        Permission,
-        verbose_name='user permissions',
-        blank=True,
-        help_text='Specific permissions for this user.',
-        related_name="api_user_permissions_set",
-        related_query_name="user",
-    )
-
-# --- Video Model ---
 class Video(models.Model):
     CATEGORY_CHOICES = [
         ('Pain Relief', 'Pain Relief'),
@@ -77,7 +43,6 @@ class Video(models.Model):
         ('Posture Correction', 'Posture Correction'),
         ('Sports Injury', 'Sports Injury'),
     ]
-
     title = models.CharField(max_length=200)
     instructor = models.CharField(max_length=100)
     description = models.TextField(blank=True)
@@ -85,76 +50,55 @@ class Video(models.Model):
     image = models.URLField(max_length=500)
     category = models.CharField(max_length=50, choices=CATEGORY_CHOICES)
     rating = models.DecimalField(max_digits=2, decimal_places=1)
-
     def __str__(self):
         return self.title
 
-# --- Course Model ---
 class Course(models.Model):
     title = models.CharField(max_length=200)
     validity_days = models.IntegerField(default=35)
     bestseller = models.BooleanField(default=False)
     price = models.CharField(max_length=20, default="0")
-
     def __str__(self):
         return self.title
 
-# --- Day Model ---
-class Day(models.Model):
-    title = models.CharField(max_length=100) # e.g., "Day 1", "Rest Day"
-    day_number = models.IntegerField()
+class Playlist(models.Model):
+    title = models.CharField(max_length=200)
     videos = models.ManyToManyField(Video, blank=True)
-    is_rest_day = models.BooleanField(default=False)
-
-    class Meta:
-        ordering = ['day_number']
-
     def __str__(self):
-        return f"{self.title} (Day {self.day_number})"
+        return self.title
 
-# --- Week Model (previously WeekPlaylist) ---
 class Week(models.Model):
     title = models.CharField(max_length=200)
     week_number = models.IntegerField()
-    days = models.ManyToManyField(Day)
-
+    playlist = models.ForeignKey(Playlist, on_delete=models.CASCADE, null=True, blank=True)
     class Meta:
         ordering = ['week_number']
-
     def __str__(self):
         return f"{self.title} (Week {self.week_number})"
 
-# --- Phase Model ---
 class Phase(models.Model):
     title = models.CharField(max_length=200)
     course = models.ForeignKey(Course, related_name='phases', on_delete=models.CASCADE)
     weeks = models.ManyToManyField(Week)
     phase_number = models.IntegerField(default=1)
-
     class Meta:
         ordering = ['phase_number']
-
     def __str__(self):
         return f"{self.title} (Phase {self.phase_number} of {self.course.title})"
 
-
-# --- UserCourse Model ---
 class UserCourse(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     start_time = models.DateTimeField(auto_now_add=True)
     end_time = models.DateTimeField()
     current_phase = models.ForeignKey(Phase, on_delete=models.SET_NULL, null=True, blank=True)
-
     def save(self, *args, **kwargs):
         if not self.id:
             self.end_time = timezone.now() + timedelta(days=self.course.validity_days)
         super().save(*args, **kwargs)
-
     def __str__(self):
         return f"{self.user.email} - {self.course.title}"
 
-# --- Pain Assessment Model ---
 class PainAssessmentSubmission(models.Model):
     pain_level = models.IntegerField(help_text="Question 1: Current level of pain")
     rising_pain = models.IntegerField(help_text="Question 2: Pain when rising from a seated position")
@@ -170,6 +114,5 @@ class PainAssessmentSubmission(models.Model):
     can_bend_fully = models.IntegerField(help_text="Question 12: Can you bend down fully?")
     stand_on_one_leg_duration = models.IntegerField(help_text="Question 13: How long can you stand on one leg?")
     submitted_at = models.DateTimeField(auto_now_add=True)
-
     def __str__(self):
         return f"Submission from {self.submitted_at.strftime('%Y-%m-%d %H:%M')}"
