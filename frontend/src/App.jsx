@@ -1,10 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Container, Navbar, Nav, Form, Button, Card, CloseButton, Row, Col, Modal, Alert } from 'react-bootstrap';
 import axios from 'axios';
-import { Routes, Route, Link } from 'react-router-dom';
-// --- Import your new page component ---
+import { Routes, Route, Link, useNavigate } from 'react-router-dom';
 import VideoPlayerPage from './VideoPlayerPage.jsx';
 import CoursePage from './CoursePage.jsx';
+import MyCoursesPage from './MyCoursesPage.jsx';
 
 // This imports the styles from your main CSS file.
 import './index.css';
@@ -16,7 +16,7 @@ const API_URL = 'http://127.0.0.1:8000/api';
 const content = {
     en: {
         brand: "PhysioFlex",
-        categories: "Categories",
+        myCourses: "My Courses",
         searchPlaceholder: "Search for anything",
         forBusiness: "For Business",
         teach: "Teach",
@@ -65,7 +65,7 @@ const content = {
     },
     ta: {
         brand: "பிசியோஃபிளெக்ஸ்",
-        categories: "பிரிவுகள்",
+        myCourses: "எனது படிப்புகள்",
         searchPlaceholder: "எதையும் தேடுங்கள்",
         forBusiness: "வணிகத்திற்காக",
         teach: "கற்பிக்க",
@@ -229,23 +229,30 @@ const AuthModal = ({ show, handleClose, mode, onLoginSuccess, language }) => {
 };
 const Header = ({ language, setLanguage, user, onLogout, onShowLogin, onShowSignup }) => {
     const toggleLanguage = () => setLanguage(language === 'en' ? 'ta' : 'en');
+    const navigate = useNavigate();
+
+    const handleMyCoursesClick = () => {
+        if (user) {
+            navigate('/my-courses');
+        } else {
+            onShowLogin();
+        }
+    };
     
     return (
         <Navbar bg="white" expand="lg" className="app-header shadow-sm sticky-top">
             <Container fluid="xl">
-                <Navbar.Brand href="#" className="header-brand">{content[language].brand}</Navbar.Brand>
+                <Navbar.Brand as={Link} to="/" className="header-brand">{content[language].brand}</Navbar.Brand>
                 <Navbar.Toggle aria-controls="basic-navbar-nav" />
                 <Navbar.Collapse id="basic-navbar-nav">
                     <Nav className="me-auto">
-                        <Nav.Link href="#" className="header-nav-link">{content[language].categories}</Nav.Link>
+                        {/* UPDATED Nav.Link to handle My Courses click */}
+                        <Nav.Link onClick={handleMyCoursesClick} className="header-nav-link">{content[language].myCourses}</Nav.Link>
                     </Nav>
                     <Form className="d-flex flex-grow-1 my-2 my-lg-0 mx-lg-4">
-                        <div className="search-wrapper">
-                            <span className="search-icon-wrapper"><SearchIcon /></span>
-                            <Form.Control type="search" placeholder={content[language].searchPlaceholder} className="search-input" />
-                        </div>
+                        <div className="search-wrapper"><span className="search-icon-wrapper"><SearchIcon /></span><Form.Control type="search" placeholder={content[language].searchPlaceholder} className="search-input" /></div>
                     </Form>
-                    <Nav>
+                    <Nav className="align-items-center">
                         <Button variant="outline-dark" className="header-btn mx-2 my-1 my-lg-0" onClick={toggleLanguage}>{language === 'en' ? 'தமிழ்' : 'English'}</Button>
                         {user ? (
                             <>
@@ -442,18 +449,14 @@ export default function App() {
     const [authToken, setAuthToken] = useState(localStorage.getItem('authToken'));
     const [currentUser, setCurrentUser] = useState(null);
 
-    // This hook runs on initial load and whenever the authToken changes.
-    // It fetches the logged-in user's data if a token exists.
     useEffect(() => {
         const fetchUser = async () => {
             if (authToken) {
                 try {
-                    // Set the auth header for all future requests in this session
                     axios.defaults.headers.common['Authorization'] = `Bearer ${authToken}`;
                     const userResponse = await axios.get(`${API_URL}/user/`);
                     setCurrentUser(userResponse.data);
                 } catch (error) {
-                    // If the token is invalid (e.g., expired), log the user out
                     handleLogout();
                 }
             }
@@ -465,7 +468,6 @@ export default function App() {
     const handleShowSignup = () => { setModalMode('signup'); setShowModal(true); };
     const handleCloseModal = () => setShowModal(false);
 
-    // This function now only needs to save the token. The useEffect will handle fetching user data.
     const handleLoginSuccess = (data) => {
         localStorage.setItem('authToken', data.access);
         setAuthToken(data.access);
@@ -474,7 +476,6 @@ export default function App() {
 
     const handleLogout = () => {
         localStorage.removeItem('authToken');
-        // Clear the auth header from axios defaults
         delete axios.defaults.headers.common['Authorization'];
         setAuthToken(null);
         setCurrentUser(null);
@@ -499,7 +500,7 @@ export default function App() {
             />
             <main>
                 <Routes>
-                    {/* Your original Home Page route with all sections */}
+                    {/* Main homepage route with ALL sections restored */}
                     <Route path="/" element={
                         <>
                             <IntroSection language={language} />
@@ -510,15 +511,15 @@ export default function App() {
                             <PainAssessmentSection language={language} />
                         </>
                     } />
-
-                    {/* New route for the Course Home/Payment Page */}
+                    
                     <Route 
                         path="/course/:courseId" 
                         element={<CoursePage user={currentUser} token={authToken} showLogin={handleShowLogin} />} 
                     />
                     
-                    {/* New, dedicated route for the Video Player with phase selection */}
                     <Route path="/player/:courseId/phase/:phaseId" element={<VideoPlayerPage />} />
+                    
+                    <Route path="/my-courses" element={<MyCoursesPage />} />
                 </Routes>
             </main>
         </div>
