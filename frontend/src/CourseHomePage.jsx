@@ -25,12 +25,17 @@ const CourseHomePage = ({ course, userCourse }) => {
 
     const introVideo = course.phases?.[0]?.weeks?.[0]?.playlist?.videos?.[0];
 
-    const calculateDaysLeft = () => {
-        if (!userCourse?.end_time) return 0;
+    const calculateTimeLeft = () => {
+        if (!userCourse?.end_time) return { weeks: 0, days: 0 };
         const endDate = new Date(userCourse.end_time);
         const now = new Date();
-        const diffDays = Math.ceil((endDate - now) / (1000 * 60 * 60 * 24));
-        return diffDays > 0 ? diffDays : 0;
+        const diffTime = endDate - now;
+        if (diffTime <= 0) return { weeks: 0, days: 0 };
+        
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        const weeks = Math.floor(diffDays / 7);
+        const days = diffDays % 7;
+        return { weeks, days };
     };
 
     const handleGoToCourse = () => {
@@ -42,9 +47,11 @@ const CourseHomePage = ({ course, userCourse }) => {
         }
     };
 
-    const daysLeft = calculateDaysLeft();
-    const validity_days = course.validity_days || 35;
-    const progress = Math.min(((validity_days - daysLeft) / validity_days) * 100, 100);
+    const timeLeft = calculateTimeLeft();
+    const validity_weeks = course.validity_weeks || 5;
+    const totalDays = validity_weeks * 7;
+    const daysLeft = timeLeft.weeks * 7 + timeLeft.days;
+    const progress = Math.min(((totalDays - daysLeft) / totalDays) * 100, 100);
 
     return (
         <div className="main-content">
@@ -56,8 +63,8 @@ const CourseHomePage = ({ course, userCourse }) => {
                             <p className="lead">Welcome back! Continue your recovery journey.</p>
                             <div className="mt-4">
                                <h5>Your Progress</h5>
-                               <ProgressBar now={progress} label={`${daysLeft} days left`} className="mb-2" />
-                               <small>Your access expires in {daysLeft} days.</small>
+                               <ProgressBar now={progress} label={`${timeLeft.weeks} weeks and ${timeLeft.days} days left`} className="mb-2" />
+                               <small>Your access expires in {timeLeft.weeks} weeks and {timeLeft.days} days.</small>
                             </div>
                         </Col>
                         <Col lg={4}>
@@ -69,7 +76,7 @@ const CourseHomePage = ({ course, userCourse }) => {
                                     <Form.Group className="mb-3">
                                         <Form.Label>Select Your Phase</Form.Label>
                                         <Form.Select value={selectedPhase} onChange={e => setSelectedPhase(e.target.value)}>
-                                            {course.phases.map(phase => (
+                                            {course.phases && course.phases.map(phase => (
                                                 <option key={phase.id} value={phase.id}>{phase.title}</option>
                                             ))}
                                         </Form.Select>
@@ -92,4 +99,3 @@ const CourseHomePage = ({ course, userCourse }) => {
 };
 
 export default CourseHomePage;
-

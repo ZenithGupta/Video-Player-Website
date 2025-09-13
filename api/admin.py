@@ -1,7 +1,7 @@
 from django.contrib import admin
 from .models import (
     PainAssessmentSubmission, Video, Course, UserCourse, User,
-    Phase, Week, Playlist
+    Phase, Week, Playlist, SuperCourse
 )
 
 class PlaylistAdmin(admin.ModelAdmin):
@@ -36,5 +36,6 @@ admin.site.register(Playlist, PlaylistAdmin)
 admin.site.register(Week, WeekAdmin)
 admin.site.register(Phase, PhaseAdmin)
 admin.site.register(Course)
+admin.site.register(SuperCourse)
 admin.site.register(UserCourse, UserCourseAdmin)
 admin.site.register(User)

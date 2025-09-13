@@ -3,8 +3,8 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated # Import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
-from .models import PainAssessmentSubmission, Course, Video, UserCourse
-from .serializers import UserSerializer, CourseSerializer
+from .models import PainAssessmentSubmission, Course, Video, UserCourse, SuperCourse
+from .serializers import UserSerializer, CourseSerializer, SuperCourseSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.db import IntegrityError
 from rest_framework_simplejwt.views import TokenObtainPairView
@@ -61,9 +61,9 @@ def get_current_user(request):
 @permission_classes([AllowAny])
 def get_courses(request):
     """
-    Fetches and returns the list of all courses.
+    Fetches and returns the list of all courses that are not part of a super course.
     """
-    courses = Course.objects.all()
+    courses = Course.objects.filter(super_course__isnull=True)
     serializer = CourseSerializer(courses, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -79,6 +79,29 @@ def get_course_detail(request, pk):
         return Response(serializer.data)
     except Course.DoesNotExist:
         return Response({'error': 'Course not found'}, status=status.HTTP_404_NOT_FOUND)
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def get_super_courses(request):
+    """
+    Fetches and returns the list of all super courses.
+    """
+    super_courses = SuperCourse.objects.all()
+    serializer = SuperCourseSerializer(super_courses, many=True)
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def get_super_course_detail(request, pk):
+    """
+    Fetches and returns a single super course by its ID.
+    """
+    try:
+        super_course = SuperCourse.objects.get(pk=pk)
+        serializer = SuperCourseSerializer(super_course)
+        return Response(serializer.data)
+    except SuperCourse.DoesNotExist:
+        return Response({'error': 'Super Course not found'}, status=status.HTTP_404_NOT_FOUND)
     
 # --- NEW: View to get enrolled courses for the current user ---
 @api_view(['GET'])

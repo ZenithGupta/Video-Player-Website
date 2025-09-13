@@ -5,6 +5,7 @@ import { Routes, Route, Link, useNavigate } from 'react-router-dom';
 import VideoPlayerPage from './VideoPlayerPage.jsx';
 import CoursePage from './CoursePage.jsx';
 import MyCoursesPage from './MyCoursesPage.jsx';
+import ProtectedRoute from './ProtectedRoute.jsx';
 
 // This imports the styles from your main CSS file.
 import './index.css';
@@ -272,11 +273,14 @@ const Header = ({ language, setLanguage, user, onLogout, onShowLogin, onShowSign
     );
 };
 
-const CourseCard = ({ course }) => {
-    const firstVideo = course.phases?.[0]?.weeks?.[0]?.days?.[0]?.videos?.[0];
+const CourseCard = ({ course, isSuperCourse }) => {
+    const firstVideo = isSuperCourse ? course.courses?.[0]?.phases?.[0]?.weeks?.[0]?.playlist?.videos?.[0] : course.phases?.[0]?.weeks?.[0]?.playlist?.videos?.[0];
+    const linkTo = isSuperCourse ? `/course/${course.id}?super=true` : `/course/${course.id}`;
+    const price = isSuperCourse ? course.courses?.[0]?.price : course.price;
+
 
     return (
-         <Link to={`/course/${course.id}`} className="course-card-link">
+         <Link to={linkTo} className="course-card-link">
             <div className="course-card">
                 <Card className="border-0 h-100 bg-transparent">
                     <Card.Img 
@@ -292,7 +296,7 @@ const CourseCard = ({ course }) => {
                         {/* Star icons can be made dynamic based on rating */}
                         <span className="course-card-reviews">({firstVideo?.reviews || '1234'})</span>
                     </div>
-                    <p className="course-card-price">₹{course.price}</p>
+                    <p className="course-card-price">₹{price}</p>
                     {course.bestseller && <div className="badge bestseller-badge">Bestseller</div>}
                 </Card.Body>
             </Card>
@@ -390,14 +394,17 @@ const CtaSection = ({ language }) => (
 
 const CoursesSection = ({ language }) => {
     const [courses, setCourses] = useState([]);
+    const [superCourses, setSuperCourses] = useState([]);
     const [activeTab, setActiveTab] = useState('Pain Relief');
     const scrollContainerRef = useRef(null);
 
     useEffect(() => {
         const fetchCourses = async () => {
             try {
-                const response = await axios.get(`${API_URL}/courses/`);
-                setCourses(response.data);
+                const coursesResponse = await axios.get(`${API_URL}/courses/`);
+                setCourses(coursesResponse.data);
+                const superCoursesResponse = await axios.get(`${API_URL}/super-courses/`);
+                setSuperCourses(superCoursesResponse.data);
             } catch (error) {
                 console.error("Failed to fetch courses:", error);
             }
@@ -433,6 +440,7 @@ const CoursesSection = ({ language }) => {
                 <div className="carousel-wrapper mt-4">
                    <Button onClick={() => scroll('left')} variant="light" className="scroll-btn scroll-btn-left"><ChevronLeftIcon/></Button>
                     <div ref={scrollContainerRef} className="course-carousel">
+                        {superCourses.map(course => <CourseCard key={course.id} course={course} isSuperCourse={true} />)}
                         {courses.map(course => <CourseCard key={course.id} course={course} />)}
                     </div>
                    <Button onClick={() => scroll('right')} variant="light" className="scroll-btn scroll-btn-right"><ChevronRightIcon/></Button>
@@ -448,6 +456,7 @@ export default function App() {
     const [modalMode, setModalMode] = useState('login');
     const [authToken, setAuthToken] = useState(localStorage.getItem('authToken'));
     const [currentUser, setCurrentUser] = useState(null);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchUser = async () => {
@@ -479,6 +488,7 @@ export default function App() {
         delete axios.defaults.headers.common['Authorization'];
         setAuthToken(null);
         setCurrentUser(null);
+        navigate('/');
     };
     
     return (
@@ -517,9 +527,17 @@ export default function App() {
                         element={<CoursePage user={currentUser} token={authToken} showLogin={handleShowLogin} />} 
                     />
                     
-                    <Route path="/player/:courseId/phase/:phaseId" element={<VideoPlayerPage />} />
+                    <Route path="/player/:courseId/phase/:phaseId" element={
+                        <ProtectedRoute user={currentUser}>
+                            <VideoPlayerPage />
+                        </ProtectedRoute>
+                    } />
                     
-                    <Route path="/my-courses" element={<MyCoursesPage />} />
+                    <Route path="/my-courses" element={
+                        <ProtectedRoute user={currentUser}>
+                            <MyCoursesPage />
+                        </ProtectedRoute>
+                    } />
                 </Routes>
             </main>
         </div>
