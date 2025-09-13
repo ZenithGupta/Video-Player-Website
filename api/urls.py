@@ -14,6 +14,8 @@ urlpatterns = [
     # Course Data Endpoint
     path('courses/', views.get_courses, name='get_courses'),
     path('courses/<int:pk>/', views.get_course_detail, name='get_course_detail'),
+    path('super-courses/', views.get_super_courses, name='get_super_courses'),
+    path('super-courses/<int:pk>/', views.get_super_course_detail, name='get_super_course_detail'),
 
     # --- NEW: URL for fetching user's enrolled courses ---
     path('my-courses/', views.get_my_courses, name='my_courses'),

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User, Course, Week, Video, UserCourse, Phase, Playlist
+from .models import User, Course, Week, Video, UserCourse, Phase, Playlist, SuperCourse
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -57,3 +57,8 @@ class CourseSerializer(serializers.ModelSerializer):
         model = Course
         fields = '__all__'
 
+class SuperCourseSerializer(serializers.ModelSerializer):
+    courses = CourseSerializer(many=True, read_only=True)
+    class Meta:
+        model = SuperCourse
+        fields = '__all__'

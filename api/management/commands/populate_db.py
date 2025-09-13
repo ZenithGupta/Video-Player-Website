@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from api.models import User, Course, Week, Video, UserCourse, Phase, Playlist
+from api.models import User, Course, Week, Video, UserCourse, Phase, Playlist, SuperCourse
 
 class Command(BaseCommand):
     help = 'Populates the database with sample data'
@@ -12,6 +12,7 @@ class Command(BaseCommand):
         Playlist.objects.all().delete()
         Video.objects.all().delete()
         Course.objects.all().delete()
+        SuperCourse.objects.all().delete()
         User.objects.exclude(is_superuser=True).delete()
 
         self.stdout.write("Creating new data...")
@@ -37,20 +38,38 @@ class Command(BaseCommand):
         week3 = Week.objects.create(title="Week 3", week_number=3, playlist=playlist3)
         week4 = Week.objects.create(title="Week 4", week_number=4, playlist=playlist4)
 
-        # 4. Create a Course and a Phase
-        course1 = Course.objects.create(title="Knee Pain Recovery Program", bestseller=True, price="499")
-        phase1 = Phase.objects.create(title="Phase 1: Foundation and Recovery", course=course1, phase_number=1)
-        phase1.weeks.set([week1, week2, week3, week4])
+        # 4. Create SuperCourses and Courses
+        super_course1 = SuperCourse.objects.create(title="Knee Pain Recovery Program", bestseller=True)
+        course1_4_weeks = Course.objects.create(super_course=super_course1, title="Knee Pain Recovery Program (4 Weeks)", validity_weeks=4, price="499")
+        course1_8_weeks = Course.objects.create(super_course=super_course1, title="Knee Pain Recovery Program (8 Weeks)", validity_weeks=8, price="899")
+        
+        super_course2 = SuperCourse.objects.create(title="Back Pain Relief Program")
+        course2_4_weeks = Course.objects.create(super_course=super_course2, title="Back Pain Relief Program (4 Weeks)", validity_weeks=4, price="599")
+        course2_8_weeks = Course.objects.create(super_course=super_course2, title="Back Pain Relief Program (8 Weeks)", validity_weeks=8, price="999")
+        
+        # 5. Create Phases for each course
+        phase1_course1 = Phase.objects.create(title="Phase 1: Foundation and Recovery", course=course1_4_weeks, phase_number=1)
+        phase1_course1.weeks.set([week1, week2, week3, week4])
+        
+        phase1_course2 = Phase.objects.create(title="Phase 1: Foundation and Recovery", course=course1_8_weeks, phase_number=1)
+        phase1_course2.weeks.set([week1, week2, week3, week4])
+        
+        phase1_course3 = Phase.objects.create(title="Phase 1: Foundation and Recovery", course=course2_4_weeks, phase_number=1)
+        phase1_course3.weeks.set([week1, week2, week3, week4])
+        
+        phase1_course4 = Phase.objects.create(title="Phase 1: Foundation and Recovery", course=course2_8_weeks, phase_number=1)
+        phase1_course4.weeks.set([week1, week2, week3, week4])
 
-        # 5. Create Sample Users
+
+        # 6. Create Sample Users
         self.stdout.write("Creating sample users...")
         # User 1: Alice is ENROLLED in the course.
         user1 = User.objects.create_user(email='alice@example.com', password='password123', first_name='Alice')
         # User 2: Bob is NOT enrolled in any course.
         user2 = User.objects.create_user(email='bob@example.com', password='password123', first_name='Bob')
         
-        # 6. Enroll ONLY Alice in the course to create the two test scenarios.
+        # 7. Enroll ONLY Alice in the course to create the two test scenarios.
         # This is why only one UserCourse object is created.
-        UserCourse.objects.create(user=user1, course=course1, current_phase=phase1)
+        UserCourse.objects.create(user=user1, course=course1_4_weeks, current_phase=phase1_course1)
 
         self.stdout.write(self.style.SUCCESS('Database has been populated successfully!'))

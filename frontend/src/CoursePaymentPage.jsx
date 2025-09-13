@@ -1,5 +1,5 @@
 import React from 'react';
-import { Container, Row, Col, Card, Button } from 'react-bootstrap';
+import { Container, Row, Col, Card, Button, Form, Nav } from 'react-bootstrap';
 
 const getEmbedUrl = (url) => {
     if (!url) return '';
@@ -11,9 +11,26 @@ const getEmbedUrl = (url) => {
     }
 };
 
-const CoursePaymentPage = ({ course, onPurchase }) => {
-    const introVideo = course.phases?.[0]?.weeks?.[0]?.playlist?.videos?.[0];
+const CoursePaymentPage = ({ course, onPurchase, isSuperCourse }) => {
+    const [selectedCourse, setSelectedCourse] = React.useState(null);
+    const [paymentMethod, setPaymentMethod] = React.useState('credit-card');
 
+    React.useEffect(() => {
+        if (isSuperCourse && course.courses.length > 0) {
+            setSelectedCourse(course.courses[0]);
+        } else {
+            setSelectedCourse(course);
+        }
+    }, [course, isSuperCourse]);
+
+    const handleValidityChange = (e) => {
+        const courseId = parseInt(e.target.value);
+        const newSelectedCourse = course.courses.find(c => c.id === courseId);
+        setSelectedCourse(newSelectedCourse);
+    };
+    
+    const introVideo = isSuperCourse ? course.courses?.[0]?.phases?.[0]?.weeks?.[0]?.playlist?.videos?.[0] : course.phases?.[0]?.weeks?.[0]?.playlist?.videos?.[0];
+    
     return (
         <div className="course-page-wrapper">
             <header className="course-header-dark py-5">
@@ -57,12 +74,47 @@ const CoursePaymentPage = ({ course, onPurchase }) => {
                                 </div>
                             )}
                             <Card.Body>
-                                <Card.Title as="h2" className="text-center mb-3">₹{course.price}</Card.Title>
+                                <Card.Title as="h2" className="text-center mb-3">₹{selectedCourse?.price}</Card.Title>
+                                {isSuperCourse &&
+                                    <Form.Group className="mb-3">
+                                        <Form.Label>Select Validity</Form.Label>
+                                        <Form.Select onChange={handleValidityChange} value={selectedCourse?.id}>
+                                            {course.courses.map(subCourse => (
+                                                <option key={subCourse.id} value={subCourse.id}>
+                                                    {subCourse.validity_weeks} Weeks
+                                                </option>
+                                            ))}
+                                        </Form.Select>
+                                    </Form.Group>
+                                }
+
+                                <Nav variant="tabs" activeKey={paymentMethod} onSelect={(k) => setPaymentMethod(k)} className="mb-3 payment-methods">
+                                    <Nav.Item>
+                                        <Nav.Link eventKey="credit-card">Credit Card</Nav.Link>
+                                    </Nav.Item>
+                                    <Nav.Item>
+                                        <Nav.Link eventKey="debit-card">Debit Card</Nav.Link>
+                                    </Nav.Item>
+                                    <Nav.Item>
+                                        <Nav.Link eventKey="upi">UPI</Nav.Link>
+                                    </Nav.Item>
+                                    <Nav.Item>
+                                        <Nav.Link eventKey="net-banking">Net Banking</Nav.Link>
+                                    </Nav.Item>
+                                </Nav>
+                                <div className="payment-method-content mb-3">
+                                    {paymentMethod === 'credit-card' && <p>Credit Card form will be here.</p>}
+                                    {paymentMethod === 'debit-card' && <p>Debit Card form will be here.</p>}
+                                    {paymentMethod === 'upi' && <p>UPI payment instructions will be here.</p>}
+                                    {paymentMethod === 'net-banking' && <p>Net Banking options will be here.</p>}
+                                </div>
+
+
                                 <Button variant="dark" size="lg" className="w-100" onClick={onPurchase}>
                                     Buy Now
                                 </Button>
                                 <Card.Text className="text-muted text-center mt-2 small">
-                                    {course.validity_days}-Day Access
+                                    {selectedCourse?.validity_weeks}-Week Access
                                 </Card.Text>
                             </Card.Body>
                         </Card>

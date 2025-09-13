@@ -53,9 +53,17 @@ class Video(models.Model):
     def __str__(self):
         return self.title
 
-class Course(models.Model):
+class SuperCourse(models.Model):
     title = models.CharField(max_length=200)
-    validity_days = models.IntegerField(default=35)
+    bestseller = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.title
+
+class Course(models.Model):
+    super_course = models.ForeignKey(SuperCourse, related_name='courses', on_delete=models.CASCADE, null=True, blank=True)
+    title = models.CharField(max_length=200)
+    validity_weeks = models.IntegerField(default=5)
     bestseller = models.BooleanField(default=False)
     price = models.CharField(max_length=20, default="0")
     def __str__(self):
@@ -94,7 +102,7 @@ class UserCourse(models.Model):
     current_phase = models.ForeignKey(Phase, on_delete=models.SET_NULL, null=True, blank=True)
     def save(self, *args, **kwargs):
         if not self.id:
-            self.end_time = timezone.now() + timedelta(days=self.course.validity_days)
+            self.end_time = timezone.now() + timedelta(weeks=self.course.validity_weeks)
         super().save(*args, **kwargs)
     def __str__(self):
         return f"{self.user.email} - {self.course.title}"
