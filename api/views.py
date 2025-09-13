@@ -3,7 +3,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated # Import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
-from .models import PainAssessmentSubmission, Course, Video
+from .models import PainAssessmentSubmission, Course, Video, UserCourse
 from .serializers import UserSerializer, CourseSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.db import IntegrityError
@@ -79,7 +79,22 @@ def get_course_detail(request, pk):
         return Response(serializer.data)
     except Course.DoesNotExist:
         return Response({'error': 'Course not found'}, status=status.HTTP_404_NOT_FOUND)
-
+    
+# --- NEW: View to get enrolled courses for the current user ---
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_my_courses(request):
+    """
+    Fetches and returns a list of courses the current user is enrolled in.
+    """
+    user = request.user
+    # Find all UserCourse entries for this user
+    user_courses = UserCourse.objects.filter(user=user)
+    # Extract the actual Course objects from those entries
+    courses = [uc.course for uc in user_courses]
+    # Serialize the course data
+    serializer = CourseSerializer(courses, many=True)
+    return Response(serializer.data, status=status.HTTP_200_OK)
 
 # --- Pain Assessment View ---
 # This view remains the same.

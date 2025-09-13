@@ -15,6 +15,9 @@ urlpatterns = [
     path('courses/', views.get_courses, name='get_courses'),
     path('courses/<int:pk>/', views.get_course_detail, name='get_course_detail'),
 
+    # --- NEW: URL for fetching user's enrolled courses ---
+    path('my-courses/', views.get_my_courses, name='my_courses'),
+
     # User Authentication Endpoints
     path('register/', views.register_user, name='register_user'),
     path('user/', views.get_current_user, name='get_current_user'),
