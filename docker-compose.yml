@@ -1,0 +1,23 @@
+# docker-compose.yml
+services:
+  backend:
+    build: ./backend
+    container_name: video-player-backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+      - sqlite_db:/app/db
+
+  frontend:
+    build: ./frontend
+    container_name: video-player-frontend
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+    environment:
+      - WDS_SOCKET_PORT=5173
+
+volumes:
+  sqlite_db:
