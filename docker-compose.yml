@@ -8,6 +8,8 @@ services:
     volumes:
       - ./backend:/app
       - sqlite_db:/app/db
+    networks:
+      - app-network
 
   frontend:
     build: ./frontend
@@ -16,8 +18,19 @@ services:
       - "5173:5173"
     volumes:
       - ./frontend:/app
+      - /app/node_modules  # This prevents the local directory from overriding node_modules
     environment:
       - WDS_SOCKET_PORT=5173
+      - CHOKIDAR_USEPOLLING=true  # For better file watching in Docker
+      - HOST=0.0.0.0  # Allow external connections
+    depends_on:
+      - backend
+    networks:
+      - app-network
 
 volumes:
   sqlite_db:
+
+networks:
+  app-network:
+    driver: bridge

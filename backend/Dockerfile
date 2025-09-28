@@ -13,4 +13,4 @@ COPY . /app/
 
 EXPOSE 8000
 
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+CMD ["sh", "-c", "python manage.py check --deploy && python manage.py makemigrations api && python manage.py migrate api && python manage.py populate_db && python manage.py runserver 0.0.0.0:8000"]

@@ -4,8 +4,8 @@ import axios from 'axios';
 import { Container, Alert } from 'react-bootstrap';
 import CourseHomePage from './CourseHomePage.jsx';
 import CoursePaymentPage from './CoursePaymentPage.jsx';
-
-const API_URL = 'http://127.0.0.1:8000/api'; 
+import API_URL from './config/api.js';
+// const API_URL = 'http://127.0.0.1:8000/api'; 
 
 function useQuery() {
     return new URLSearchParams(useLocation().search);

@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import { Container, Alert, Tabs, Tab, ListGroup, Card } from 'react-bootstrap';
-
-const API_URL = 'http://127.0.0.1:8000/api';
+import API_URL from './config/api.js';
+// const API_URL = 'http://127.0.0.1:8000/api';
 
 const getEmbedUrl = (url) => {
     if (!url) return '';
