@@ -21,7 +21,7 @@ jobs:
           credentials_json: '${{ secrets.GCP_SA_KEY }}'
 
       - name: Deploy to VM
-        uses: google-github-actions/gcloud-compute-ssh@v2
+        uses: google-github-actions/ssh-compute@v2
         with:
           instance_name: '${{ secrets.VM_INSTANCE_NAME }}'
           zone: '${{ secrets.VM_ZONE }}'
