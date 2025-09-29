@@ -4,7 +4,7 @@ name: Deploy to GCP VM
 on:
   push:
     branches:
-      - main
+      - Deploy
 
 jobs:
   deploy:
@@ -29,13 +29,18 @@ jobs:
           ssh_private_key: '${{ secrets.GCP_SSH_PRIVATE_KEY }}'
           command: |
             set -e
+            # Quick check for SSH key setup (optional, for debugging)
+            if [ ! -f ~/.ssh/id_rsa ]; then
+              echo "Warning: SSH key not found locally on VM. Ensure it's installed."
+            fi
+            
             cd ~
             if [ -d "video-player-website" ]; then
               cd video-player-website
               git pull
             else
-              git clone https://github.com/${{ github.repository }}.git
-              cd video-player-website
+              git clone https://github.com/${{ github.repository }}.git .
+              # Note: Cloned directly into the dir to avoid extra 'video-player-website' subdir
             fi
             
             echo "Building and deploying services..."
