@@ -6,12 +6,13 @@ import VideoPlayerPage from './VideoPlayerPage.jsx';
 import CoursePage from './CoursePage.jsx';
 import MyCoursesPage from './MyCoursesPage.jsx';
 import ProtectedRoute from './ProtectedRoute.jsx';
+import API_URL from './config/api.js';
 
 // This imports the styles from your main CSS file.
 import './index.css';
 
 // --- API Base URL ---
-const API_URL = 'http://127.0.0.1:8000/api';
+// const API_URL = 'http://127.0.0.1:8000/api';
 
 // --- Language Content ---
 const content = {

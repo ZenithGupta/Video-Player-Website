@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { Container, Row, Col, Card, Button, Alert } from 'react-bootstrap';
-
-const API_URL = 'http://127.0.0.1:8000/api';
+import API_URL from './config/api.js';
+// const API_URL = 'http://127.0.0.1:8000/api';
 
 // We can reuse the CourseCard component from App.jsx
 const CourseCard = ({ course }) => {

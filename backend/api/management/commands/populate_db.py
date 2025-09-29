@@ -18,9 +18,9 @@ class Command(BaseCommand):
         self.stdout.write("Creating new data...")
 
         # 1. Create Videos
-        video1 = Video.objects.create(title="Intro to Pain Relief", vimeo_url="https://vimeo.com/1111049635/235a23f8a0", image="https://i.vimeocdn.com/video/1683964976-6d75a73e6e3381a8b7d40a9a116848037ed97802d294cb73c7d1e86a9e144c8d-d?mw=900&q=70", category="Pain Relief", rating=4.8, instructor="Dr. Sharma")
-        video2 = Video.objects.create(title="Core Strengthening", vimeo_url="https://vimeo.com/1111050393/ec9e054769", image="https://i.vimeocdn.com/video/1683965618-63a033321682cee1f564104118712e08e73454721a979929837775620958b161-d?mw=900&q=70", category="Strength", rating=4.9, instructor="Mr. Verma")
-        video3 = Video.objects.create(title="Mobility Drills", vimeo_url="https://vimeo.com/1111049635/235a23f8a0", image="https://i.vimeocdn.com/video/1683964976-6d75a73e6e3381a8b7d40a9a116848037ed97802d294cb73c7d1e86a9e144c8d-d?mw=900&q=70", category="Mobility", rating=4.7, instructor="Dr. Sharma")
+        video1 = Video.objects.create(title="Intro to Pain Relief", vimeo_url="https://vimeo.com/1111049635/235a23f8a0", image="https://i.vimeocdn.com/video/2048942115-33354f071e7cfd0317e3c2947b4448891dcda6ae01dcb41d67e8ae1d2ca8a86d-d?mw=900&q=70", category="Pain Relief", rating=4.8, instructor="Dr. Sharma")
+        video2 = Video.objects.create(title="Core Strengthening", vimeo_url="https://vimeo.com/1111050393/ec9e054769", image="https://i.vimeocdn.com/video/2048942766-c2534fc3567ba084e69ffdf3173223d547540089c29be491e965ad64959a7c4e-d?mw=900&q=70", category="Strength", rating=4.9, instructor="Mr. Verma")
+        video3 = Video.objects.create(title="Mobility Drills", vimeo_url="https://vimeo.com/1111049635/235a23f8a0", image="https://i.vimeocdn.com/video/2048942115-33354f071e7cfd0317e3c2947b4448891dcda6ae01dcb41d67e8ae1d2ca8a86d-d?mw=900&q=70", category="Mobility", rating=4.7, instructor="Dr. Sharma")
         
         # 2. Create Playlists for Weeks
         playlist1 = Playlist.objects.create(title="Week 1 Playlist")
