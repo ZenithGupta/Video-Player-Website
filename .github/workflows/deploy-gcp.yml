@@ -53,16 +53,16 @@ jobs:
 
             # Clone or update repository
             cd ~
-            if [ -d "video-player-website" ]; then
-              cd video-player-website
+            if [ -d "Video-Player-Website" ]; then
+              cd Video-Player-Website
               git pull
             else
               git clone https://github.com/${{ github.repository }}.git
-              cd video-player-website
+              cd Video-Player-Website
             fi
 
             echo "Building and deploying services..."
-            sudo docker-compose up --build -d
+            sudo docker compose up --build -d
 
             echo "Pruning old Docker images to save space..."
             sudo docker image prune -af
