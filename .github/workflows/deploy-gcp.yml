@@ -64,11 +64,11 @@ jobs:
             cd ~
             if [ -d "Video-Player-Website" ]; then
               cd Video-Player-Website
+              sudo git config --global --add safe.directory /home/runner/Video-Player-Website
               sudo git pull
             else
               sudo git clone https://github.com/${{ github.repository }}.git
               cd Video-Player-Website
-              sudo git config --global --add safe.directory /home/runner/Video-Player-Website
             fi
 
             echo "Building and deploying services..."
