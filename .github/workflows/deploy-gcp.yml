@@ -64,9 +64,10 @@ jobs:
             cd ~
             if [ -d "Video-Player-Website" ]; then
               cd Video-Player-Website
-              git pull
+              sudo git config --global --add safe.directory /home/runner/Video-Player-Website
+              sudo git pull
             else
-              git clone https://github.com/${{ github.repository }}.git
+              sudo git clone https://github.com/${{ github.repository }}.git
               cd Video-Player-Website
             fi
 
