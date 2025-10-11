@@ -154,3 +154,12 @@ def submit_assessment(request):
         # Log the error for better debugging
         print(f"Error saving submission: {e}")
         return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    
+# ---- Health Check endpoint -----
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def health_check(request):
+    """
+    Simple health check endpoint for load balancers
+    """
+    return Response({'status': 'healthy'}, status=status.HTTP_200_OK)
