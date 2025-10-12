@@ -3,9 +3,7 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { Container, Row, Col, Card, Button, Alert } from 'react-bootstrap';
 import API_URL from './config/api.js';
-// const API_URL = 'http://127.0.0.1:8000/api';
 
-// We can reuse the CourseCard component from App.jsx
 const CourseCard = ({ course }) => {
     const firstVideo = course.phases?.[0]?.weeks?.[0]?.playlist?.videos?.[0];
     return (
@@ -26,7 +24,7 @@ const CourseCard = ({ course }) => {
 };
 
 
-const MyCoursesPage = () => {
+const MyCoursesPage = ({ language }) => {
     const [courses, setCourses] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -35,7 +33,8 @@ const MyCoursesPage = () => {
         const fetchMyCourses = async () => {
             try {
                 setLoading(true);
-                const response = await axios.get(`${API_URL}/my-courses/`);
+                // Add the lang query parameter to the API call
+                const response = await axios.get(`${API_URL}/my-courses/?lang=${language}`);
                 setCourses(response.data);
             } catch (err) {
                 setError('Could not load your courses. Please try again later.');
@@ -44,7 +43,7 @@ const MyCoursesPage = () => {
             }
         };
         fetchMyCourses();
-    }, []);
+    }, [language]); // Add language to the dependency array
 
     if (loading) return <Container className="main-content py-5 text-center"><h2>Loading Your Courses...</h2></Container>;
     if (error) return <Container className="main-content py-5"><Alert variant="danger">{error}</Alert></Container>;
