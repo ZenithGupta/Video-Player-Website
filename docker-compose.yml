@@ -15,14 +15,7 @@ services:
     build: ./frontend
     container_name: video-player-frontend
     ports:
-      - "5173:5173"
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules  # This prevents the local directory from overriding node_modules
-    environment:
-      - WDS_SOCKET_PORT=5173
-      - CHOKIDAR_USEPOLLING=true  # For better file watching in Docker
-      - HOST=0.0.0.0  # Allow external connections
+      - "5173:80" # Map host port 5173 to container port 80 (nginx)
     depends_on:
       - backend
     networks:
