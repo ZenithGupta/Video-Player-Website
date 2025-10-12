@@ -71,6 +71,11 @@ jobs:
               cd Video-Player-Website
             fi
 
+            # Set environment variables for production
+            echo "Setting up environment variables..."
+            export NODE_ENV=production
+            echo "NODE_ENV=production" | sudo tee .env.production
+
             echo "Building and deploying services..."
             sudo docker compose up --build -d
 
