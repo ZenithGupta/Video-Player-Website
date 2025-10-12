@@ -71,12 +71,12 @@ jobs:
               cd Video-Player-Website
             fi
             
-            echo "Stopping containers if its running..."
-            sudo docker compose down
+            # echo "Stopping containers if its running..."
+            # sudo docker compose down
 
-            echo "Pruning old Docker images to save space..."
-            sudo docker image prune -af
-            docker system prune --all --force
+            # echo "Pruning old Docker images to save space..."
+            # sudo docker image prune -af
+            # docker system prune --all --force
 
-            echo "Building and deploying services..."
-            sudo docker compose up --build -d
+            # echo "Building and deploying services..."
+            # sudo docker compose up --build -d
