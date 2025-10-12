@@ -1,6 +1,34 @@
 import React from 'react';
 import { Container, Row, Col, Card, Button, Form, Nav } from 'react-bootstrap';
 
+// Define content for this component
+const content = {
+    en: {
+        lead: "Start your journey to a pain-free life today.",
+        bestseller: "Bestseller",
+        createdBy: "Created by",
+        whatYouLearn: "What you'll learn",
+        description: "Description",
+        detailedDescription: "This is a detailed description of the course, explaining the benefits, methods, and expected outcomes for the user.",
+        selectValidity: "Select Validity",
+        weeks: "Weeks",
+        buyNow: "Buy Now",
+        access: "Access",
+    },
+    ta: {
+        lead: "வலியற்ற வாழ்க்கையை நோக்கிய உங்கள் பயணத்தை இன்றே தொடங்குங்கள்.",
+        bestseller: "மிகவும் விற்பனையாகிறது",
+        createdBy: "உருவாக்கியவர்",
+        whatYouLearn: "நீங்கள் என்ன கற்றுக்கொள்வீர்கள்",
+        description: "விளக்கம்",
+        detailedDescription: "இது பாடநெறியின் விரிவான விளக்கமாகும், இது பயனருக்கான நன்மைகள், முறைகள் மற்றும் எதிர்பார்க்கப்படும் விளைவுகளை விளக்குகிறது.",
+        selectValidity: "செல்லுபடியாகும் காலத்தைத் தேர்ந்தெடுக்கவும்",
+        weeks: "வாரங்கள்",
+        buyNow: "இப்போதே வாங்குங்கள்",
+        access: "அணுகல்",
+    }
+}
+
 const getEmbedUrl = (url) => {
     if (!url) return '';
     try {
@@ -11,9 +39,10 @@ const getEmbedUrl = (url) => {
     }
 };
 
-const CoursePaymentPage = ({ course, onPurchase, isSuperCourse }) => {
+const CoursePaymentPage = ({ course, onPurchase, isSuperCourse, language }) => {
     const [selectedCourse, setSelectedCourse] = React.useState(null);
     const [paymentMethod, setPaymentMethod] = React.useState('credit-card');
+    const t = content[language]; // Translation object
 
     React.useEffect(() => {
         if (isSuperCourse && course.courses.length > 0) {
@@ -38,9 +67,9 @@ const CoursePaymentPage = ({ course, onPurchase, isSuperCourse }) => {
                     <Row>
                         <Col lg={8} className="text-white">
                             <h1>{course.title}</h1>
-                            <p className="lead">Start your journey to a pain-free life today.</p>
-                            {course.bestseller && <span className="badge bg-warning text-dark me-2">Bestseller</span>}
-                            <span>Created by {introVideo?.instructor || 'PhysioFlex Team'}</span>
+                            <p className="lead">{t.lead}</p>
+                            {course.bestseller && <span className="badge bg-warning text-dark me-2">{t.bestseller}</span>}
+                            <span>{t.createdBy} {introVideo?.instructor || 'PhysioFlex Team'}</span>
                         </Col>
                     </Row>
                 </Container>
@@ -50,14 +79,14 @@ const CoursePaymentPage = ({ course, onPurchase, isSuperCourse }) => {
                 <Row>
                     <Col lg={8}>
                         <div className="course-details">
-                            <h2>What you'll learn</h2>
+                            <h2>{t.whatYouLearn}</h2>
                             <ul className="list-unstyled">
                                 <li>✔️ Technique 1</li>
                                 <li>✔️ Technique 2</li>
                                 <li>✔️ Technique 3</li>
                             </ul>
-                            <h2>Description</h2>
-                            <p>This is a detailed description of the course, explaining the benefits, methods, and expected outcomes for the user.</p>
+                            <h2>{t.description}</h2>
+                            <p>{t.detailedDescription}</p>
                         </div>
                     </Col>
                     <Col lg={4}>
@@ -77,11 +106,11 @@ const CoursePaymentPage = ({ course, onPurchase, isSuperCourse }) => {
                                 <Card.Title as="h2" className="text-center mb-3">₹{selectedCourse?.price}</Card.Title>
                                 {isSuperCourse &&
                                     <Form.Group className="mb-3">
-                                        <Form.Label>Select Validity</Form.Label>
+                                        <Form.Label>{t.selectValidity}</Form.Label>
                                         <Form.Select onChange={handleValidityChange} value={selectedCourse?.id}>
                                             {course.courses.map(subCourse => (
                                                 <option key={subCourse.id} value={subCourse.id}>
-                                                    {subCourse.validity_weeks} Weeks
+                                                    {subCourse.validity_weeks} {t.weeks}
                                                 </option>
                                             ))}
                                         </Form.Select>
@@ -111,10 +140,10 @@ const CoursePaymentPage = ({ course, onPurchase, isSuperCourse }) => {
 
 
                                 <Button variant="dark" size="lg" className="w-100" onClick={onPurchase}>
-                                    Buy Now
+                                    {t.buyNow}
                                 </Button>
                                 <Card.Text className="text-muted text-center mt-2 small">
-                                    {selectedCourse?.validity_weeks}-Week Access
+                                    {selectedCourse?.validity_weeks}-{t.weeks} {t.access}
                                 </Card.Text>
                             </Card.Body>
                         </Card>

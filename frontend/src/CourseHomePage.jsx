@@ -2,6 +2,34 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Container, Row, Col, Card, Button, ProgressBar, Form } from 'react-bootstrap';
 
+// Define content for this component
+const content = {
+    en: {
+        welcomeBack: "Welcome back! Continue your recovery journey.",
+        yourProgress: "Your Progress",
+        weeks: "weeks",
+        days: "days",
+        left: "left",
+        accessExpires: "Your access expires in",
+        selectPhase: "Select Your Phase",
+        goToPhase: "Go to Phase",
+        aboutCourse: "About This Course",
+        description: "Detailed course description will go here."
+    },
+    ta: {
+        welcomeBack: "மீண்டும் வருக! உங்கள் மீட்பு பயணத்தைத் தொடரவும்.",
+        yourProgress: "உங்கள் முன்னேற்றம்",
+        weeks: "வாரங்கள்",
+        days: "நாட்கள்",
+        left: "மீதமுள்ளன",
+        accessExpires: "உங்கள் அணுகல் காலாவதியாகிறது",
+        selectPhase: "உங்கள் கட்டத்தைத் தேர்ந்தெடுக்கவும்",
+        goToPhase: "கட்டத்திற்குச் செல்லவும்",
+        aboutCourse: "இந்த பாடநெறி பற்றி",
+        description: "விரிவான பாடநெறி விளக்கம் இங்கே செல்லும்."
+    }
+};
+
 const getEmbedUrl = (url) => {
     if (!url) return '';
     try {
@@ -10,12 +38,12 @@ const getEmbedUrl = (url) => {
     } catch (e) { return ""; }
 };
 
-const CourseHomePage = ({ course, userCourse }) => {
+const CourseHomePage = ({ course, userCourse, language }) => {
     const [selectedPhase, setSelectedPhase] = useState('');
     const navigate = useNavigate();
+    const t = content[language]; // Translation object
 
     useEffect(() => {
-        // Set the user's current phase from their enrollment data, or default to the first phase
         if (userCourse?.current_phase) {
             setSelectedPhase(userCourse.current_phase);
         } else if (course.phases?.length > 0) {
@@ -40,7 +68,6 @@ const CourseHomePage = ({ course, userCourse }) => {
 
     const handleGoToCourse = () => {
         if (selectedPhase) {
-            // Navigate to the player with both course and phase IDs
             navigate(`/player/${course.id}/phase/${selectedPhase}`);
         } else {
             alert("Please select a phase to begin.");
@@ -60,11 +87,11 @@ const CourseHomePage = ({ course, userCourse }) => {
                     <Row className="align-items-center">
                         <Col lg={8} className="text-white">
                             <h1>{course.title}</h1>
-                            <p className="lead">Welcome back! Continue your recovery journey.</p>
+                            <p className="lead">{t.welcomeBack}</p>
                             <div className="mt-4">
-                               <h5>Your Progress</h5>
-                               <ProgressBar now={progress} label={`${timeLeft.weeks} weeks and ${timeLeft.days} days left`} className="mb-2" />
-                               <small>Your access expires in {timeLeft.weeks} weeks and {timeLeft.days} days.</small>
+                               <h5>{t.yourProgress}</h5>
+                               <ProgressBar now={progress} label={`${timeLeft.weeks} ${t.weeks} and ${timeLeft.days} ${t.days} ${t.left}`} className="mb-2" />
+                               <small>{t.accessExpires} {timeLeft.weeks} {t.weeks} and {timeLeft.days} {t.days}.</small>
                             </div>
                         </Col>
                         <Col lg={4}>
@@ -74,7 +101,7 @@ const CourseHomePage = ({ course, userCourse }) => {
                                 )}
                                 <Card.Body>
                                     <Form.Group className="mb-3">
-                                        <Form.Label>Select Your Phase</Form.Label>
+                                        <Form.Label>{t.selectPhase}</Form.Label>
                                         <Form.Select value={selectedPhase} onChange={e => setSelectedPhase(e.target.value)}>
                                             {course.phases && course.phases.map(phase => (
                                                 <option key={phase.id} value={phase.id}>{phase.title}</option>
@@ -82,7 +109,7 @@ const CourseHomePage = ({ course, userCourse }) => {
                                         </Form.Select>
                                     </Form.Group>
                                     <Button variant="dark" size="lg" className="w-100" onClick={handleGoToCourse}>
-                                        Go to Phase
+                                        {t.goToPhase}
                                     </Button>
                                 </Card.Body>
                             </Card>
@@ -91,8 +118,8 @@ const CourseHomePage = ({ course, userCourse }) => {
                 </Container>
             </header>
             <Container className="py-5">
-                <h2>About This Course</h2>
-                <p>Detailed course description will go here.</p>
+                <h2>{t.aboutCourse}</h2>
+                <p>{t.description}</p>
             </Container>
         </div>
     );

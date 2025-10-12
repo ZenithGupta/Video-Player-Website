@@ -3,7 +3,6 @@ import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import { Container, Alert, Tabs, Tab, ListGroup, Card } from 'react-bootstrap';
 import API_URL from './config/api.js';
-// const API_URL = 'http://127.0.0.1:8000/api';
 
 const getEmbedUrl = (url) => {
     if (!url) return '';
@@ -12,31 +11,29 @@ const getEmbedUrl = (url) => {
         const pathParts = videoUrl.pathname.split('/').filter(Boolean);
         const videoId = pathParts[0];
         const privacyHash = pathParts[1];
-        // Adding dnt=1 can sometimes help with privacy-related embedding issues
         const privacyParam = privacyHash ? `h=${privacyHash}&` : '';
         return `https://player.vimeo.com/video/${videoId}?${privacyParam}autoplay=1&color=ffffff&title=0&byline=0&portrait=0&dnt=1`;
     } catch (e) { return ""; }
 };
 
-export default function VideoPlayerPage() {
+export default function VideoPlayerPage({ language }) {
     const [course, setCourse] = useState(null);
     const [activeVideo, setActiveVideo] = useState({ video: null, weekIndex: 0, dayIndex: 0 });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
-    const { courseId, phaseId } = useParams(); // Get both IDs from URL
+    const { courseId, phaseId } = useParams();
 
     useEffect(() => {
         const fetchCourse = async () => {
             try {
                 setLoading(true);
-                const response = await axios.get(`${API_URL}/courses/${courseId}/`);
+                // Add the lang query parameter to the API call
+                const response = await axios.get(`${API_URL}/courses/${courseId}/?lang=${language}`);
                 const courseData = response.data;
                 
-                // Find the specific phase the user selected from the full course data
                 const selectedPhase = courseData.phases.find(p => p.id === parseInt(phaseId));
                 
                 if (selectedPhase) {
-                    // Create a new "course" object that *only* contains the selected phase
                     setCourse({ ...courseData, phases: [selectedPhase] });
                     const firstVideo = selectedPhase.weeks?.[0]?.playlist?.videos?.[0];
                     if (firstVideo) {
@@ -52,7 +49,7 @@ export default function VideoPlayerPage() {
             }
         };
         fetchCourse();
-    }, [courseId, phaseId]);
+    }, [courseId, phaseId, language]); // Add language to the dependency array
 
     const generateVideoTitle = () => {
         if (!activeVideo.video) return course?.title || '';
@@ -111,4 +108,3 @@ export default function VideoPlayerPage() {
         </div>
     );
 }
-

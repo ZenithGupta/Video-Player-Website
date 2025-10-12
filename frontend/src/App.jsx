@@ -402,16 +402,17 @@ const CoursesSection = ({ language }) => {
     useEffect(() => {
         const fetchCourses = async () => {
             try {
-                const coursesResponse = await axios.get(`${API_URL}/courses/`);
+                // Add the lang query parameter to the API calls
+                const coursesResponse = await axios.get(`${API_URL}/courses/?lang=${language}`);
                 setCourses(coursesResponse.data);
-                const superCoursesResponse = await axios.get(`${API_URL}/super-courses/`);
+                const superCoursesResponse = await axios.get(`${API_URL}/super-courses/?lang=${language}`);
                 setSuperCourses(superCoursesResponse.data);
             } catch (error) {
                 console.error("Failed to fetch courses:", error);
             }
         };
         fetchCourses();
-    }, []);
+    }, [language]); // Add language to the dependency array
 
     const scroll = (direction) => {
         if (scrollContainerRef.current) {
@@ -525,18 +526,18 @@ export default function App() {
                     
                     <Route 
                         path="/course/:courseId" 
-                        element={<CoursePage user={currentUser} token={authToken} showLogin={handleShowLogin} />} 
+                        element={<CoursePage user={currentUser} token={authToken} showLogin={handleShowLogin} language={language} />} 
                     />
                     
                     <Route path="/player/:courseId/phase/:phaseId" element={
                         <ProtectedRoute user={currentUser}>
-                            <VideoPlayerPage />
+                            <VideoPlayerPage language={language} />
                         </ProtectedRoute>
                     } />
                     
                     <Route path="/my-courses" element={
                         <ProtectedRoute user={currentUser}>
-                            <MyCoursesPage />
+                            <MyCoursesPage language={language} />
                         </ProtectedRoute>
                     } />
                 </Routes>

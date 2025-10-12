@@ -5,13 +5,12 @@ import { Container, Alert } from 'react-bootstrap';
 import CourseHomePage from './CourseHomePage.jsx';
 import CoursePaymentPage from './CoursePaymentPage.jsx';
 import API_URL from './config/api.js';
-// const API_URL = 'http://127.0.0.1:8000/api'; 
 
 function useQuery() {
     return new URLSearchParams(useLocation().search);
 }
 
-const CoursePage = ({ user, token, showLogin }) => {
+const CoursePage = ({ user, token, showLogin, language }) => {
     const [course, setCourse] = useState(null);
     const [userCourse, setUserCourse] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -24,7 +23,7 @@ const CoursePage = ({ user, token, showLogin }) => {
         const fetchCourse = async () => {
             try {
                 setLoading(true);
-                const url = isSuperCourse ? `${API_URL}/super-courses/${courseId}/` : `${API_URL}/courses/${courseId}/`;
+                const url = isSuperCourse ? `${API_URL}/super-courses/${courseId}/?lang=${language}` : `${API_URL}/courses/${courseId}/?lang=${language}`;
                 const response = await axios.get(url);
                 const courseData = response.data;
                 
@@ -39,7 +38,7 @@ const CoursePage = ({ user, token, showLogin }) => {
                     }
 
                     if (enrollment) {
-                        const enrolledCourseResponse = await axios.get(`${API_URL}/courses/${enrollment.course}/`);
+                        const enrolledCourseResponse = await axios.get(`${API_URL}/courses/${enrollment.course}/?lang=${language}`);
                         setCourse(enrolledCourseResponse.data);
                         setUserCourse(enrollment);
                     } else {
@@ -60,7 +59,7 @@ const CoursePage = ({ user, token, showLogin }) => {
         };
 
         fetchCourse();
-    }, [courseId, user, isSuperCourse]);
+    }, [courseId, user, isSuperCourse, language]);
 
     const handlePurchase = () => {
         if (!token) {
@@ -74,10 +73,11 @@ const CoursePage = ({ user, token, showLogin }) => {
     if (error) return <Container className="main-content py-5"><Alert variant="danger">{error}</Alert></Container>;
     if (!course) return null;
     
+    // Pass the language prop down to the child components
     return userCourse ? (
-        <CourseHomePage course={course} userCourse={userCourse} />
+        <CourseHomePage course={course} userCourse={userCourse} language={language} />
     ) : (
-        <CoursePaymentPage course={course} onPurchase={handlePurchase} isSuperCourse={isSuperCourse} />
+        <CoursePaymentPage course={course} onPurchase={handlePurchase} isSuperCourse={isSuperCourse} language={language} />
     );
 };
 
