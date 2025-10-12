@@ -13,4 +13,5 @@ COPY . /app/
 
 EXPOSE 8000
 
-CMD ["sh", "-c", "python manage.py check --deploy && python manage.py makemigrations && python manage.py migrate && python manage.py populate_db && python manage.py runserver 0.0.0.0:8000"]
+# Final CMD: Create migrations for the 'api' app, apply them, and then run
+CMD ["sh", "-c", "python manage.py makemigrations api && python manage.py migrate --noinput && python manage.py populate_db && python manage.py runserver 0.0.0.0:8000"]

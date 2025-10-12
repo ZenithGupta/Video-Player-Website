@@ -43,18 +43,18 @@ class Video(models.Model):
         ('Posture Correction', 'Posture Correction'),
         ('Sports Injury', 'Sports Injury'),
     ]
-    title = models.CharField(max_length=200)
-    instructor = models.CharField(max_length=100)
+    title = models.CharField(max_length=200, default='')
+    instructor = models.CharField(max_length=100, default='')
     description = models.TextField(blank=True)
     vimeo_url = models.URLField(max_length=500)
     image = models.URLField(max_length=500)
-    category = models.CharField(max_length=50, choices=CATEGORY_CHOICES)
-    rating = models.DecimalField(max_digits=2, decimal_places=1)
+    category = models.CharField(max_length=50, choices=CATEGORY_CHOICES, default='Pain Relief')
+    rating = models.DecimalField(max_digits=2, decimal_places=1, default=0.0)
     def __str__(self):
         return self.title
 
 class SuperCourse(models.Model):
-    title = models.CharField(max_length=200)
+    title = models.CharField(max_length=200, default='')
     bestseller = models.BooleanField(default=False)
 
     def __str__(self):
@@ -62,7 +62,7 @@ class SuperCourse(models.Model):
 
 class Course(models.Model):
     super_course = models.ForeignKey(SuperCourse, related_name='courses', on_delete=models.CASCADE, null=True, blank=True)
-    title = models.CharField(max_length=200)
+    title = models.CharField(max_length=200, default='')
     validity_weeks = models.IntegerField(default=5)
     bestseller = models.BooleanField(default=False)
     price = models.CharField(max_length=20, default="0")
@@ -70,13 +70,13 @@ class Course(models.Model):
         return self.title
 
 class Playlist(models.Model):
-    title = models.CharField(max_length=200)
+    title = models.CharField(max_length=200, default='')
     videos = models.ManyToManyField(Video, blank=True)
     def __str__(self):
         return self.title
 
 class Week(models.Model):
-    title = models.CharField(max_length=200)
+    title = models.CharField(max_length=200, default='')
     week_number = models.IntegerField()
     playlist = models.ForeignKey(Playlist, on_delete=models.CASCADE, null=True, blank=True)
     class Meta:
@@ -85,7 +85,7 @@ class Week(models.Model):
         return f"{self.title} (Week {self.week_number})"
 
 class Phase(models.Model):
-    title = models.CharField(max_length=200)
+    title = models.CharField(max_length=200, default='')
     course = models.ForeignKey(Course, related_name='phases', on_delete=models.CASCADE)
     weeks = models.ManyToManyField(Week)
     phase_number = models.IntegerField(default=1)
@@ -94,6 +94,7 @@ class Phase(models.Model):
     def __str__(self):
         return f"{self.title} (Phase {self.phase_number} of {self.course.title})"
 
+# ... rest of the models ...
 class UserCourse(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
