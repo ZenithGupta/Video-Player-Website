@@ -70,9 +70,13 @@ jobs:
               sudo git clone https://github.com/${{ github.repository }}.git
               cd Video-Player-Website
             fi
-
-            echo "Building and deploying services..."
-            sudo docker compose up --build -d
+            
+            echo "Stopping containers if its running..."
+            sudo docker compose down
 
             echo "Pruning old Docker images to save space..."
             sudo docker image prune -af
+            docker system prune --all --force
+
+            echo "Building and deploying services..."
+            sudo docker compose up --build -d
