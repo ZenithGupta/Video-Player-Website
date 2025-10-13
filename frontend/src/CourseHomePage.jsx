@@ -14,7 +14,7 @@ const content = {
         selectPhase: "Select Your Phase",
         goToPhase: "Go to Phase",
         aboutCourse: "About This Course",
-        description: "Detailed course description will go here."
+        description: "This comprehensive program is designed to guide you step-by-step through your recovery. Each phase builds upon the last, ensuring a safe and effective progression. Follow the daily videos, stay consistent, and you'll be on your way to a pain-free life."
     },
     ta: {
         welcomeBack: "மீண்டும் வருக! உங்கள் மீட்பு பயணத்தைத் தொடரவும்.",
@@ -26,7 +26,7 @@ const content = {
         selectPhase: "உங்கள் கட்டத்தைத் தேர்ந்தெடுக்கவும்",
         goToPhase: "கட்டத்திற்குச் செல்லவும்",
         aboutCourse: "இந்த பாடநெறி பற்றி",
-        description: "விரிவான பாடநெறி விளக்கம் இங்கே செல்லும்."
+        description: "இந்த விரிவான திட்டம் உங்கள் மீட்பு மூலம் படிப்படியாக உங்களுக்கு வழிகாட்ட வடிவமைக்கப்பட்டுள்ளது. ஒவ்வொரு கட்டமும் கடைசியாக கட்டமைக்கப்படுகிறது, இது ஒரு பாதுகாப்பான மற்றும் பயனுள்ள முன்னேற்றத்தை உறுதி செய்கிறது. தினசரி வீடியோக்களைப் பின்பற்றுங்கள், சீராக இருங்கள், நீங்கள் வலியற்ற வாழ்க்கையை நோக்கிச் செல்வீர்கள்."
     }
 };
 
@@ -86,11 +86,11 @@ const CourseHomePage = ({ course, userCourse, language }) => {
                 <Container>
                     <Row className="align-items-center">
                         <Col lg={8} className="text-white">
-                            <h1>{course.title}</h1>
+                            <h1 className="main-heading">{course.title}</h1>
                             <p className="lead">{t.welcomeBack}</p>
                             <div className="mt-4">
-                               <h5>{t.yourProgress}</h5>
-                               <ProgressBar now={progress} label={`${timeLeft.weeks} ${t.weeks} and ${timeLeft.days} ${t.days} ${t.left}`} className="mb-2" />
+                               <h5 className="font-weight-bold">{t.yourProgress}</h5>
+                               <ProgressBar now={progress} label={`${Math.round(progress)}%`} className="mb-2" style={{height: '20px'}} />
                                <small>{t.accessExpires} {timeLeft.weeks} {t.weeks} and {timeLeft.days} {t.days}.</small>
                             </div>
                         </Col>
@@ -101,14 +101,14 @@ const CourseHomePage = ({ course, userCourse, language }) => {
                                 )}
                                 <Card.Body>
                                     <Form.Group className="mb-3">
-                                        <Form.Label>{t.selectPhase}</Form.Label>
+                                        <Form.Label className="font-weight-bold">{t.selectPhase}</Form.Label>
                                         <Form.Select value={selectedPhase} onChange={e => setSelectedPhase(e.target.value)}>
                                             {course.phases && course.phases.map(phase => (
                                                 <option key={phase.id} value={phase.id}>{phase.title}</option>
                                             ))}
                                         </Form.Select>
                                     </Form.Group>
-                                    <Button variant="dark" size="lg" className="w-100" onClick={handleGoToCourse}>
+                                    <Button variant="primary" size="lg" className="w-100 header-btn" onClick={handleGoToCourse}>
                                         {t.goToPhase}
                                     </Button>
                                 </Card.Body>
@@ -118,8 +118,8 @@ const CourseHomePage = ({ course, userCourse, language }) => {
                 </Container>
             </header>
             <Container className="py-5">
-                <h2>{t.aboutCourse}</h2>
-                <p>{t.description}</p>
+                <h2 className="main-heading">{t.aboutCourse}</h2>
+                <p className="sub-heading">{t.description}</p>
             </Container>
         </div>
     );

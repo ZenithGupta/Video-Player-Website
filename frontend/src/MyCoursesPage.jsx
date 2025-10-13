@@ -11,7 +11,7 @@ const CourseCard = ({ course }) => {
             <div className="course-card h-100">
                 <Card className="border-0 h-100 bg-transparent">
                     <Card.Img variant="top" src={firstVideo?.image || 'https://placehold.co/240x135/749BC2/FFFFFF?text=Course'} className="course-card-img" />
-                    <Card.Body className="p-0 pt-2">
+                    <Card.Body className="p-3">
                         <Card.Title className="course-card-title text-dark">{course.title}</Card.Title>
                         <Card.Text className="course-card-instructor">{firstVideo?.instructor || 'Dr. Physio'}</Card.Text>
                         <p className="course-card-price text-dark">₹{course.price}</p>
@@ -45,7 +45,7 @@ const MyCoursesPage = ({ language }) => {
         fetchMyCourses();
     }, [language]); // Add language to the dependency array
 
-    if (loading) return <Container className="main-content py-5 text-center"><h2>Loading Your Courses...</h2></Container>;
+    if (loading) return <Container className="main-content py-5 text-center"><h2 className="main-heading">Loading Your Courses...</h2></Container>;
     if (error) return <Container className="main-content py-5"><Alert variant="danger">{error}</Alert></Container>;
 
     return (
@@ -60,9 +60,9 @@ const MyCoursesPage = ({ language }) => {
                     ))}
                 </Row>
             ) : (
-                <div className="text-center">
-                    <p>You have not enrolled in any courses yet.</p>
-                    <Link to="/" className="btn btn-dark">Explore Courses</Link>
+                <div className="text-center p-5 bg-light rounded shadow-sm">
+                    <p className="sub-heading">You have not enrolled in any courses yet.</p>
+                    <Link to="/" className="btn btn-primary header-btn mt-3">Explore Courses</Link>
                 </div>
             )}
         </Container>
