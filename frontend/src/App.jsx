@@ -51,19 +51,6 @@ const content = {
         courseSectionTitle: "A broad selection of courses",
         assessmentTitle: "Pain Assessment Questions",
         assessmentIntro: "Once you begin, answer the following questions honestly to help us guide you on the right path:",
-        q1: "1. What is your current level of pain? (0 - No pain, 10 - Severe pain)",
-        q2: "2. How is your pain when rising from a seated position?",
-        q3: "3. How long can you stand without pain?",
-        q4: "4. Can you climb stairs?",
-        q5: "5. Do your joints hurt while descending stairs?",
-        q6: "6. How far can you walk?",
-        q7: "7. Can you fully bend your knees?",
-        q8: "8. Can you sit on the floor?",
-        q9: "9. Can you stand up from a chair without holding onto anything?",
-        q10: "10. Do your joints feel stiff after sitting or standing for a long time?",
-        q11: "11. Do you lean or limp while walking?",
-        q12: "12. Can you bend down fully?",
-        q13: "13. How long can you stand on one leg?"
     },
     ta: {
         brand: "பிசியோஃபிளெக்ஸ்",
@@ -100,24 +87,11 @@ const content = {
         courseSectionTitle: "பாடங்களின் பரந்த தேர்வு",
         assessmentTitle: "வலி மதிப்பீட்டுக் கேள்விகள்",
         assessmentIntro: "நீங்கள் தொடங்கியதும், சரியான பாதையில் உங்களுக்கு வழிகாட்ட எங்களுக்கு உதவ பின்வரும் கேள்விகளுக்கு நேர்மையாக பதிலளிக்கவும்:",
-        q1: "1. உங்கள் தற்போதைய வலி நிலை என்ன? (0 - வலி இல்லை, 10 - கடுமையான வலி)",
-        q2: "2. உட்கார்ந்த நிலையில் இருந்து எழும்போது உங்கள் வலி எப்படி இருக்கிறது?",
-        q3: "3. வலியின்றி எவ்வளவு நேரம் நிற்க முடியும்?",
-        q4: "4. உங்களால் மாடிப்படிகளில் ஏற முடியுமா?",
-        q5: "5. மாடிப்படிகளில் இறங்கும்போது உங்கள் மூட்டுகள் வலிக்கிறதா?",
-        q6: "6. எவ்வளவு தூரம் நடக்க முடியும்?",
-        q7: "7. உங்கள் முழங்கால்களை முழுமையாக மடக்க முடியுமா?",
-        q8: "8. உங்களால் தரையில் உட்கார முடியுமா?",
-        q9: "9. எதையும் பிடிக்காமல் நாற்காலியில் இருந்து உங்களால் நிற்க முடியுமா?",
-        q10: "10. நீண்ட நேரம் உட்கார்ந்த பிறகு அல்லது நின்ற பிறகு உங்கள் மூட்டுகள் விறைப்பாக உணர்கிறதா?",
-        q11: "11. நடக்கும்போது நீங்கள் சாய்ந்து அல்லது நொண்டி நடக்கிறீர்களா?",
-        q12: "12. உங்களால் முழுமையாக குனிய முடியுமா?",
-        q13: "13. ஒரு காலில் எவ்வளவு நேரம் நிற்க முடியும்?"
     }
 };
 
 // --- SVG Icons ---
-const StarIcon = ({ filled }) => ( <svg className="star-icon" style={{ color: filled ? '#e59819' : '#d1d7dc' }} fill="currentColor" viewBox="0 0 20 20"> <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.957a1 1 0 00.95.69h4.162c.969 0 1.371 1.24.588 1.81l-3.368 2.448a1 1 0 00-.364 1.118l1.287 3.957c.3.921-.755 1.688-1.54 1.118l-3.368-2.448a1 1 0 00-1.175 0l-3.368 2.448c-.784.57-1.838-.197-1.539-1.118l1.287-3.957a1 1 0 00-.364-1.118L2.25 9.384c-.783-.57-.38-1.81.588-1.81h4.162a1 1 0 00.95-.69L9.049 2.927z" /> </svg> );
+const StarIcon = ({ filled }) => ( <svg className="star-icon" style={{ color: filled ? '#F5A623' : '#d1d7dc' }} fill="currentColor" viewBox="0 0 20 20"> <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.957a1 1 0 00.95.69h4.162c.969 0 1.371 1.24.588 1.81l-3.368 2.448a1 1 0 00-.364 1.118l1.287 3.957c.3.921-.755 1.688-1.54 1.118l-3.368-2.448a1 1 0 00-1.175 0l-3.368 2.448c-.784.57-1.838-.197-1.539-1.118l1.287-3.957a1 1 0 00-.364-1.118L2.25 9.384c-.783-.57-.38-1.81.588-1.81h4.162a1 1 0 00.95-.69L9.049 2.927z" /> </svg> );
 const SearchIcon = () => <svg className="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>;
 const ChevronLeftIcon = () => <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" /></svg>;
 const ChevronRightIcon = () => <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" /></svg>;
@@ -221,7 +195,7 @@ const AuthModal = ({ show, handleClose, mode, onLoginSuccess, language }) => {
                         <Form.Label>Password</Form.Label>
                         <Form.Control type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
                     </Form.Group>
-                    <Button variant="dark" type="submit" className="w-100">
+                    <Button variant="primary" type="submit" className="w-100">
                         {mode === 'signup' ? content[language].signup : content[language].login}
                     </Button>
                 </Form>
@@ -264,7 +238,7 @@ const Header = ({ language, setLanguage, user, onLogout, onShowLogin, onShowSign
                         ) : (
                             <>
                                 <Button variant="outline-dark" className="header-btn my-1 my-lg-0" onClick={onShowLogin}>{content[language].login}</Button>
-                                <Button variant="dark" className="header-btn ms-lg-2 my-1 my-lg-0" onClick={onShowSignup}>{content[language].signup}</Button>
+                                <Button variant="primary" className="header-btn ms-lg-2 my-1 my-lg-0" onClick={onShowSignup}>{content[language].signup}</Button>
                             </>
                         )}
                     </Nav>
@@ -281,7 +255,7 @@ const CourseCard = ({ course, isSuperCourse }) => {
 
 
     return (
-         <Link to={linkTo} className="course-card-link">
+         <Link to={linkTo} className="course-card-link text-decoration-none">
             <div className="course-card">
                 <Card className="border-0 h-100 bg-transparent">
                     <Card.Img 
@@ -289,12 +263,12 @@ const CourseCard = ({ course, isSuperCourse }) => {
                         src={firstVideo?.image || 'https://placehold.co/240x135/749BC2/FFFFFF?text=Course'} 
                         className="course-card-img" 
                     />
-                <Card.Body className="p-0 pt-2">
+                <Card.Body className="p-3">
                     <Card.Title className="course-card-title">{course.title}</Card.Title>
                     <Card.Text className="course-card-instructor">{firstVideo?.instructor || 'Dr. Physio'}</Card.Text>
                     <div className="d-flex align-items-center">
                         <span className="course-card-rating">{firstVideo?.rating || '4.5'}</span>
-                        {/* Star icons can be made dynamic based on rating */}
+                        <StarIcon filled />
                         <span className="course-card-reviews">({firstVideo?.reviews || '1234'})</span>
                     </div>
                     <p className="course-card-price">₹{price}</p>
@@ -306,20 +280,31 @@ const CourseCard = ({ course, isSuperCourse }) => {
     );
 };
 
-const IntroSection = ({ language }) => ( <Container fluid="xl" className="py-5 text-center"> <h1 className="main-heading">{content[language].mainHeading}</h1> <p className="sub-heading mx-auto" style={{ maxWidth: '800px' }}>{content[language].intro}</p> <p className="lead mx-auto" style={{ maxWidth: '800px' }}>{content[language].subHeading}</p> <p className="fw-bold mt-3">{content[language].suffering}</p> <p className="lead mx-auto mt-3" style={{ maxWidth: '800px' }}>{content[language].journey}</p> </Container> );
+const IntroSection = ({ language }) => (
+    <div className="intro-section-gradient">
+        <Container fluid="xl" className="py-5 text-center">
+            <h1 className="main-heading text-white">{content[language].mainHeading}</h1>
+            <p className="sub-heading text-white">{content[language].intro}</p>
+            <p className="lead mx-auto mt-4" style={{ maxWidth: '800px' }}>{content[language].subHeading}</p>
+            <p className="fw-bold mt-4">{content[language].suffering}</p>
+            <p className="lead mx-auto mt-3" style={{ maxWidth: '800px' }}>{content[language].journey}</p>
+        </Container>
+    </div>
+);
 
 const PrinciplesSection = ({ language }) => (
-    <Container fluid="xl" className="py-5 bg-light">
+    <Container fluid="xl" className="py-5 bg-white">
+      <h2 className="text-center main-heading mb-5">Our Core Principles</h2>
         <Row>
-            <Col md={4}>
+            <Col md={4} className="text-center">
                 <h4>{content[language].principle1Title}</h4>
                 <p>{content[language].principle1Text}</p>
             </Col>
-            <Col md={4}>
+            <Col md={4} className="text-center">
                 <h4>{content[language].principle2Title}</h4>
                 <p>{content[language].principle2Text}</p>
             </Col>
-            <Col md={4}>
+            <Col md={4} className="text-center">
                 <h4>{content[language].principle3Title}</h4>
                 <p>{content[language].principle3Text}</p>
             </Col>
@@ -329,7 +314,7 @@ const PrinciplesSection = ({ language }) => (
 
 const HowItWorksSection = ({ language }) => (
      <Container fluid="xl" className="py-5">
-        <h2 className="text-center main-heading mb-4">{content[language].howItWorksTitle}</h2>
+        <h2 className="text-center main-heading mb-5">{content[language].howItWorksTitle}</h2>
         <Row className="text-center">
             <Col md={3}><strong>Step 1:</strong> {content[language].howItWorksStep1}</Col>
             <Col md={3}><strong>Step 2:</strong> {content[language].howItWorksStep2}</Col>
@@ -349,25 +334,6 @@ const PainAssessmentSection = ({ language }) => {
         <Container fluid="xl" className="py-5">
             <h2 className="text-center main-heading mb-4">{content[language].assessmentTitle}</h2>
             <p className="text-center sub-heading mx-auto" style={{ maxWidth: '800px' }}>{content[language].assessmentIntro}</p>
-            <Row className="justify-content-center">
-                <Col md={8}>
-                    <ul className="list-unstyled">
-                        <li className="mt-3">{content[language].q1}</li>
-                        <li className="mt-3">{content[language].q2}</li>
-                        <li className="mt-3">{content[language].q3}</li>
-                        <li className="mt-3">{content[language].q4}</li>
-                        <li className="mt-3">{content[language].q5}</li>
-                        <li className="mt-3">{content[language].q6}</li>
-                        <li className="mt-3">{content[language].q7}</li>
-                        <li className="mt-3">{content[language].q8}</li>
-                        <li className="mt-3">{content[language].q9}</li>
-                        <li className="mt-3">{content[language].q10}</li>
-                        <li className="mt-3">{content[language].q11}</li>
-                        <li className="mt-3">{content[language].q12}</li>
-                        <li className="mt-3">{content[language].q13}</li>
-                    </ul>
-                </Col>
-            </Row>
             <div className="google-form-container mt-5">
                 <iframe
                     src={formUrls[language]}
@@ -384,12 +350,14 @@ const PainAssessmentSection = ({ language }) => {
 };
 
 const CtaSection = ({ language }) => (
-    <Container fluid="xl" className="py-5 text-center bg-light">
+    <Container fluid="xl" className="my-5">
+      <div className="cta-section text-center">
         <h3>{content[language].reclaimLifeTitle}</h3>
         <p className="lead mx-auto" style={{ maxWidth: '700px' }}>{content[language].reclaimLifeText}</p>
         <h4 className="mt-4">{content[language].ctaTitle}</h4>
         <p>{content[language].ctaText}</p>
-        <Button variant="dark" size="lg" className="header-btn mt-2">{content[language].ctaButton}</Button>
+        <Button variant="light" size="lg" className="header-btn mt-2">{content[language].ctaButton}</Button>
+      </div>
     </Container>
 );
 

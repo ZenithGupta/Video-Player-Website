@@ -66,9 +66,9 @@ const CoursePaymentPage = ({ course, onPurchase, isSuperCourse, language }) => {
                 <Container>
                     <Row>
                         <Col lg={8} className="text-white">
-                            <h1>{course.title}</h1>
+                            <h1 className="main-heading">{course.title}</h1>
                             <p className="lead">{t.lead}</p>
-                            {course.bestseller && <span className="badge bg-warning text-dark me-2">{t.bestseller}</span>}
+                            {course.bestseller && <span className="badge bg-warning text-dark me-2 bestseller-badge">{t.bestseller}</span>}
                             <span>{t.createdBy} {introVideo?.instructor || 'PhysioFlex Team'}</span>
                         </Col>
                     </Row>
@@ -78,14 +78,14 @@ const CoursePaymentPage = ({ course, onPurchase, isSuperCourse, language }) => {
             <Container className="py-5">
                 <Row>
                     <Col lg={8}>
-                        <div className="course-details">
-                            <h2>{t.whatYouLearn}</h2>
+                        <div className="course-details p-4 rounded bg-white shadow-sm">
+                            <h2 className="explore-heading">{t.whatYouLearn}</h2>
                             <ul className="list-unstyled">
-                                <li>✔️ Technique 1</li>
-                                <li>✔️ Technique 2</li>
-                                <li>✔️ Technique 3</li>
+                                <li>✔️ Personalized recovery plans</li>
+                                <li>✔️ Expert guidance from certified physiotherapists</li>
+                                <li>✔️ A supportive community to keep you motivated</li>
                             </ul>
-                            <h2>{t.description}</h2>
+                            <h2 className="explore-heading mt-4">{t.description}</h2>
                             <p>{t.detailedDescription}</p>
                         </div>
                     </Col>
@@ -103,10 +103,10 @@ const CoursePaymentPage = ({ course, onPurchase, isSuperCourse, language }) => {
                                 </div>
                             )}
                             <Card.Body>
-                                <Card.Title as="h2" className="text-center mb-3">₹{selectedCourse?.price}</Card.Title>
+                                <Card.Title as="h2" className="text-center mb-3 course-card-price">₹{selectedCourse?.price}</Card.Title>
                                 {isSuperCourse &&
                                     <Form.Group className="mb-3">
-                                        <Form.Label>{t.selectValidity}</Form.Label>
+                                        <Form.Label className="font-weight-bold">{t.selectValidity}</Form.Label>
                                         <Form.Select onChange={handleValidityChange} value={selectedCourse?.id}>
                                             {course.courses.map(subCourse => (
                                                 <option key={subCourse.id} value={subCourse.id}>
@@ -139,7 +139,7 @@ const CoursePaymentPage = ({ course, onPurchase, isSuperCourse, language }) => {
                                 </div>
 
 
-                                <Button variant="dark" size="lg" className="w-100" onClick={onPurchase}>
+                                <Button variant="primary" size="lg" className="w-100 header-btn" onClick={onPurchase}>
                                     {t.buyNow}
                                 </Button>
                                 <Card.Text className="text-muted text-center mt-2 small">
