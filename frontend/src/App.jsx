@@ -2,14 +2,23 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Container, Navbar, Nav, Form, Button, Card, CloseButton, Row, Col, Modal, Alert } from 'react-bootstrap';
 import axios from 'axios';
 import { Routes, Route, Link, useNavigate } from 'react-router-dom';
+
+// GSAP Imports
+import { gsap } from 'gsap';
+import { useGSAP } from '@gsap/react';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { SplitText } from 'gsap/SplitText';
+import { ScrambleTextPlugin } from 'gsap/ScrambleTextPlugin';
+
 import VideoPlayerPage from './VideoPlayerPage.jsx';
 import CoursePage from './CoursePage.jsx';
 import MyCoursesPage from './MyCoursesPage.jsx';
 import ProtectedRoute from './ProtectedRoute.jsx';
 import API_URL from './config/api.js';
-
-// This imports the styles from your main CSS file.
 import './index.css';
+
+// Register GSAP Plugins
+gsap.registerPlugin(useGSAP, ScrollTrigger, SplitText, ScrambleTextPlugin);
 
 // --- API Base URL ---
 // const API_URL = 'http://127.0.0.1:8000/api';
@@ -280,49 +289,133 @@ const CourseCard = ({ course, isSuperCourse }) => {
     );
 };
 
-const IntroSection = ({ language }) => (
-    <div className="intro-section-gradient">
-        <Container fluid="xl" className="py-5 text-center">
-            <h1 className="main-heading text-white">{content[language].mainHeading}</h1>
-            <p className="sub-heading text-white">{content[language].intro}</p>
-            <p className="lead mx-auto mt-4" style={{ maxWidth: '800px' }}>{content[language].subHeading}</p>
-            <p className="fw-bold mt-4">{content[language].suffering}</p>
-            <p className="lead mx-auto mt-3" style={{ maxWidth: '800px' }}>{content[language].journey}</p>
+const IntroSection = ({ language }) => {
+    const introRef = useRef(null);
+
+    useGSAP(() => {
+        // Scramble Text for the main heading
+        gsap.to(".main-heading-scramble", {
+            duration: 2,
+            scrambleText: {
+                text: content[language].mainHeading,
+                chars: "lowerCase",
+                speed: 0.3
+            }
+        });
+
+        // Staggered fade-in for other elements
+        gsap.from(".intro-fade-in", {
+            duration: 1,
+            y: 50,
+            opacity: 0,
+            stagger: 0.2,
+            delay: 1
+        });
+    }, { scope: introRef, dependencies: [language] });
+
+    return (
+        <div className="intro-section-gradient" ref={introRef}>
+            <Container fluid="xl" className="py-5 text-center">
+                <h1 className="main-heading text-white main-heading-scramble"></h1>
+                <p className="sub-heading text-white intro-fade-in">{content[language].intro}</p>
+                <p className="lead mx-auto mt-4 intro-fade-in" style={{ maxWidth: '800px' }}>{content[language].subHeading}</p>
+                <p className="fw-bold mt-4 intro-fade-in">{content[language].suffering}</p>
+                <p className="lead mx-auto mt-3 intro-fade-in" style={{ maxWidth: '800px' }}>{content[language].journey}</p>
+            </Container>
+        </div>
+    );
+};
+
+const PrinciplesSection = ({ language }) => {
+    const principlesRef = useRef(null);
+
+    useGSAP(() => {
+        const split = new SplitText(".principles-title", { type: "words,chars" });
+        const chars = split.chars;
+
+        gsap.from(chars, {
+            duration: 0.8,
+            opacity: 0,
+            y: 20,
+            ease: "back",
+            stagger: 0.05,
+            scrollTrigger: {
+                trigger: principlesRef.current,
+                start: "top 80%",
+            }
+        });
+
+        gsap.from(".principle-col", {
+            duration: 1,
+            opacity: 0,
+            y: 50,
+            stagger: 0.2,
+            scrollTrigger: {
+                trigger: ".principles-title",
+                start: "bottom 80%",
+            }
+        });
+    }, { scope: principlesRef, dependencies: [language] });
+
+    return (
+        <Container fluid="xl" className="py-5 bg-white" ref={principlesRef}>
+            <h2 className="text-center main-heading mb-5 principles-title">Our Core Principles</h2>
+            <Row>
+                <Col md={4} className="text-center principle-col">
+                    <h4>{content[language].principle1Title}</h4>
+                    <p>{content[language].principle1Text}</p>
+                </Col>
+                <Col md={4} className="text-center principle-col">
+                    <h4>{content[language].principle2Title}</h4>
+                    <p>{content[language].principle2Text}</p>
+                </Col>
+                <Col md={4} className="text-center principle-col">
+                    <h4>{content[language].principle3Title}</h4>
+                    <p>{content[language].principle3Text}</p>
+                </Col>
+            </Row>
         </Container>
-    </div>
-);
+    );
+};
 
-const PrinciplesSection = ({ language }) => (
-    <Container fluid="xl" className="py-5 bg-white">
-      <h2 className="text-center main-heading mb-5">Our Core Principles</h2>
-        <Row>
-            <Col md={4} className="text-center">
-                <h4>{content[language].principle1Title}</h4>
-                <p>{content[language].principle1Text}</p>
-            </Col>
-            <Col md={4} className="text-center">
-                <h4>{content[language].principle2Title}</h4>
-                <p>{content[language].principle2Text}</p>
-            </Col>
-            <Col md={4} className="text-center">
-                <h4>{content[language].principle3Title}</h4>
-                <p>{content[language].principle3Text}</p>
-            </Col>
-        </Row>
-    </Container>
-);
+const HowItWorksSection = ({ language }) => {
+    const howItWorksRef = useRef(null);
 
-const HowItWorksSection = ({ language }) => (
-     <Container fluid="xl" className="py-5">
-        <h2 className="text-center main-heading mb-5">{content[language].howItWorksTitle}</h2>
-        <Row className="text-center">
-            <Col md={3}><strong>Step 1:</strong> {content[language].howItWorksStep1}</Col>
-            <Col md={3}><strong>Step 2:</strong> {content[language].howItWorksStep2}</Col>
-            <Col md={3}><strong>Step 3:</strong> {content[language].howItWorksStep3}</Col>
-            <Col md={3}><strong>Step 4:</strong> {content[language].howItWorksStep4}</Col>
-        </Row>
-    </Container>
-);
+    useGSAP(() => {
+        gsap.from(".how-it-works-title", {
+            duration: 1,
+            opacity: 0,
+            y: -50,
+            scrollTrigger: {
+                trigger: howItWorksRef.current,
+                start: "top 80%"
+            }
+        });
+
+        gsap.from(".how-it-works-step", {
+            duration: 0.8,
+            opacity: 0,
+            scale: 0.8,
+            stagger: 0.2,
+            scrollTrigger: {
+                trigger: ".how-it-works-title",
+                start: "bottom 90%"
+            }
+        });
+    }, { scope: howItWorksRef, dependencies: [language] });
+
+    return (
+        <Container fluid="xl" className="py-5" ref={howItWorksRef}>
+            <h2 className="text-center main-heading mb-5 how-it-works-title">{content[language].howItWorksTitle}</h2>
+            <Row className="text-center">
+                <Col md={3} className="how-it-works-step"><strong>Step 1:</strong> {content[language].howItWorksStep1}</Col>
+                <Col md={3} className="how-it-works-step"><strong>Step 2:</strong> {content[language].howItWorksStep2}</Col>
+                <Col md={3} className="how-it-works-step"><strong>Step 3:</strong> {content[language].howItWorksStep3}</Col>
+                <Col md={3} className="how-it-works-step"><strong>Step 4:</strong> {content[language].howItWorksStep4}</Col>
+            </Row>
+        </Container>
+    );
+};
 
 const PainAssessmentSection = ({ language }) => {
     const formUrls = {
@@ -349,28 +442,72 @@ const PainAssessmentSection = ({ language }) => {
     );
 };
 
-const CtaSection = ({ language }) => (
-    <Container fluid="xl" className="my-5">
-      <div className="cta-section text-center">
-        <h3>{content[language].reclaimLifeTitle}</h3>
-        <p className="lead mx-auto" style={{ maxWidth: '700px' }}>{content[language].reclaimLifeText}</p>
-        <h4 className="mt-4">{content[language].ctaTitle}</h4>
-        <p>{content[language].ctaText}</p>
-        <Button variant="light" size="lg" className="header-btn mt-2">{content[language].ctaButton}</Button>
-      </div>
-    </Container>
-);
+const CtaSection = ({ language }) => {
+    const ctaRef = useRef(null);
+
+    useGSAP(() => {
+        const split = new SplitText(".cta-title-split", { type: "words" });
+        const words = split.words;
+
+        gsap.from(words, {
+            duration: 1,
+            opacity: 0,
+            y: 30,
+            stagger: 0.1,
+            scrollTrigger: {
+                trigger: ctaRef.current,
+                start: "top 80%",
+            }
+        });
+
+        gsap.from(".cta-fade-in", {
+            duration: 1,
+            opacity: 0,
+            delay: 0.5,
+            scrollTrigger: {
+                trigger: ctaRef.current,
+                start: "top 70%",
+            }
+        });
+    }, { scope: ctaRef, dependencies: [language] });
+
+    return (
+        <Container fluid="xl" className="my-5" ref={ctaRef}>
+          <div className="cta-section text-center">
+            <h3 className="cta-title-split">{content[language].reclaimLifeTitle}</h3>
+            <p className="lead mx-auto cta-fade-in" style={{ maxWidth: '700px' }}>{content[language].reclaimLifeText}</p>
+            <h4 className="mt-4 cta-fade-in">{content[language].ctaTitle}</h4>
+            <p className="cta-fade-in">{content[language].ctaText}</p>
+            <Button variant="light" size="lg" className="header-btn mt-2 cta-fade-in">{content[language].ctaButton}</Button>
+          </div>
+        </Container>
+    );
+};
 
 const CoursesSection = ({ language }) => {
+    // ... (CoursesSection component remains mostly the same, but you could add animations to the cards too)
     const [courses, setCourses] = useState([]);
     const [superCourses, setSuperCourses] = useState([]);
     const [activeTab, setActiveTab] = useState('Pain Relief');
     const scrollContainerRef = useRef(null);
+    const coursesRef = useRef(null);
+
+    useGSAP(() => {
+        gsap.from(".course-section-title-split", {
+            duration: 1,
+            opacity: 0,
+            y: -30,
+            scrollTrigger: {
+                trigger: coursesRef.current,
+                start: "top 80%"
+            }
+        });
+    }, { scope: coursesRef, dependencies: [language] });
+
 
     useEffect(() => {
         const fetchCourses = async () => {
             try {
-                // Add the lang query parameter to the API calls
                 const coursesResponse = await axios.get(`${API_URL}/courses/?lang=${language}`);
                 setCourses(coursesResponse.data);
                 const superCoursesResponse = await axios.get(`${API_URL}/super-courses/?lang=${language}`);
@@ -380,7 +517,7 @@ const CoursesSection = ({ language }) => {
             }
         };
         fetchCourses();
-    }, [language]); // Add language to the dependency array
+    }, [language]);
 
     const scroll = (direction) => {
         if (scrollContainerRef.current) {
@@ -390,9 +527,9 @@ const CoursesSection = ({ language }) => {
     };
 
     return (
-        <Container fluid="xl" className="py-5">
+        <Container fluid="xl" className="py-5" ref={coursesRef}>
             <div className="mb-4">
-                <h2 className="main-heading">{content[language].courseSectionTitle}</h2>
+                <h2 className="main-heading course-section-title-split">{content[language].courseSectionTitle}</h2>
             </div>
 
             <Nav variant="tabs" activeKey={activeTab} onSelect={(k) => setActiveTab(k)} className="course-tabs">
@@ -419,6 +556,7 @@ const CoursesSection = ({ language }) => {
         </Container>
     );
 };
+
 // --- FINAL App Component ---
 export default function App() {
     const [language, setLanguage] = useState('en');
@@ -480,7 +618,6 @@ export default function App() {
             />
             <main>
                 <Routes>
-                    {/* Main homepage route with ALL sections restored */}
                     <Route path="/" element={
                         <>
                             <IntroSection language={language} />
