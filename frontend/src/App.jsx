@@ -17,7 +17,7 @@ import './index.css';
 // --- Language Content ---
 const content = {
     en: {
-        brand: "PhysioFlex",
+        brand: "One Last Move",
         myCourses: "My Courses",
         searchPlaceholder: "Search for anything",
         forBusiness: "For Business",
@@ -53,7 +53,7 @@ const content = {
         assessmentIntro: "Once you begin, answer the following questions honestly to help us guide you on the right path:",
     },
     ta: {
-        brand: "பிசியோஃபிளெக்ஸ்",
+        brand: "ஒரு கடைசி நகர்வு",
         myCourses: "எனது படிப்புகள்",
         searchPlaceholder: "எதையும் தேடுங்கள்",
         forBusiness: "வணிகத்திற்காக",

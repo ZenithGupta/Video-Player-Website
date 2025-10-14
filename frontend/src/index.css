@@ -71,7 +71,7 @@ body {
 }
 .header-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 10px #4A90E2;
 }
 
 .btn-primary {
@@ -315,7 +315,7 @@ body {
 
 .accordion-button:focus {
   box-shadow: none;
-  border-color: rgba(0,0,0,.125);
+  border-color: #4A90E2;
 }
 
 .list-group-item.active {
@@ -448,4 +448,40 @@ body {
     padding: 0.75rem !important;
     border-radius: 8px !important;
     font-weight: 700 !important;
+}
+
+/* --- Add this code to the end of the file --- */
+
+/* --- Collapsed Navbar Menu Styles --- */
+@media (max-width: 991.98px) {
+    .navbar-collapse.show,
+    .navbar-collapse.collapsing {
+        background-color: #fff;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-top: 1rem;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        border: 1px solid #e9ecef;
+    }
+
+    /* Adjust spacing for items inside the collapsed menu */
+    .navbar-collapse .nav-item,
+    .navbar-collapse .d-flex,
+    .navbar-collapse .align-items-center {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+
+    .navbar-collapse .form-control {
+      margin-bottom: 0.5rem;
+    }
+
+    .navbar-collapse .header-btn {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+
+    .navbar-collapse .navbar-nav {
+      align-items: flex-start;
+    }
 }
