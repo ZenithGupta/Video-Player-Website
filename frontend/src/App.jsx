@@ -311,7 +311,7 @@ const IntroSection = ({ language }) => {
             stagger: 0.2,
             delay: 1
         });
-    }, { scope: introRef, dependencies: [language] });
+    }, { scope: introRef, dependencies: [language], revertOnUpdate: true });
 
     return (
         <div className="intro-section-gradient" ref={introRef}>
@@ -355,7 +355,7 @@ const PrinciplesSection = ({ language }) => {
                 start: "bottom 80%",
             }
         });
-    }, { scope: principlesRef, dependencies: [language] });
+    }, { scope: principlesRef, dependencies: [language], revertOnUpdate: true});
 
     return (
         <Container fluid="xl" className="py-5 bg-white" ref={principlesRef}>
@@ -402,7 +402,7 @@ const HowItWorksSection = ({ language }) => {
                 start: "bottom 90%"
             }
         });
-    }, { scope: howItWorksRef, dependencies: [language] });
+    }, { scope: howItWorksRef, dependencies: [language], revertOnUpdate: true});
 
     return (
         <Container fluid="xl" className="py-5" ref={howItWorksRef}>
@@ -469,7 +469,12 @@ const CtaSection = ({ language }) => {
                 start: "top 70%",
             }
         });
-    }, { scope: ctaRef, dependencies: [language] });
+
+        return () => {
+            // Reset opacity for cta-fade-in elements
+            gsap.set(".cta-fade-in", { opacity: 1 });
+        };
+    }, { scope: ctaRef, dependencies: [language], revertOnUpdate: true});
 
     return (
         <Container fluid="xl" className="my-5" ref={ctaRef}>
@@ -502,7 +507,7 @@ const CoursesSection = ({ language }) => {
                 start: "top 80%"
             }
         });
-    }, { scope: coursesRef, dependencies: [language] });
+    }, { scope: coursesRef, dependencies: [language], revertOnUpdate: true });
 
 
     useEffect(() => {
