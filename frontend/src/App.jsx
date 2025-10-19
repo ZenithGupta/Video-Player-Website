@@ -40,12 +40,16 @@ const content = {
         subHeading: "This program is designed to help you overcome problems such as osteoarthritis, muscle tightness, muscle weakness, and spinal instability, allowing you to do what you love again—without limitations.",
         suffering: "Are you suffering from joint degeneration or osteoarthritis? You're not alone—and surgery is not the only solution.",
         journey: "This program helps restore your movement, kickstart a healthier, happier old age, and regain your confidence in life. I am happy to be part of your joyful journey. How can the One Last Move program help you overcome joint issues and move with ease in daily life?",
+        
+        // --- TRANSLATION ADDED HERE ---
+        principlesTitle: "Our Core Principles",
         principle1Title: "1. Understanding the Root Cause",
         principle1Text: "The primary reason you still experience pain is the lack of a proper understanding of what’s actuallycausing it. This program helps you get to the root of your problem and teaches you how to resolve it with the right movements and awareness.",
         principle2Title: "2. What Truly Deserves Attention?",
         principle2Text: "Will you continue to focus only on your X-rays and MRI reports? Or will you focus on the real cause of your joint and hip pain? If you can fix the other underlying issues—not just the degeneration—you can regain pain-free movements.",
         principle3Title: "3. Dedication is Key",
         principle3Text: "With the right understanding and the correct plan in hand, staying dedicated to your recovery becomes easier. Let go of fear, past failed attempts, and limiting beliefs. Start rebuilding your joints to a pain-free, empowered life.",
+        
         howItWorksTitle: "How Does the Program Work?",
         howItWorksStep1: "Sign up for the 12-day free trial by submitting your details.",
         howItWorksStep2: "Answer a few questions to help us understand your pain levels and limitations.",
@@ -76,12 +80,16 @@ const content = {
         subHeading: "இந்தத் திட்டம் ஆஸ்டியோஆர்த்ரைடிஸ், தசை இறுக்கம், தசை பலவீனம் மற்றும் முதுகெலும்பு உறுதியற்றன்மை போன்ற பிரச்சனைகளைச் சமாளிக்க உதவும் வகையில் வடிவமைக்கப்பட்டுள்ளது, இது நீங்கள் விரும்பியதை மீண்டும் வரம்புகள் இல்லாமல் செய்ய அனுமதிக்கிறது.",
         suffering: "நீங்கள் மூட்டு தேய்மானம் அல்லது கீல்வாதத்தால் பாதிக்கப்படுகிறீர்களா? நீங்கள் தனியாக இல்லை - அறுவை சிகிச்சை மட்டுமே தீர்வு அல்ல.",
         journey: "இந்தத் திட்டம் உங்கள் இயக்கத்தை மீட்டெடுக்கவும், ஆரோக்கியமான, மகிழ்ச்சியான முதுமையைத் தொடங்கவும், வாழ்க்கையில் உங்கள் நம்பிக்கையை மீண்டும் பெறவும் உதவுகிறது. உங்கள் மகிழ்ச்சியான பயணத்தின் ஒரு பகுதியாக இருப்பதில் நான் மகிழ்ச்சியடைகிறேன். மூட்டுப் பிரச்சனைகளைச் சமாளித்து, அன்றாட வாழ்வில் எளிதாக நடமாட, 'தி ஒன் லாஸ்ட் மூவ்' திட்டம் உங்களுக்கு எப்படி உதவும்?",
+        
+        // --- TRANSLATION ADDED HERE ---
+        principlesTitle: "எங்கள் முக்கிய கொள்கைகள்",
         principle1Title: "1. மூல காரணத்தைப் புரிந்துகொள்வது",
         principle1Text: "நீங்கள் இன்னும் வலியை அனுபவிப்பதற்கு முக்கிய காரணம், உண்மையான காரணம் என்ன என்பதைப் பற்றிய சரியான புரிதல் இல்லாததுதான். இந்தத் திட்டம் உங்கள் பிரச்சனையின் மூல காரணத்தைக் கண்டறிந்து, சரியான இயக்கங்கள் மற்றும் விழிப்புணர்வுடன் அதை எவ்வாறு தீர்ப்பது என்று உங்களுக்குக் கற்பிக்கிறது.",
         principle2Title: "2. உண்மையிலேயே கவனம் செலுத்த வேண்டியது என்ன?",
         principle2Text: "உங்கள் எக்ஸ்-ரே மற்றும் எம்ஆர்ஐ அறிக்கைகளில் மட்டுமே கவனம் செலுத்துவீர்களா? அல்லது உங்கள் மூட்டு மற்றும் இடுப்பு வலியின் உண்மையான காரணத்தில் கவனம் செலுத்துவீர்களா? தேய்மானத்தை மட்டுமல்ல, மற்ற அடிப்படைப் பிரச்சனைகளையும் சரிசெய்தால், வலியற்ற இயக்கங்களை மீண்டும் பெறலாம்.",
         principle3Title: "3. அர்ப்பணிப்பு முக்கியம்",
         principle3Text: "சரியான புரிதலுடனும், சரியான திட்டத்துடனும், உங்கள் மீட்புக்கு அர்ப்பணிப்புடன் இருப்பது எளிதாகிறது. பயம், கடந்தகால தோல்வியுற்ற முயற்சிகள் மற்றும் கட்டுப்படுத்தும் நம்பிக்கைகளை விட்டுவிடுங்கள். வலியற்ற, அதிகாரம் பெற்ற வாழ்க்கைக்கு உங்கள் மூட்டுகளை மீண்டும் உருவாக்கத் தொடங்குங்கள்.",
+        
         howItWorksTitle: "இந்தத் திட்டம் எப்படி வேலை செய்கிறது?",
         howItWorksStep1: "உங்கள் விவரங்களைச் சமர்ப்பித்து 12 நாள் இலவச சோதனைக்கு பதிவு செய்யவும்.",
         howItWorksStep2: "உங்கள் வலி நிலைகள் மற்றும் வரம்புகளைப் புரிந்துகொள்ள எங்களுக்கு உதவும் சில கேள்விகளுக்குப் பதிலளிக்கவும்.",
@@ -213,8 +221,16 @@ const AuthModal = ({ show, handleClose, mode, onLoginSuccess, language }) => {
     );
 };
 const Header = ({ language, setLanguage, user, onLogout, onShowLogin, onShowSignup }) => {
-    const toggleLanguage = () => setLanguage(language === 'en' ? 'ta' : 'en');
+    // --- NAVBAR COLLAPSE FIX: Add state for menu ---
+    const [expanded, setExpanded] = useState(false);
     const navigate = useNavigate();
+    const t = content[language]; // Get translation object
+
+    // --- NAVBAR COLLAPSE FIX: Create wrapped handlers ---
+    const handleToggleLanguage = () => {
+        setLanguage(language === 'en' ? 'ta' : 'en');
+        setExpanded(false); // Close menu
+    };
 
     const handleMyCoursesClick = () => {
         if (user) {
@@ -222,32 +238,59 @@ const Header = ({ language, setLanguage, user, onLogout, onShowLogin, onShowSign
         } else {
             onShowLogin();
         }
+        setExpanded(false); // Close menu
+    };
+
+    const handleLoginClick = () => {
+        onShowLogin();
+        setExpanded(false); // Close menu
+    };
+
+    const handleSignupClick = () => {
+        onShowSignup();
+        setExpanded(false); // Close menu
+    };
+
+    const handleLogoutClick = () => {
+        onLogout();
+        setExpanded(false); // Close menu
     };
     
+    const handleBrandClick = () => {
+        // We don't need to navigate if we are already on '/', but closing the menu is important
+        setExpanded(false);
+    }
+    
     return (
-        <Navbar bg="white" expand="lg" className="app-header shadow-sm sticky-top">
+        // --- NAVBAR COLLAPSE FIX: Add expanded and onToggle props ---
+        <Navbar bg="white" expand="lg" className="app-header shadow-sm sticky-top" expanded={expanded} onToggle={setExpanded}>
             <Container fluid="xl">
-                <Navbar.Brand as={Link} to="/" className="header-brand">{content[language].brand}</Navbar.Brand>
+                {/* --- NAVBAR COLLAPSE FIX: Use Link component and add onClick --- */}
+                <Navbar.Brand as={Link} to="/" onClick={handleBrandClick} className="header-brand">{t.brand}</Navbar.Brand>
                 <Navbar.Toggle aria-controls="basic-navbar-nav" />
                 <Navbar.Collapse id="basic-navbar-nav">
-                    <Nav className="me-auto">
-                        {/* UPDATED Nav.Link to handle My Courses click */}
-                        <Nav.Link onClick={handleMyCoursesClick} className="header-nav-link">{content[language].myCourses}</Nav.Link>
-                    </Nav>
-                    <Form className="d-flex flex-grow-1 my-2 my-lg-0 mx-lg-4">
-                        <div className="search-wrapper"><span className="search-icon-wrapper"><SearchIcon /></span><Form.Control type="search" placeholder={content[language].searchPlaceholder} className="search-input" /></div>
-                    </Form>
+                    <Nav className="me-auto"></Nav>
+                    
                     <Nav className="align-items-center">
-                        <Button variant="outline-dark" className="header-btn mx-2 my-1 my-lg-0" onClick={toggleLanguage}>{language === 'en' ? 'தமிழ்' : 'English'}</Button>
+                        {/* --- NAVBAR COLLAPSE FIX: Use wrapped handler --- */}
+                        <Button variant="outline-dark" className="header-btn mx-2 my-1 my-lg-0" onClick={handleMyCoursesClick}>
+                            {t.myCourses}
+                        </Button>
+                        
+                        {/* --- NAVBAR COLLAPSE FIX: Use wrapped handler --- */}
+                        <Button variant="outline-dark" className="header-btn mx-2 my-1 my-lg-0" onClick={handleToggleLanguage}>{language === 'en' ? 'தமிழ்' : 'English'}</Button>
                         {user ? (
                             <>
-                                <Navbar.Text className="me-2">{content[language].welcome}, {user.first_name}</Navbar.Text>
-                                <Button variant="outline-dark" className="header-btn my-1 my-lg-0" onClick={onLogout}>{content[language].logout}</Button>
+                                <Navbar.Text className="me-2">{t.welcome}, {user.first_name}</Navbar.Text>
+                                {/* --- NAVBAR COLLAPSE FIX: Use wrapped handler --- */}
+                                <Button variant="outline-dark" className="header-btn my-1 my-lg-0" onClick={handleLogoutClick}>{t.logout}</Button>
                             </>
                         ) : (
                             <>
-                                <Button variant="outline-dark" className="header-btn my-1 my-lg-0" onClick={onShowLogin}>{content[language].login}</Button>
-                                <Button variant="primary" className="header-btn ms-lg-2 my-1 my-lg-0" onClick={onShowSignup}>{content[language].signup}</Button>
+                                {/* --- NAVBAR COLLAPSE FIX: Use wrapped handler --- */}
+                                <Button variant="outline-dark" className="header-btn my-1 my-lg-0" onClick={handleLoginClick}>{t.login}</Button>
+                                {/* --- NAVBAR COLLAPSE FIX: Use wrapped handler --- */}
+                                <Button variant="primary" className="header-btn ms-lg-2 my-1 my-lg-0" onClick={handleSignupClick}>{t.signup}</Button>
                             </>
                         )}
                     </Nav>
@@ -291,13 +334,14 @@ const CourseCard = ({ course, isSuperCourse }) => {
 
 const IntroSection = ({ language }) => {
     const introRef = useRef(null);
+    const t = content[language]; // Get translation object
 
     useGSAP(() => {
         // Scramble Text for the main heading
         gsap.to(".main-heading-scramble", {
             duration: 2,
             scrambleText: {
-                text: content[language].mainHeading,
+                text: t.mainHeading, // Use translated text
                 chars: "lowerCase",
                 speed: 0.3
             }
@@ -317,10 +361,10 @@ const IntroSection = ({ language }) => {
         <div className="intro-section-gradient" ref={introRef}>
             <Container fluid="xl" className="py-5 text-center">
                 <h1 className="main-heading text-white main-heading-scramble"></h1>
-                <p className="sub-heading text-white intro-fade-in">{content[language].intro}</p>
-                <p className="lead mx-auto mt-4 intro-fade-in" style={{ maxWidth: '800px' }}>{content[language].subHeading}</p>
-                <p className="fw-bold mt-4 intro-fade-in">{content[language].suffering}</p>
-                <p className="lead mx-auto mt-3 intro-fade-in" style={{ maxWidth: '800px' }}>{content[language].journey}</p>
+                <p className="sub-heading text-white intro-fade-in">{t.intro}</p>
+                <p className="lead mx-auto mt-4 intro-fade-in" style={{ maxWidth: '800px' }}>{t.subHeading}</p>
+                <p className="fw-bold mt-4 intro-fade-in">{t.suffering}</p>
+                <p className="lead mx-auto mt-3 intro-fade-in" style={{ maxWidth: '800px' }}>{t.journey}</p>
             </Container>
         </div>
     );
@@ -328,6 +372,7 @@ const IntroSection = ({ language }) => {
 
 const PrinciplesSection = ({ language }) => {
     const principlesRef = useRef(null);
+    const t = content[language]; // Get translation object
 
     useGSAP(() => {
         const split = new SplitText(".principles-title", { type: "words,chars" });
@@ -359,19 +404,20 @@ const PrinciplesSection = ({ language }) => {
 
     return (
         <Container fluid="xl" className="py-5 bg-white" ref={principlesRef}>
-            <h2 className="text-center main-heading mb-5 principles-title">Our Core Principles</h2>
+            {/* --- TRANSLATION FIX: Use translated title --- */}
+            <h2 className="text-center main-heading mb-5 principles-title">{t.principlesTitle}</h2>
             <Row>
                 <Col md={4} className="text-center principle-col">
-                    <h4>{content[language].principle1Title}</h4>
-                    <p>{content[language].principle1Text}</p>
+                    <h4>{t.principle1Title}</h4>
+                    <p>{t.principle1Text}</p>
                 </Col>
                 <Col md={4} className="text-center principle-col">
-                    <h4>{content[language].principle2Title}</h4>
-                    <p>{content[language].principle2Text}</p>
+                    <h4>{t.principle2Title}</h4>
+                    <p>{t.principle2Text}</p>
                 </Col>
                 <Col md={4} className="text-center principle-col">
-                    <h4>{content[language].principle3Title}</h4>
-                    <p>{content[language].principle3Text}</p>
+                    <h4>{t.principle3Title}</h4>
+                    <p>{t.principle3Text}</p>
                 </Col>
             </Row>
         </Container>
@@ -380,6 +426,7 @@ const PrinciplesSection = ({ language }) => {
 
 const HowItWorksSection = ({ language }) => {
     const howItWorksRef = useRef(null);
+    const t = content[language]; // Get translation object
 
     useGSAP(() => {
         gsap.from(".how-it-works-title", {
@@ -406,12 +453,12 @@ const HowItWorksSection = ({ language }) => {
 
     return (
         <Container fluid="xl" className="py-5" ref={howItWorksRef}>
-            <h2 className="text-center main-heading mb-5 how-it-works-title">{content[language].howItWorksTitle}</h2>
+            <h2 className="text-center main-heading mb-5 how-it-works-title">{t.howItWorksTitle}</h2>
             <Row className="text-center">
-                <Col md={3} className="how-it-works-step"><strong>Step 1:</strong> {content[language].howItWorksStep1}</Col>
-                <Col md={3} className="how-it-works-step"><strong>Step 2:</strong> {content[language].howItWorksStep2}</Col>
-                <Col md={3} className="how-it-works-step"><strong>Step 3:</strong> {content[language].howItWorksStep3}</Col>
-                <Col md={3} className="how-it-works-step"><strong>Step 4:</strong> {content[language].howItWorksStep4}</Col>
+                <Col md={3} className="how-it-works-step"><strong>Step 1:</strong> {t.howItWorksStep1}</Col>
+                <Col md={3} className="how-it-works-step"><strong>Step 2:</strong> {t.howItWorksStep2}</Col>
+                <Col md={3} className="how-it-works-step"><strong>Step 3:</strong> {t.howItWorksStep3}</Col>
+                <Col md={3} className="how-it-works-step"><strong>Step 4:</strong> {t.howItWorksStep4}</Col>
             </Row>
         </Container>
     );
@@ -422,11 +469,12 @@ const PainAssessmentSection = ({ language }) => {
         en: "https://docs.google.com/forms/d/e/1FAIpQLSfIaAj1pHSriX35aprHF28nDtRXEq6pDIHDVuqYd4ugXR4Peg/viewform?embedded=true",
         ta: "https://docs.google.com/forms/d/e/1FAIpQLSfMx1WBo2CvnSWlLBRHcd6gmrraAYt3A--jFGriFNrKkSc9uA/viewform?embedded=true"
     };
+    const t = content[language]; // Get translation object
 
     return (
         <Container fluid="xl" className="py-5">
-            <h2 className="text-center main-heading mb-4">{content[language].assessmentTitle}</h2>
-            <p className="text-center sub-heading mx-auto" style={{ maxWidth: '800px' }}>{content[language].assessmentIntro}</p>
+            <h2 className="text-center main-heading mb-4">{t.assessmentTitle}</h2>
+            <p className="text-center sub-heading mx-auto" style={{ maxWidth: '800px' }}>{t.assessmentIntro}</p>
             <div className="google-form-container mt-5">
                 <iframe
                     src={formUrls[language]}
@@ -444,6 +492,7 @@ const PainAssessmentSection = ({ language }) => {
 
 const CtaSection = ({ language }) => {
     const ctaRef = useRef(null);
+    const t = content[language]; // Get translation object
 
     useGSAP(() => {
         const split = new SplitText(".cta-title-split", { type: "words" });
@@ -471,31 +520,30 @@ const CtaSection = ({ language }) => {
         });
 
         return () => {
-            // Reset opacity for cta-fade-in elements
             gsap.set(".cta-fade-in", { opacity: 1 });
         };
     }, { scope: ctaRef, dependencies: [language], revertOnUpdate: true});
 
     return (
-        <Container fluid="xl" className="my-5" ref={ctaRef}>
-          <div className="cta-section text-center">
-            <h3 className="cta-title-split">{content[language].reclaimLifeTitle}</h3>
-            <p className="lead mx-auto cta-fade-in" style={{ maxWidth: '700px' }}>{content[language].reclaimLifeText}</p>
-            <h4 className="mt-4 cta-fade-in">{content[language].ctaTitle}</h4>
-            <p className="cta-fade-in">{content[language].ctaText}</p>
-            <Button variant="light" size="lg" className="header-btn mt-2 cta-fade-in">{content[language].ctaButton}</Button>
-          </div>
-        </Container>
+        <div className="cta-section my-5" ref={ctaRef}>
+          <Container fluid="xl" className="text-center">
+            <h3 className="cta-title-split">{t.reclaimLifeTitle}</h3>
+            <p className="lead mx-auto cta-fade-in" style={{ maxWidth: '700px' }}>{t.reclaimLifeText}</p>
+            <h4 className="mt-4 cta-fade-in">{t.ctaTitle}</h4>
+            <p className="cta-fade-in">{t.ctaText}</p>
+            <Button variant="light" size="lg" className="header-btn mt-2 cta-fade-in">{t.ctaButton}</Button>
+          </Container>
+        </div>
     );
 };
 
 const CoursesSection = ({ language }) => {
-    // ... (CoursesSection component remains mostly the same, but you could add animations to the cards too)
     const [courses, setCourses] = useState([]);
     const [superCourses, setSuperCourses] = useState([]);
     const [activeTab, setActiveTab] = useState('Pain Relief');
     const scrollContainerRef = useRef(null);
     const coursesRef = useRef(null);
+    const t = content[language]; // Get translation object
 
     useGSAP(() => {
         gsap.from(".course-section-title-split", {
@@ -534,7 +582,7 @@ const CoursesSection = ({ language }) => {
     return (
         <Container fluid="xl" className="py-5" ref={coursesRef}>
             <div className="mb-4">
-                <h2 className="main-heading course-section-title-split">{content[language].courseSectionTitle}</h2>
+                <h2 className="main-heading course-section-title-split">{t.courseSectionTitle}</h2>
             </div>
 
             <Nav variant="tabs" activeKey={activeTab} onSelect={(k) => setActiveTab(k)} className="course-tabs">
@@ -545,9 +593,9 @@ const CoursesSection = ({ language }) => {
                 ))}
             </Nav>
             <div className="course-tab-content">
-                <h3 className="explore-heading">{content[language].explore} {activeTab}</h3>
+                <h3 className="explore-heading">{t.explore} {activeTab}</h3>
                 <p>Discover top-rated programs in {activeTab} led by certified physiotherapists.</p>
-                <Button variant="outline-dark" className="explore-btn">{content[language].explore} {activeTab}</Button>
+                <Button variant="outline-dark" className="explore-btn">{t.explore} {activeTab}</Button>
                 
                 <div className="carousel-wrapper mt-4">
                    <Button onClick={() => scroll('left')} variant="light" className="scroll-btn scroll-btn-left"><ChevronLeftIcon/></Button>
