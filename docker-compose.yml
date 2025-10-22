@@ -3,19 +3,23 @@ services:
   backend:
     build: ./backend
     container_name: video-player-backend
-    ports:
-      - "8000:8000"
+    # No ports needed here; Nginx will proxy to it
     volumes:
       - ./backend:/app
       - sqlite_db:/app/db
+      - static_files:/app/staticfiles # Add this
     networks:
       - app-network
+    # Use the new Gunicorn command from backend/Dockerfile
+    # No need to override 'command' here if it's in the Dockerfile
 
   frontend:
     build: ./frontend
     container_name: video-player-frontend
     ports:
-      - "5173:80" # Map host port 5173 to container port 80 (nginx)
+      - "80:80" # Use standard HTTP port 80
+    volumes:
+      - static_files:/app/staticfiles # Add this
     depends_on:
       - backend
     networks:
@@ -23,6 +27,8 @@ services:
 
 volumes:
   sqlite_db:
+  static_files: # Define the shared volume
+    driver: local
 
 networks:
   app-network:
