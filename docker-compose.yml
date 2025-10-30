@@ -17,13 +17,9 @@ services:
     build: ./frontend
     container_name: video-player-frontend
     ports:
-      - "80:80"
-      - "443:443"
-    # host bind mounts for certbot/webroot and certs
+      - "80:80" # Use standard HTTP port 80
     volumes:
-      - ./static_files:/app/staticfiles
-      - ./letsencrypt:/etc/letsencrypt    # host dir for certs (not ro)
-      - ./webroot:/usr/share/nginx/html/.well-known/acme-challenge  # host webroot for ACME
+      - static_files:/app/staticfiles # Add this
     depends_on:
       - backend
     networks:
@@ -31,7 +27,7 @@ services:
 
 volumes:
   sqlite_db:
-  static_files:
+  static_files: # Define the shared volume
     driver: local
 
 networks:
