@@ -18,9 +18,11 @@ services:
     container_name: video-player-frontend
     ports:
       - "80:80" # Use standard HTTP port 80
+      - "443:443"
     volumes:
       - static_files:/app/staticfiles # Add this
       - ./webroot:/app/webroot
+      - /etc/letsencrypt:/etc/letsencrypt:ro
     depends_on:
       - backend
     networks:
