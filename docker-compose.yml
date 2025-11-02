@@ -20,6 +20,7 @@ services:
       - "80:80" # Use standard HTTP port 80
     volumes:
       - static_files:/app/staticfiles # Add this
+      - ./webroot:/app/webroot
     depends_on:
       - backend
     networks:
