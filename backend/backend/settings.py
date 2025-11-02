@@ -133,6 +133,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 #]
 CORS_ALLOW_ALL_ORIGINS = True
 
+CSRF_TRUSTED_ORIGINS = ['https://onelastmove.com']
+
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
