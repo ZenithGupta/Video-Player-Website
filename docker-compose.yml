@@ -22,7 +22,8 @@ services:
     volumes:
       - static_files:/app/staticfiles # Add this
       - ./webroot:/app/webroot
-      - /etc/letsencrypt:/etc/letsencrypt:ro
+      # - /etc/letsencrypt:/etc/letsencrypt:ro
+      - ${SSL_CERT_PATH:-/etc/letsencrypt}:/etc/letsencrypt:ro
     depends_on:
       - backend
     networks:
