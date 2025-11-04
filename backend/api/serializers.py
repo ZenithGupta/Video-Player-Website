@@ -18,15 +18,18 @@ class UserCourseSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     usercourse_set = UserCourseSerializer(many=True, read_only=True)
+    # Expose the explicit flag from the User model
+    assessment_submitted = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = User
-        fields = ('id', 'email', 'first_name', 'last_name', 'password', 'date_of_birth', 'gender', 'usercourse_set')
+        fields = ('id', 'email', 'first_name', 'last_name', 'password', 'date_of_birth', 'gender', 'usercourse_set', 'assessment_submitted')
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
         user = User.objects.create_user(**validated_data)
         return user
+    
 
 class VideoSerializer(serializers.ModelSerializer):
     class Meta:
