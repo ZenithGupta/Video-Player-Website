@@ -26,7 +26,9 @@ urlpatterns = [
     # User Authentication Endpoints
     path('register/', views.register_user, name='register_user'),
     path('user/', views.get_current_user, name='get_current_user'),
+    path('assessment-submitted/', views.get_current_user, name='get_current_user'),
     path('token/', MyTokenObtainPairView.as_view(), name='token_obtain_pair'), # Use your custom view
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('health/', views.health_check, name='health_check'),
+    path('enroll-free-trial/', views.enroll_free_trial, name='enroll_free_trial'),
 ]

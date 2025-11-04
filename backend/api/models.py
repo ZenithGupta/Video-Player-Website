@@ -29,6 +29,8 @@ class User(AbstractUser):
     GENDER_CHOICES = [('M', 'Male'), ('F', 'Female'), ('O', 'Other')]
     date_of_birth = models.DateField(null=True, blank=True)
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES, null=True, blank=True)
+    # Track whether the user has submitted the pain assessment via Google Form
+    assessment_submitted = models.BooleanField(default=False)
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
     objects = CustomUserManager()
@@ -109,6 +111,9 @@ class UserCourse(models.Model):
         return f"{self.user.email} - {self.course.title}"
 
 class PainAssessmentSubmission(models.Model):
+    # Optional link to the user who submitted the assessment. Kept nullable
+    # because some submissions may still come in anonymously from the form.
+    user = models.ForeignKey('User', null=True, blank=True, on_delete=models.SET_NULL, related_name='pain_assessments')
     pain_level = models.IntegerField(help_text="Question 1: Current level of pain")
     rising_pain = models.IntegerField(help_text="Question 2: Pain when rising from a seated position")
     standing_duration = models.IntegerField(help_text="Question 3: How long can you stand without pain?")
@@ -124,4 +129,6 @@ class PainAssessmentSubmission(models.Model):
     stand_on_one_leg_duration = models.IntegerField(help_text="Question 13: How long can you stand on one leg?")
     submitted_at = models.DateTimeField(auto_now_add=True)
     def __str__(self):
+        if self.user:
+            return f"Submission from {self.user.email} at {self.submitted_at.strftime('%Y-%m-%d %H:%M')}"
         return f"Submission from {self.submitted_at.strftime('%Y-%m-%d %H:%M')}"

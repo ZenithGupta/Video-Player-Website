@@ -3,7 +3,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated # Import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
-from .models import PainAssessmentSubmission, Course, Video, UserCourse, SuperCourse
+from .models import PainAssessmentSubmission, Course, Video, UserCourse, SuperCourse, User
 from .serializers import UserSerializer, CourseSerializer, SuperCourseSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.db import IntegrityError
@@ -119,6 +119,36 @@ def get_my_courses(request):
     serializer = CourseSerializer(courses, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
 
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def enroll_free_trial(request):
+    """
+    Enroll the authenticated user into the Knee Pain Recovery Program (free trial course).
+    Finds the SuperCourse titled 'Knee Pain Recovery Program' and enrolls into its first child course.
+    """
+    user = request.user
+    try:
+        sc = SuperCourse.objects.filter(title__icontains='Knee Pain Recovery Program').first()
+        if not sc:
+            # Fallback: choose any available course
+            course = Course.objects.first()
+        else:
+            course = sc.courses.first()
+
+        if not course:
+            return Response({'error': 'No course available to enroll'}, status=status.HTTP_404_NOT_FOUND)
+
+        # Prevent duplicate enrollment
+        existing = UserCourse.objects.filter(user=user, course=course).first()
+        if existing:
+            return Response({'course_id': course.id, 'message': 'Already enrolled'}, status=status.HTTP_200_OK)
+
+        uc = UserCourse.objects.create(user=user, course=course)
+        return Response({'course_id': course.id, 'message': 'Enrolled successfully'}, status=status.HTTP_201_CREATED)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
 # --- Pain Assessment View ---
 # This view remains the same.
 
@@ -132,8 +162,28 @@ def submit_assessment(request):
     data = request.data
     
     try:
-        # --- This is the corrected and complete create() call ---
+        # Try to resolve a user if the payload includes an identifier
+        user_obj = None
+        user_email = data.get('user_email') or data.get('email')
+        user_id = data.get('user_id')
+        if user_email:
+            try:
+                user_obj = User.objects.filter(email__iexact=user_email).first()
+            except Exception:
+                user_obj = None
+        elif user_id:
+            try:
+                user_obj = User.objects.filter(id=user_id).first()
+            except Exception:
+                user_obj = None
+        # If we found a user, check if they already have a submission (or flag)
+        if user_obj:
+            if user_obj.assessment_submitted:
+                return Response({'error': 'User has already submitted assessment.'}, status=status.HTTP_409_CONFLICT)
+
+        # Create the submission and associate with the user if found
         submission = PainAssessmentSubmission.objects.create(
+            user=user_obj,
             pain_level=data.get('pain_level'),
             rising_pain=data.get('rising_pain'),
             standing_duration=data.get('standing_duration'),
@@ -148,7 +198,32 @@ def submit_assessment(request):
             can_bend_fully=data.get('can_bend_fully'),
             stand_on_one_leg_duration=data.get('stand_on_one_leg_duration')
         )
-        return Response({'message': 'Submission received successfully!'}, status=status.HTTP_201_CREATED)
+
+        # If we have a user, mark them as having submitted the assessment and enroll them
+        course_id = None
+        if user_obj:
+            try:
+                user_obj.assessment_submitted = True
+                user_obj.save()
+
+                # Enroll user into Knee Pain Recovery Program (first child course of the super course)
+                sc = SuperCourse.objects.filter(title__icontains='Knee Pain Recovery Program').first()
+                if sc and sc.courses.exists():
+                    course = sc.courses.first()
+                else:
+                    course = Course.objects.first()
+
+                if course:
+                    # create UserCourse if not exists
+                    existing = UserCourse.objects.filter(user=user_obj, course=course).first()
+                    if not existing:
+                        UserCourse.objects.create(user=user_obj, course=course)
+                    course_id = course.id
+            except Exception as e:
+                # Don't fail the whole request if enrollment or flagging fails; just continue
+                print('Warning: could not mark user or enroll:', e)
+
+        return Response({'message': 'Submission received successfully!', 'course_id': course_id}, status=status.HTTP_201_CREATED)
     
     except Exception as e:
         # Log the error for better debugging

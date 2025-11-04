@@ -14,7 +14,7 @@ import VideoPlayerPage from './VideoPlayerPage.jsx';
 import CoursePage from './CoursePage.jsx';
 import MyCoursesPage from './MyCoursesPage.jsx';
 import ProtectedRoute from './ProtectedRoute.jsx';
-import API_URL from './config/api.js';
+import API_URL, { GOOGLE_FORM_ENTRY_IDS } from './config/api.js';
 import './index.css';
 
 // Register GSAP Plugins
@@ -266,7 +266,13 @@ const Header = ({ language, setLanguage, user, onLogout, onShowLogin, onShowSign
         <Navbar bg="white" expand="lg" className="app-header shadow-sm sticky-top" expanded={expanded} onToggle={setExpanded}>
             <Container fluid="xl">
                 {/* --- NAVBAR COLLAPSE FIX: Use Link component and add onClick --- */}
-                <Navbar.Brand as={Link} to="/" onClick={handleBrandClick} className="header-brand">{t.brand}</Navbar.Brand>
+                <Navbar.Brand as={Link} to="/" onClick={handleBrandClick} className="header-brand">
+                    <img 
+                        src="/logo/WebsiteLogo.png" 
+                        alt={t.brand}
+                        style={{ height: '50px', width: 'auto' }}
+                    />
+                </Navbar.Brand>
                 <Navbar.Toggle aria-controls="basic-navbar-nav" />
                 <Navbar.Collapse id="basic-navbar-nav">
                     <Nav className="me-auto"></Nav>
@@ -329,6 +335,57 @@ const CourseCard = ({ course, isSuperCourse }) => {
             </Card>
             </div>
         </Link>
+    );
+};
+
+const HeroSection = ({ language }) => {
+    const heroRef = useRef(null);
+    const quoteBoxRef = useRef(null);
+
+    useGSAP(() => {
+        // Fade in the quote box with scale animation on page load
+        gsap.from(quoteBoxRef.current, {
+            duration: 1.5,
+            opacity: 0,
+            scale: 0.8,
+            y: 50,
+            ease: "power3.out",
+            delay: 0.3
+        });
+
+        // Parallax effect for background on scroll
+        if (quoteBoxRef.current) {
+            gsap.to(".hero-background", {
+                scale: 1.1,
+                scrollTrigger: {
+                    trigger: heroRef.current,
+                    start: "top top",
+                    end: "bottom top",
+                    scrub: true
+                }
+            });
+        }
+    }, { scope: heroRef, dependencies: [language], revertOnUpdate: true });
+
+    return (
+        <div className="hero-section" ref={heroRef}>
+            <div className="hero-background">
+                <img 
+                    src="/logo/NatureBackground.jpg" 
+                    alt="Nature Background" 
+                    className="hero-bg-image"
+                />
+            </div>
+            <Container fluid="xl" className="hero-content">
+                <div className="hero-quote-box" ref={quoteBoxRef}>
+                    <img 
+                        src="/logo/WebsiteQuote.png" 
+                        alt="Website Quote" 
+                        className="hero-quote-image"
+                    />
+                </div>
+            </Container>
+        </div>
     );
 };
 
@@ -464,33 +521,168 @@ const HowItWorksSection = ({ language }) => {
     );
 };
 
-const PainAssessmentSection = ({ language }) => {
+const PainAssessmentSection = ({ language, showForm, formRef, onFormSubmit, currentUser, googleFormEntryId }) => {
     const formUrls = {
         en: "https://docs.google.com/forms/d/e/1FAIpQLSfIaAj1pHSriX35aprHF28nDtRXEq6pDIHDVuqYd4ugXR4Peg/viewform?embedded=true",
         ta: "https://docs.google.com/forms/d/e/1FAIpQLSfMx1WBo2CvnSWlLBRHcd6gmrraAYt3A--jFGriFNrKkSc9uA/viewform?embedded=true"
     };
+    const iframeRef = useRef(null);
     const t = content[language]; // Get translation object
 
+    useEffect(() => {
+        if (!showForm || !iframeRef.current) return;
+
+        let checkCount = 0;
+        const maxChecks = 300; // Stop checking after 10 minutes (300 * 2 seconds)
+        let initialUrl = '';
+        let interval = null;
+
+        // Monitor iframe for form submission by checking URL changes and content
+        const checkFormSubmission = () => {
+            try {
+                const iframe = iframeRef.current;
+                if (!iframe) return;
+
+                checkCount++;
+                if (checkCount > maxChecks) {
+                    if (interval) clearInterval(interval);
+                    return;
+                }
+
+                // Method 1: Check iframe URL changes (Google Forms changes URL after submission)
+                try {
+                    const currentSrc = iframe.src || '';
+                    if (!initialUrl) {
+                        initialUrl = currentSrc;
+                    } else if (currentSrc !== initialUrl && currentSrc.includes('formResponse')) {
+                        // URL changed and contains 'formResponse' - form was likely submitted
+                        if (onFormSubmit) {
+                            onFormSubmit();
+                            if (interval) clearInterval(interval);
+                            return;
+                        }
+                    }
+                } catch (e) {
+                    // Cross-origin restrictions - continue with other methods
+                }
+
+                // Method 2: Try to access iframe content (may fail due to CORS)
+                try {
+                    if (iframe.contentDocument) {
+                        const doc = iframe.contentDocument;
+                        const body = doc.body;
+                        if (body) {
+                            const text = (body.innerText || body.textContent || '').toLowerCase();
+                            // Google Forms shows "Submit another response" after successful submission
+                            // Also check for other indicators
+                            if (text.includes('submit another response') || 
+                                text.includes('your response has been recorded') ||
+                                text.includes('response was recorded') ||
+                                (text.includes('thank you') && (text.includes('response') || text.includes('submitted'))) ||
+                                text.includes('response recorded')) {
+                                // Form submitted, hide it
+                                if (onFormSubmit) {
+                                    onFormSubmit();
+                                    if (interval) clearInterval(interval);
+                                    return;
+                                }
+                            }
+                        }
+                    }
+                } catch (e) {
+                    // Cross-origin restrictions - this is expected for Google Forms
+                    // We can't access iframe content due to CORS, but we try anyway
+                }
+
+                // Method 3: Check for URL parameter changes in the iframe src
+                try {
+                    const currentSrc = iframe.src || '';
+                    // After submission, Google Forms might add query parameters
+                    if (currentSrc.includes('formResponse') || currentSrc.includes('submit')) {
+                        if (onFormSubmit && currentSrc !== initialUrl) {
+                            onFormSubmit();
+                            if (interval) clearInterval(interval);
+                            return;
+                        }
+                    }
+                } catch (e) {
+                    // Continue
+                }
+            } catch (e) {
+                // General error handling
+            }
+        };
+
+        // Check every 2 seconds for form submission
+        interval = setInterval(checkFormSubmission, 2000);
+        
+        // Also listen for postMessage events from Google Forms
+        const handleMessage = (event) => {
+            // Google Forms may send messages on submission
+            if (event.data) {
+                const dataStr = typeof event.data === 'string' ? event.data : JSON.stringify(event.data || {});
+                if (dataStr.includes('formSubmitted') || 
+                    dataStr.includes('submit-success') ||
+                    dataStr.includes('form-submit') ||
+                    dataStr.includes('submit') ||
+                    (event.data && typeof event.data === 'object' && event.data.type && event.data.type.includes('submit'))) {
+                    if (onFormSubmit) {
+                        onFormSubmit();
+                        if (interval) clearInterval(interval);
+                    }
+                }
+            }
+        };
+
+        window.addEventListener('message', handleMessage);
+        
+        return () => {
+            if (interval) clearInterval(interval);
+            window.removeEventListener('message', handleMessage);
+        };
+    }, [showForm, onFormSubmit]);
+
+    if (!showForm) return null;
+
     return (
-        <Container fluid="xl" className="py-5">
+        <Container fluid="xl" className="py-5" ref={formRef}>
             <h2 className="text-center main-heading mb-4">{t.assessmentTitle}</h2>
-            <p className="text-center sub-heading mx-auto" style={{ maxWidth: '800px' }}>{t.assessmentIntro}</p>
+            <p className="text-center sub-heading mx-auto mb-4" style={{ maxWidth: '800px' }}>{t.assessmentIntro}</p>
             <div className="google-form-container mt-5">
                 <iframe
-                    src={formUrls[language]}
+                    ref={iframeRef}
+                    src={(() => {
+                        let src = formUrls[language];
+                        // If we have a logged-in user and a prefill entry id, append the prefilled user email
+                        try {
+                            if (currentUser && currentUser.email && googleFormEntryId) {
+                                // formUrls already include ?embedded=true, so append with &
+                                src += '&entry.' + encodeURIComponent(googleFormEntryId) + '=' + encodeURIComponent(currentUser.email);
+                            }
+                        } catch (e) {
+                            // ignore
+                        }
+                        return src;
+                    })()}
                     width="100%"
                     height="750"
                     frameBorder="0"
                     marginHeight="0"
-                    marginWidth="0">
+                    marginWidth="0"
+                    title="Pain Assessment Form">
                     Loading…
                 </iframe>
+            </div>
+            <div className="text-center mt-4">
+                <Button variant="outline-secondary" size="sm" onClick={() => onFormSubmit && onFormSubmit()}>
+                    Close Form
+                </Button>
             </div>
         </Container>
     );
 };
 
-const CtaSection = ({ language }) => {
+const CtaSection = ({ language, onFreeTrialClick }) => {
     const ctaRef = useRef(null);
     const t = content[language]; // Get translation object
 
@@ -524,6 +716,12 @@ const CtaSection = ({ language }) => {
         };
     }, { scope: ctaRef, dependencies: [language], revertOnUpdate: true});
 
+    const handleButtonClick = () => {
+        if (onFreeTrialClick) {
+            onFreeTrialClick();
+        }
+    };
+
     return (
         <div className="cta-section my-5" ref={ctaRef}>
           <Container fluid="xl" className="text-center">
@@ -531,7 +729,7 @@ const CtaSection = ({ language }) => {
             <p className="lead mx-auto cta-fade-in" style={{ maxWidth: '700px' }}>{t.reclaimLifeText}</p>
             <h4 className="mt-4 cta-fade-in">{t.ctaTitle}</h4>
             <p className="cta-fade-in">{t.ctaText}</p>
-            <Button variant="light" size="lg" className="header-btn mt-2 cta-fade-in">{t.ctaButton}</Button>
+            <Button variant="light" size="lg" className="header-btn mt-2 cta-fade-in" onClick={handleButtonClick}>{t.ctaButton}</Button>
           </Container>
         </div>
     );
@@ -617,6 +815,11 @@ export default function App() {
     const [modalMode, setModalMode] = useState('login');
     const [authToken, setAuthToken] = useState(localStorage.getItem('authToken'));
     const [currentUser, setCurrentUser] = useState(null);
+    const [showForm, setShowForm] = useState(false);
+    // When a non-logged-in user clicks the free-trial CTA we mark a pending flag
+    // so we can show the Google Form only after a successful login.
+    const [showFormPending, setShowFormPending] = useState(false);
+    const formRef = useRef(null);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -636,19 +839,162 @@ export default function App() {
 
     const handleShowLogin = () => { setModalMode('login'); setShowModal(true); };
     const handleShowSignup = () => { setModalMode('signup'); setShowModal(true); };
-    const handleCloseModal = () => setShowModal(false);
+    const handleCloseModal = () => {
+        setShowModal(false);
+        // If the user closed the login/signup modal without completing auth,
+        // clear any pending request to show the form.
+        setShowFormPending(false);
+    };
 
-    const handleLoginSuccess = (data) => {
+    const handleLoginSuccess = async (data) => {
         localStorage.setItem('authToken', data.access);
         setAuthToken(data.access);
         handleCloseModal();
+
+        // Fetch fresh user data immediately so we know whether they already submitted
+        try {
+            axios.defaults.headers.common['Authorization'] = `Bearer ${data.access}`;
+            const userResponse = await axios.get(`${API_URL}/user/`);
+            setCurrentUser(userResponse.data);
+
+            // If user had pending intent to open the form, show it only when they haven't submitted
+            if (showFormPending && !userResponse.data.assessment_submitted) {
+                setShowForm(true);
+                setShowFormPending(false);
+                setTimeout(() => {
+                    if (formRef.current) {
+                        formRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                }, 300);
+            } else {
+                // Clear pending in cases where user already submitted
+                setShowFormPending(false);
+            }
+        } catch (err) {
+            // If fetching user fails, clear pending and close modal
+            setShowFormPending(false);
+        }
     };
+
+    const handleFreeTrialClick = () => {
+        if (!currentUser) {
+            // User not logged in: mark intent and open login modal. Do NOT show the form yet.
+            setShowFormPending(true);
+            handleShowLogin();
+        } else {
+            // User already logged in, show form and scroll to it
+            setShowForm(true);
+            setTimeout(() => {
+                if (formRef.current) {
+                    formRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }, 100);
+        }
+    };
+
+    const handleFormSubmit = () => {
+        // Hide form after submission
+        setShowForm(false);
+        setShowFormPending(false);
+        // If user is logged in, call backend to enroll them in the free trial Knee program
+        (async () => {
+            try {
+                if (!currentUser) return;
+
+                // Ensure auth header is present
+                if (authToken) {
+                    axios.defaults.headers.common['Authorization'] = `Bearer ${authToken}`;
+                }
+
+                // Try to enroll (idempotent) and get course id
+                let courseId = null;
+                try {
+                    const enrollResp = await axios.post(`${API_URL}/enroll-free-trial/`);
+                    courseId = enrollResp.data.course_id;
+                } catch (err) {
+                    // ignore - we'll try to refresh user and find course
+                }
+
+                // Refresh current user data so frontend knows they've submitted/enrolled
+                let userResponse = null;
+                try {
+                    userResponse = await axios.get(`${API_URL}/user/`);
+                    setCurrentUser(userResponse.data);
+                } catch (e) {
+                    // If we couldn't refresh user, still try to proceed
+                }
+
+                // If we don't have a course id yet, fetch my-courses and look for Knee program
+                if (!courseId) {
+                    try {
+                        const myCourses = await axios.get(`${API_URL}/my-courses/`);
+                        // find a course that contains 'Knee Pain Recovery Program' in the title
+                        const kneeCourse = (myCourses.data || []).find(c => (c.title || '').toLowerCase().includes('knee pain recovery program'));
+                        if (kneeCourse) courseId = kneeCourse.id;
+                    } catch (e) {
+                        // ignore
+                    }
+                }
+
+                if (courseId) {
+                    // navigate to course home page
+                    navigate(`/course/${courseId}`);
+                }
+            } catch (e) {
+                // If anything unexpected fails, attempt to refresh user state once more
+                try {
+                    const userResponse = await axios.get(`${API_URL}/user/`);
+                    setCurrentUser(userResponse.data);
+                } catch (er) {}
+            }
+        })();
+    };
+
+    // Poll the user endpoint while the form is open so we detect server-side
+    // updates made by the Google Apps Script (which posts directly to backend).
+    useEffect(() => {
+        if (!showForm || !authToken || !currentUser) return;
+
+        let interval = null;
+        const start = Date.now();
+        const maxMs = 1000 * 60; // 60s max polling
+
+        const poll = async () => {
+            try {
+                axios.defaults.headers.common['Authorization'] = `Bearer ${authToken}`;
+                const resp = await axios.get(`${API_URL}/user/`);
+                if (resp.data && resp.data.assessment_submitted) {
+                    // The backend has recorded the submission — treat as if form submitted
+                    handleFormSubmit();
+                    if (interval) clearInterval(interval);
+                    return;
+                }
+            } catch (e) {
+                // ignore errors during polling
+            }
+
+            if (Date.now() - start > maxMs) {
+                if (interval) clearInterval(interval);
+            }
+        };
+
+        interval = setInterval(poll, 2000);
+        // Do a first immediate poll
+        poll();
+
+        return () => {
+            if (interval) clearInterval(interval);
+        };
+    }, [showForm, authToken, currentUser]);
 
     const handleLogout = () => {
         localStorage.removeItem('authToken');
         delete axios.defaults.headers.common['Authorization'];
         setAuthToken(null);
         setCurrentUser(null);
+        // Hide any visible form if the user logs out immediately after login
+        setShowForm(false);
+        setShowFormPending(false);
         navigate('/');
     };
     
@@ -673,12 +1019,13 @@ export default function App() {
                 <Routes>
                     <Route path="/" element={
                         <>
+                            <HeroSection language={language} />
                             <IntroSection language={language} />
                             <PrinciplesSection language={language} />
                             <HowItWorksSection language={language} />
                             <CoursesSection language={language} />
-                            <CtaSection language={language} />
-                            <PainAssessmentSection language={language} />
+                            {!currentUser?.assessment_submitted && <CtaSection language={language} onFreeTrialClick={handleFreeTrialClick} />}
+                            <PainAssessmentSection language={language} showForm={showForm} formRef={formRef} onFormSubmit={handleFormSubmit} currentUser={currentUser} googleFormEntryId={GOOGLE_FORM_ENTRY_IDS[language]} />
                         </>
                     } />
                     
