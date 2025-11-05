@@ -51,15 +51,15 @@ const content = {
         principle3Text: "With the right understanding and the correct plan in hand, staying dedicated to your recovery becomes easier. Let go of fear, past failed attempts, and limiting beliefs. Start rebuilding your joints to a pain-free, empowered life.",
         
         howItWorksTitle: "How Does the Program Work?",
-        howItWorksStep1: "Sign up for the 12-day free trial by submitting your details.",
+    howItWorksStep1: "Sign up for the 14-day free trial by submitting your details.",
         howItWorksStep2: "Answer a few questions to help us understand your pain levels and limitations.",
         howItWorksStep3: "Get customized exercises tailored to your condition.",
-        howItWorksStep4: "After 12 days, continue your journey with a membership.",
+    howItWorksStep4: "After 14 days, continue your journey with a membership.",
         reclaimLifeTitle: "Reclaim Your Life",
         reclaimLifeText: "Our members are now performing movements they once thought impossible. This program helps reduce pain, improve strength, enhance balance, and boost confidence in your body's ability.",
         ctaTitle: "Don’t Wait Any Longer",
-        ctaText: "Get started with your free 12-day trial worth ₹1000 today.",
-        ctaButton: "Start Your 12-Day Free Trial Now",
+    ctaText: "Get started with your free 14-day trial worth ₹1000 today.",
+    ctaButton: "Start Your 14-Day Free Trial Now",
         explore: "Explore",
         courseSectionTitle: "A broad selection of courses",
         assessmentTitle: "Pain Assessment Questions",
@@ -91,15 +91,15 @@ const content = {
         principle3Text: "சரியான புரிதலுடனும், சரியான திட்டத்துடனும், உங்கள் மீட்புக்கு அர்ப்பணிப்புடன் இருப்பது எளிதாகிறது. பயம், கடந்தகால தோல்வியுற்ற முயற்சிகள் மற்றும் கட்டுப்படுத்தும் நம்பிக்கைகளை விட்டுவிடுங்கள். வலியற்ற, அதிகாரம் பெற்ற வாழ்க்கைக்கு உங்கள் மூட்டுகளை மீண்டும் உருவாக்கத் தொடங்குங்கள்.",
         
         howItWorksTitle: "இந்தத் திட்டம் எப்படி வேலை செய்கிறது?",
-        howItWorksStep1: "உங்கள் விவரங்களைச் சமர்ப்பித்து 12 நாள் இலவச சோதனைக்கு பதிவு செய்யவும்.",
+    howItWorksStep1: "உங்கள் விவரங்களைச் சமர்ப்பித்து 14 நாள் இலவச சோதனைக்கு பதிவு செய்யவும்.",
         howItWorksStep2: "உங்கள் வலி நிலைகள் மற்றும் வரம்புகளைப் புரிந்துகொள்ள எங்களுக்கு உதவும் சில கேள்விகளுக்குப் பதிலளிக்கவும்.",
         howItWorksStep3: "உங்கள் நிலைக்கு ஏற்ப தனிப்பயனாக்கப்பட்ட பயிற்சிகளைப் பெறுங்கள்.",
-        howItWorksStep4: "12 நாட்களுக்குப் பிறகு, உறுப்பினர் சந்தாவுடன் உங்கள் பயணத்தைத் தொடரவும்.",
+    howItWorksStep4: "14 நாட்களுக்குப் பிறகு, உறுப்பினர் சந்தாவுடன் உங்கள் பயணத்தைத் தொடரவும்.",
         reclaimLifeTitle: "உங்கள் வாழ்க்கையை மீட்டெடுங்கள்",
         reclaimLifeText: "எங்கள் உறுப்பினர்கள் ஒரு காலத்தில் சாத்தியமற்றது என்று நினைத்த இயக்கங்களை இப்போது செய்கிறார்கள். இந்தத் திட்டம் வலியைக் குறைக்கவும், வலிமையை மேம்படுத்தவும், சமநிலையை அதிகரிக்கவும், உங்கள் உடலின் திறனில் நம்பிக்கையை அதிகரிக்கவும் உதவுகிறது.",
         ctaTitle: "இனி காத்திருக்க வேண்டாம்",
-        ctaText: "இன்றே உங்கள் ₹1000 மதிப்புள்ள இலவச 12-நாள் சோதனையைத் தொடங்குங்கள்.",
-        ctaButton: "உங்கள் 12-நாள் இலவச சோதனையை இப்போது தொடங்குங்கள்",
+    ctaText: "இன்றே உங்கள் ₹1000 மதிப்புள்ள இலவச 14-நாள் சோதனையைத் தொடங்குங்கள்.",
+    ctaButton: "உங்கள் 14-நாள் இலவச சோதனையை இப்போது தொடங்குங்கள்",
         explore: "ஆராயுங்கள்",
         courseSectionTitle: "பாடங்களின் பரந்த தேர்வு",
         assessmentTitle: "வலி மதிப்பீட்டுக் கேள்விகள்",
@@ -808,6 +808,76 @@ const CoursesSection = ({ language }) => {
     );
 };
 
+// Replicated section copied from Lifelong Mobility (layout + text + image)
+const ReplicatedSection = ({ language }) => {
+        const t = content[language];
+        return (
+                <div className="full-gradient-bg intro-section-gradient" style={{overflow: 'hidden'}}>
+                        <style>{`
+    /* Replicated block styles (kept scoped by #lifelong-block) */
+    .full-gradient-bg {
+        width: 100%;
+        padding-top: 40px;
+        padding-bottom: 80px; /* make sure following section is pushed below */
+        box-sizing: border-box;
+    }
+    #lifelong-block {
+        margin-top: 0px;
+        margin-bottom: 0px;
+    }
+    #lifelong-block .block {
+        border: 0 none;
+        padding: 0;
+    }
+    #lifelong-block .row {
+        align-items: center;
+        justify-content: center;
+    }
+    #lifelong-block .lifelong-image {
+        width: 100%;
+        border-radius: 8px;
+        object-fit: cover;
+        display: block;
+        max-height: 680px;
+    }
+    #lifelong-block .lifelong-content {
+        padding: 10px 20px;
+    }
+    @media (min-width: 768px) {
+        #lifelong-block .lifelong-content {
+            padding-left: 40px;
+        }
+    }
+    @media (min-width: 1200px) {
+        .full-gradient-bg {
+            padding-bottom: 120px; /* more spacing on large screens */
+        }
+    }
+`}</style>
+
+                        <Container fluid="xl" className="py-5" id="lifelong-block">
+                        <div className="row">
+                                <div className="col-12 col-md-5">
+                                        <div className="block">
+                                                <img src="/logo/photo.jpg" alt="Profile" className="lifelong-image" />
+                                        </div>
+                                </div>
+                                <div className="col-12 col-md-7">
+                                        <div className="lifelong-content">
+                                                <h2 className="main-heading">You Don’t Have to “Slow Down” with Age – Here’s How to Stay Strong, Mobile, and Pain-Free for Life</h2>
+                                                <h5 className="mb-3">Discover the proven system trusted by people over 50 who refuse to let age or pain slow them down</h5>
+                                                <p className="lead">Join 1,700+ others reclaiming their strength & confidence over 50. Access a library of exercises & guidance specifically for people over age 50, taught by an over-50s specialist physiotherapist.</p>
+                                                <div className="mt-3">
+                                                        <button className="btn btn-primary">JOIN LIFELONG MOBILITY TODAY</button>
+                                                </div>
+                                        </div>
+                                </div>
+                        </div>
+                        </Container>
+                </div>
+        );
+};
+
 // --- FINAL App Component ---
 export default function App() {
     const [language, setLanguage] = useState('en');
@@ -1022,6 +1092,8 @@ export default function App() {
                             <HeroSection language={language} />
                             <IntroSection language={language} />
                             <PrinciplesSection language={language} />
+                            {/* Replicated Lifelong Mobility section (inserted between Principles and How It Works) */}
+                            <ReplicatedSection language={language} />
                             <HowItWorksSection language={language} />
                             <CoursesSection language={language} />
                             {!currentUser?.assessment_submitted && <CtaSection language={language} onFreeTrialClick={handleFreeTrialClick} />}
