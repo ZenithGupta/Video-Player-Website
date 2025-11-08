@@ -321,9 +321,8 @@ const CourseCard = ({ course, isSuperCourse }) => {
                         src={firstVideo?.image || 'https://placehold.co/240x135/749BC2/FFFFFF?text=Course'} 
                         className="course-card-img" 
                     />
-                <Card.Body className="p-3">
+                    <Card.Body className="p-3">
                     <Card.Title className="course-card-title">{course.title}</Card.Title>
-                    <Card.Text className="course-card-instructor">{firstVideo?.instructor || 'Dr. Physio'}</Card.Text>
                     <div className="d-flex align-items-center">
                         <span className="course-card-rating">{firstVideo?.rating || '4.5'}</span>
                         <StarIcon filled />

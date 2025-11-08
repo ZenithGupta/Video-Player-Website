@@ -46,18 +46,20 @@ class Video(models.Model):
         ('Sports Injury', 'Sports Injury'),
     ]
     title = models.CharField(max_length=200, default='')
-    instructor = models.CharField(max_length=100, default='')
+    # instructor removed (moved away from Video)
     description = models.TextField(blank=True)
     vimeo_url = models.URLField(max_length=500)
     image = models.URLField(max_length=500)
-    category = models.CharField(max_length=50, choices=CATEGORY_CHOICES, default='Pain Relief')
-    rating = models.DecimalField(max_digits=2, decimal_places=1, default=0.0)
+    # category removed (videos no longer have categories)
+    # rating removed from Video; rating belongs on SuperCourse
     def __str__(self):
         return self.title
 
 class SuperCourse(models.Model):
     title = models.CharField(max_length=200, default='')
     bestseller = models.BooleanField(default=False)
+    # Move rating to SuperCourse level (aggregate/course-level rating)
+    rating = models.DecimalField(max_digits=3, decimal_places=2, default=0.0)
 
     def __str__(self):
         return self.title

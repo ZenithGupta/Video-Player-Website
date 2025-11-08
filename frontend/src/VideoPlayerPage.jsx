@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
-import { Container, Alert, Tabs, Tab, ListGroup, Card } from 'react-bootstrap';
+import { Container, Alert, Tabs, Tab, ListGroup, Card, Accordion, Button } from 'react-bootstrap';
 import API_URL from './config/api.js';
 
 const getEmbedUrl = (url) => {
@@ -80,6 +80,17 @@ export default function VideoPlayerPage({ language }) {
                     ) : (
                          <div className="player-wrapper d-flex align-items-center justify-content-center bg-dark text-white"><Alert variant="dark">Select a video to begin.</Alert></div>
                     )}
+                    {/* Video description accordion */}
+                    <div className="container mt-3">
+                        <Accordion>
+                            <Accordion.Item eventKey="0">
+                                <Accordion.Header>Video description</Accordion.Header>
+                                <Accordion.Body>
+                                    {activeVideo.video?.description || 'No description available for this video.'}
+                                </Accordion.Body>
+                            </Accordion.Item>
+                        </Accordion>
+                    </div>
                 </div>
             </div>
             <div className="course-content-container py-4">
