@@ -278,7 +278,7 @@ body {
   position: relative;
   padding-top: 56.25%;
   background-color: #000;
-  border-radius: 0 0 0.5rem 0.5rem;
+  border-radius: 0; /* radius handled by player-frame */
   overflow: hidden;
 }
 
@@ -301,6 +301,30 @@ body {
   max-width: 1400px;
   margin: 0 auto;
   padding: 0 1.5rem;
+}
+
+/* Player frame wraps the video and the description box */
+.player-frame {
+  background-color: #000; /* black frame for player */
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.video-description-inside {
+  background: linear-gradient(90deg, #2d8659 0%, #3aa06a 100%); /* green gradient */
+  padding: 1rem 1.25rem;
+  color: #fff;
+}
+
+/* White box that holds the full description below the player */
+.video-description-outside {
+  background: #fff;
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+  max-width: 1000px;
+  margin: 0 auto;
+  color: #333;
 }
 
 .player-header {

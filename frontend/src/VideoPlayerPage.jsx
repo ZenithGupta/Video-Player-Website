@@ -70,16 +70,26 @@ export default function VideoPlayerPage({ language }) {
             <div className="player-section-dark">
                 <div className="player-container">
                     <div className="d-flex justify-content-between align-items-center mb-2 player-header">
-                       <h4 className="video-title-light">{generateVideoTitle()}</h4>
-                       <Link to={`/course/${course.id}`} className="btn-close btn-close-white" aria-label="Close"></Link>
+                        <h4 className="video-title-light">{generateVideoTitle()}</h4>
+                        <Link to={`/course/${course.id}`} className="btn-close btn-close-white" aria-label="Close"></Link>
                     </div>
-                    {embedUrl ? (
-                        <div className='player-wrapper'>
-                            <iframe className='video-iframe' src={embedUrl} frameBorder="0" allow="autoplay; fullscreen; picture-in-picture" title={activeVideo.video?.title} key={activeVideo.video?.vimeo_url}></iframe>
+                    <div className="player-frame">
+                        <div className="player-wrapper">
+                            {embedUrl ? (
+                                <iframe className='video-iframe' src={embedUrl} frameBorder="0" allow="autoplay; fullscreen; picture-in-picture" title={activeVideo.video?.title} key={activeVideo.video?.vimeo_url}></iframe>
+                            ) : (
+                                <div className="player-wrapper d-flex align-items-center justify-content-center bg-dark text-white" style={{minHeight: 300}}><Alert variant="dark">Select a video to begin.</Alert></div>
+                            )}
                         </div>
-                    ) : (
-                         <div className="player-wrapper d-flex align-items-center justify-content-center bg-dark text-white"><Alert variant="dark">Select a video to begin.</Alert></div>
-                    )}
+                        {/* Green box for title */}
+                        <div className="video-description-inside" style={{background: '#339966', borderRadius: '0 0 0 0', padding: '0.75rem 1.5rem', color: '#fff'}}>
+                            <h6 className="mb-0" style={{color: '#fff', fontWeight: 700}}>Video description</h6>
+                        </div>
+                        {/* White box for actual description */}
+                        <div className="video-description-inside-white" style={{background: '#fff', borderRadius: '0 0 12px 12px', boxShadow: '0 2px 8px rgba(0,0,0,0.04)', padding: '1.25rem 1.5rem', marginTop: '-4px', borderTop: '1px solid #e0e0e0'}}>
+                            <p className="mb-0" style={{ color: '#333', fontWeight: 500 }}>{activeVideo.video?.description || 'No description available for this video.'}</p>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div className="course-content-container py-4">
