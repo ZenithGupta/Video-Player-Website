@@ -310,10 +310,10 @@ const CourseCard = ({ course, isSuperCourse }) => {
     const firstVideo = isSuperCourse ? course.courses?.[0]?.phases?.[0]?.weeks?.[0]?.playlist?.videos?.[0] : course.phases?.[0]?.weeks?.[0]?.playlist?.videos?.[0];
     const linkTo = isSuperCourse ? `/course/${course.id}?super=true` : `/course/${course.id}`;
     const price = isSuperCourse ? course.courses?.[0]?.price : course.price;
-
-
+    // Use course.rating if present, else fallback to 4.5
+    const rating = course.rating || '4.5';
     return (
-         <Link to={linkTo} className="course-card-link text-decoration-none">
+        <Link to={linkTo} className="course-card-link text-decoration-none">
             <div className="course-card">
                 <Card className="border-0 h-100 bg-transparent">
                     <Card.Img 
@@ -322,16 +322,16 @@ const CourseCard = ({ course, isSuperCourse }) => {
                         className="course-card-img" 
                     />
                     <Card.Body className="p-3">
-                    <Card.Title className="course-card-title">{course.title}</Card.Title>
-                    <div className="d-flex align-items-center">
-                        <span className="course-card-rating">{firstVideo?.rating || '4.5'}</span>
-                        <StarIcon filled />
-                        <span className="course-card-reviews">({firstVideo?.reviews || '1234'})</span>
-                    </div>
-                    <p className="course-card-price">₹{price}</p>
-                    {course.bestseller && <div className="badge bestseller-badge">Bestseller</div>}
-                </Card.Body>
-            </Card>
+                        <Card.Title className="course-card-title">{course.title}</Card.Title>
+                        <div className="d-flex align-items-center">
+                            <span className="course-card-rating">{rating}</span>
+                            <StarIcon filled />
+                            {/* <span className="course-card-reviews">({firstVideo?.reviews || '1234'})</span> */}
+                        </div>
+                        <p className="course-card-price">₹{price}</p>
+                        {course.bestseller && <div className="badge bestseller-badge">Bestseller</div>}
+                    </Card.Body>
+                </Card>
             </div>
         </Link>
     );
