@@ -13,7 +13,7 @@ const CourseCard = ({ course }) => {
                     <Card.Img variant="top" src={firstVideo?.image || 'https://placehold.co/240x135/749BC2/FFFFFF?text=Course'} className="course-card-img" />
                     <Card.Body className="p-3">
                         <Card.Title className="course-card-title text-dark">{course.title}</Card.Title>
-                        <Card.Text className="course-card-instructor">{firstVideo?.instructor || 'Dr. Physio'}</Card.Text>
+                        {/* <Card.Text className="course-card-instructor">{firstVideo?.instructor || 'Dr. Physio'}</Card.Text> */}
                         <p className="course-card-price text-dark">₹{course.price}</p>
                         {course.bestseller && <div className="badge bestseller-badge">Bestseller</div>}
                     </Card.Body>
