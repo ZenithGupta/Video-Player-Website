@@ -37,7 +37,7 @@ class VideoSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class PlaylistSerializer(serializers.ModelSerializer):
-    videos = VideoSerializer(many=True, read_only=True)
+    videos = serializers.SerializerMethodField()  # Change this line
     class Meta:
         model = Playlist
         fields = '__all__'
