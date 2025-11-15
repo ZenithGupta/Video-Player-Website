@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User, Course, Week, Video, UserCourse, Phase, Playlist, SuperCourse
+from .models import User, Course, Week, Video, UserCourse, Phase, Playlist, SuperCourse, PlaylistVideo
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -41,6 +41,12 @@ class PlaylistSerializer(serializers.ModelSerializer):
     class Meta:
         model = Playlist
         fields = '__all__'
+
+    def get_videos(self, obj):
+        # Get videos in the correct order using the through model
+        playlist_videos = PlaylistVideo.objects.filter(playlist=obj).select_related('video').order_by('order')
+        return VideoSerializer([pv.video for pv in playlist_videos], many=True).data
+
 
 class WeekSerializer(serializers.ModelSerializer):
     playlist = PlaylistSerializer(read_only=True)

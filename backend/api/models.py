@@ -73,9 +73,24 @@ class Course(models.Model):
     def __str__(self):
         return self.title
 
+class PlaylistVideo(models.Model):
+    playlist = models.ForeignKey('Playlist', on_delete=models.CASCADE)
+    video = models.ForeignKey(Video, on_delete=models.CASCADE)
+    order = models.PositiveIntegerField(default=0, db_index=True)
+    
+    class Meta:
+        ordering = ['order']
+        # unique_together = ('playlist', 'video')
+    
+    def __str__(self):
+        return f"{self.video.title} in {self.playlist.title}"
+
+
 class Playlist(models.Model):
     title = models.CharField(max_length=200, default='')
-    videos = models.ManyToManyField(Video, blank=True)
+    # Update to use through model
+    videos = models.ManyToManyField(Video, through='PlaylistVideo', blank=True)
+    
     def __str__(self):
         return self.title
 
