@@ -1,11 +1,25 @@
 from django.contrib import admin
+from adminsortable2.admin import SortableInlineAdminMixin, SortableAdminBase
 from .models import (
     PainAssessmentSubmission, Video, Course, UserCourse, User,
-    Phase, Week, Playlist, SuperCourse
+    Phase, Week, Playlist, SuperCourse, PlaylistVideo
 )
 
-class PlaylistAdmin(admin.ModelAdmin):
-    filter_horizontal = ('videos',)
+# Inline for the through model with drag-and-drop
+class PlaylistVideoInline(SortableInlineAdminMixin, admin.TabularInline):
+    model = PlaylistVideo
+    extra = 1
+    fields = ('video',)  # Hide the 'order' field
+    readonly_fields = []
+
+
+class PlaylistAdmin(SortableAdminBase, admin.ModelAdmin):
+    inlines = [PlaylistVideoInline]
+    list_display = ('title', 'video_count')
+    
+    def video_count(self, obj):
+        return obj.videos.count()
+    video_count.short_description = 'Number of Videos'
 
 class WeekAdmin(admin.ModelAdmin):
     list_display = ('title', 'week_number', 'playlist')
