@@ -46,13 +46,7 @@ const AboutUsPage = ({ language }) => {
                     <div dangerouslySetInnerHTML={{ __html: t.description }} />
                 </Col>
             </Row>
-            <Row className="mt-5">
-                <Col lg={12} className="text-center">
-                    <h2 className="main-heading mb-4">{t.teamTitle}</h2>
-                    <p className="lead">{t.teamDescription}</p>
-                    {/* Add team member photos or details here if needed */}
-                </Col>
-            </Row>
+
         </Container>
     );
 };
