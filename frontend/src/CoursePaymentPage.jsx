@@ -57,9 +57,9 @@ const CoursePaymentPage = ({ course, onPurchase, isSuperCourse, language }) => {
         const newSelectedCourse = course.courses.find(c => c.id === courseId);
         setSelectedCourse(newSelectedCourse);
     };
-    
+
     const introVideo = isSuperCourse ? course.courses?.[0]?.phases?.[0]?.weeks?.[0]?.playlist?.videos?.[0] : course.phases?.[0]?.weeks?.[0]?.playlist?.videos?.[0];
-    
+
     return (
         <div className="course-page-wrapper">
             <header className="course-header-dark py-5">
@@ -86,11 +86,11 @@ const CoursePaymentPage = ({ course, onPurchase, isSuperCourse, language }) => {
                                 <li>✔️ A supportive community to keep you motivated</li>
                             </ul>
                             <h2 className="explore-heading mt-4">{t.description}</h2>
-                            <p>{t.detailedDescription}</p>
+                            <p>{(isSuperCourse ? course.description : course.super_course_description) || t.detailedDescription}</p>
                         </div>
                     </Col>
                     <Col lg={4}>
-                         <Card className="course-action-card sticky-top">
+                        <Card className="course-action-card sticky-top">
                             {introVideo && (
                                 <div className="player-wrapper">
                                     <iframe

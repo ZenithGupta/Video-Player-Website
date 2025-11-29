@@ -58,6 +58,7 @@ class Video(models.Model):
 class SuperCourse(models.Model):
     title = models.CharField(max_length=200, default='')
     bestseller = models.BooleanField(default=False)
+    description = models.TextField(blank=True)
     # Move rating to SuperCourse level (aggregate/course-level rating)
     rating = models.DecimalField(max_digits=3, decimal_places=2, default=0.0)
 

@@ -59,7 +59,7 @@ const CourseHomePage = ({ course, userCourse, language }) => {
         const now = new Date();
         const diffTime = endDate - now;
         if (diffTime <= 0) return { weeks: 0, days: 0 };
-        
+
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
         const weeks = Math.floor(diffDays / 7);
         const days = diffDays % 7;
@@ -89,9 +89,9 @@ const CourseHomePage = ({ course, userCourse, language }) => {
                             <h1 className="main-heading">{course.title}</h1>
                             <p className="lead">{t.welcomeBack}</p>
                             <div className="mt-4">
-                               <h5 className="font-weight-bold">{t.yourProgress}</h5>
-                               <ProgressBar now={progress} label={`${Math.round(progress)}%`} className="mb-2" style={{height: '20px'}} />
-                               <small>{t.accessExpires} {timeLeft.weeks} {t.weeks} and {timeLeft.days} {t.days}.</small>
+                                <h5 className="font-weight-bold">{t.yourProgress}</h5>
+                                <ProgressBar now={progress} label={`${Math.round(progress)}%`} className="mb-2" style={{ height: '20px' }} />
+                                <small>{t.accessExpires} {timeLeft.weeks} {t.weeks} and {timeLeft.days} {t.days}.</small>
                             </div>
                         </Col>
                         <Col lg={4}>
@@ -119,7 +119,7 @@ const CourseHomePage = ({ course, userCourse, language }) => {
             </header>
             <Container className="py-5">
                 <h2 className="main-heading">{t.aboutCourse}</h2>
-                <p className="sub-heading">{t.description}</p>
+                <p className="sub-heading">{course.super_course_description || t.description}</p>
             </Container>
         </div>
     );
