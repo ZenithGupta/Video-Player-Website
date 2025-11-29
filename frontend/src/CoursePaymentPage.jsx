@@ -39,6 +39,14 @@ const getEmbedUrl = (url) => {
     }
 };
 
+const getLocalizedContent = (obj, field, language) => {
+    if (!obj) return '';
+    if (language === 'ta' && obj[`${field}_ta`]) {
+        return obj[`${field}_ta`];
+    }
+    return obj[field] || '';
+};
+
 const CoursePaymentPage = ({ course, onPurchase, isSuperCourse, language }) => {
     const [selectedCourse, setSelectedCourse] = React.useState(null);
     const [paymentMethod, setPaymentMethod] = React.useState('credit-card');
@@ -66,7 +74,7 @@ const CoursePaymentPage = ({ course, onPurchase, isSuperCourse, language }) => {
                 <Container>
                     <Row>
                         <Col lg={8} className="text-white">
-                            <h1 className="main-heading">{course.title}</h1>
+                            <h1 className="main-heading">{getLocalizedContent(course, 'title', language)}</h1>
                             <p className="lead">{t.lead}</p>
                             {course.bestseller && <span className="badge bg-warning text-dark me-2 bestseller-badge">{t.bestseller}</span>}
                             <span>{t.createdBy} {introVideo?.instructor || 'PhysioFlex Team'}</span>
@@ -86,7 +94,7 @@ const CoursePaymentPage = ({ course, onPurchase, isSuperCourse, language }) => {
                                 <li>✔️ A supportive community to keep you motivated</li>
                             </ul>
                             <h2 className="explore-heading mt-4">{t.description}</h2>
-                            <p>{(isSuperCourse ? course.description : course.super_course_description) || t.detailedDescription}</p>
+                            <p>{(isSuperCourse ? getLocalizedContent(course, 'description', language) : getLocalizedContent(course, 'super_course_description', language)) || t.detailedDescription}</p>
                         </div>
                     </Col>
                     <Col lg={4}>
@@ -98,7 +106,7 @@ const CoursePaymentPage = ({ course, onPurchase, isSuperCourse, language }) => {
                                         src={getEmbedUrl(introVideo.vimeo_url)}
                                         frameBorder="0"
                                         allow="fullscreen"
-                                        title={`Intro to ${course.title}`}
+                                        title={`Intro to ${getLocalizedContent(course, 'title', language)}`}
                                     ></iframe>
                                 </div>
                             )}

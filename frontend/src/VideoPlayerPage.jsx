@@ -16,6 +16,14 @@ const getEmbedUrl = (url) => {
     } catch (e) { return ""; }
 };
 
+const getLocalizedContent = (obj, field, language) => {
+    if (!obj) return '';
+    if (language === 'ta' && obj[`${field}_ta`]) {
+        return obj[`${field}_ta`];
+    }
+    return obj[field] || '';
+};
+
 export default function VideoPlayerPage({ language }) {
     const [course, setCourse] = useState(null);
     const [activeVideo, setActiveVideo] = useState({ video: null, weekIndex: 0, dayIndex: 0 });
@@ -30,9 +38,9 @@ export default function VideoPlayerPage({ language }) {
                 // Add the lang query parameter to the API call
                 const response = await axios.get(`${API_URL}/courses/${courseId}/?lang=${language}`);
                 const courseData = response.data;
-                
+
                 const selectedPhase = courseData.phases.find(p => p.id === parseInt(phaseId));
-                
+
                 if (selectedPhase) {
                     setCourse({ ...courseData, phases: [selectedPhase] });
                     const firstVideo = selectedPhase.weeks?.[0]?.playlist?.videos?.[0];
@@ -52,9 +60,13 @@ export default function VideoPlayerPage({ language }) {
     }, [courseId, phaseId, language]); // Add language to the dependency array
 
     const generateVideoTitle = () => {
-        if (!activeVideo.video) return course?.title || '';
+        if (!activeVideo.video) return getLocalizedContent(course, 'title', language);
         const { video, dayIndex } = activeVideo;
-        return `Day ${dayIndex + 1}: ${video.title}`;
+        const videoTitle = getLocalizedContent(video, 'title', language);
+        if (dayIndex === 0) {
+            return `${language === 'ta' ? 'வார்ம் அப்' : 'Warmup'}: ${videoTitle}`;
+        }
+        return `${language === 'ta' ? 'நாள்' : 'Day'} ${dayIndex}: ${videoTitle}`;
     };
 
     const embedUrl = getEmbedUrl(activeVideo.video?.vimeo_url);
@@ -78,34 +90,34 @@ export default function VideoPlayerPage({ language }) {
                             {embedUrl ? (
                                 <iframe className='video-iframe' src={embedUrl} frameBorder="0" allow="autoplay; fullscreen; picture-in-picture" title={activeVideo.video?.title} key={activeVideo.video?.vimeo_url}></iframe>
                             ) : (
-                                <div className="player-wrapper d-flex align-items-center justify-content-center bg-dark text-white" style={{minHeight: 300}}><Alert variant="dark">Select a video to begin.</Alert></div>
+                                <div className="player-wrapper d-flex align-items-center justify-content-center bg-dark text-white" style={{ minHeight: 300 }}><Alert variant="dark">Select a video to begin.</Alert></div>
                             )}
                         </div>
                         {/* Green box for title */}
-                        <div className="video-description-inside" style={{background: '#339966', borderRadius: '0 0 0 0', padding: '0.75rem 1.5rem', color: '#fff'}}>
-                            <h6 className="mb-0" style={{color: '#fff', fontWeight: 700}}>Video description</h6>
+                        <div className="video-description-inside" style={{ background: '#339966', borderRadius: '0 0 0 0', padding: '0.75rem 1.5rem', color: '#fff' }}>
+                            <h6 className="mb-0" style={{ color: '#fff', fontWeight: 700 }}>Video description</h6>
                         </div>
                         {/* White box for actual description */}
-                        <div className="video-description-inside-white" style={{background: '#fff', borderRadius: '0 0 12px 12px', boxShadow: '0 2px 8px rgba(0,0,0,0.04)', padding: '1.25rem 1.5rem', marginTop: '-4px', borderTop: '1px solid #e0e0e0'}}>
-                            <p className="mb-0" style={{ color: '#333', fontWeight: 500 }}>{activeVideo.video?.description || 'No description available for this video.'}</p>
+                        <div className="video-description-inside-white" style={{ background: '#fff', borderRadius: '0 0 12px 12px', boxShadow: '0 2px 8px rgba(0,0,0,0.04)', padding: '1.25rem 1.5rem', marginTop: '-4px', borderTop: '1px solid #e0e0e0' }}>
+                            <p className="mb-0" style={{ color: '#333', fontWeight: 500 }}>{getLocalizedContent(activeVideo.video, 'description', language) || 'No description available for this video.'}</p>
                         </div>
                     </div>
                 </div>
             </div>
             <div className="course-content-container py-4">
-                <h1 className="main-heading mb-2">{course.title}</h1>
-                <p className="lead text-muted">{currentPhase?.title}</p>
+                <h1 className="main-heading mb-2">{getLocalizedContent(course, 'title', language)}</h1>
+                <p className="lead text-muted">{getLocalizedContent(currentPhase, 'title', language)}</p>
                 <hr />
                 {currentPhase ? (
                     <Tabs defaultActiveKey={`week-0`} id="week-tabs" className="mb-3">
                         {currentPhase.weeks.map((week, weekIndex) => (
-                            <Tab eventKey={`week-${weekIndex}`} title={week.title} key={week.id}>
+                            <Tab eventKey={`week-${weekIndex}`} title={`${language === 'ta' ? 'வாரம்' : 'Week'} ${weekIndex + 1}`} key={week.id}>
                                 <Card>
-                                    <Card.Header>Daily Videos for {week.title}</Card.Header>
+                                    <Card.Header>{language === 'ta' ? 'தினசரி வீடியோக்கள்' : 'Daily Videos'}</Card.Header>
                                     <ListGroup variant="flush">
                                         {week.playlist?.videos.map((video, dayIndex) => (
                                             <ListGroup.Item key={`${video.id}-${dayIndex}`} action onClick={() => setActiveVideo({ video, weekIndex, dayIndex })} active={activeVideo.video === video}>
-                                                <strong>Day {dayIndex + 1}:</strong> {video.title}
+                                                <strong>{dayIndex === 0 ? (language === 'ta' ? 'வார்ம் அப்' : 'Warmup') : `${language === 'ta' ? 'நாள்' : 'Day'} ${dayIndex}`}:</strong> {getLocalizedContent(video, 'title', language)}
                                             </ListGroup.Item>
                                         ))}
                                     </ListGroup>
