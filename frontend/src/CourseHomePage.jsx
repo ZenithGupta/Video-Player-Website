@@ -38,6 +38,14 @@ const getEmbedUrl = (url) => {
     } catch (e) { return ""; }
 };
 
+const getLocalizedContent = (obj, field, language) => {
+    if (!obj) return '';
+    if (language === 'ta' && obj[`${field}_ta`]) {
+        return obj[`${field}_ta`];
+    }
+    return obj[field] || '';
+};
+
 const CourseHomePage = ({ course, userCourse, language }) => {
     const [selectedPhase, setSelectedPhase] = useState('');
     const navigate = useNavigate();
@@ -59,7 +67,7 @@ const CourseHomePage = ({ course, userCourse, language }) => {
         const now = new Date();
         const diffTime = endDate - now;
         if (diffTime <= 0) return { weeks: 0, days: 0 };
-        
+
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
         const weeks = Math.floor(diffDays / 7);
         const days = diffDays % 7;
@@ -86,25 +94,25 @@ const CourseHomePage = ({ course, userCourse, language }) => {
                 <Container>
                     <Row className="align-items-center">
                         <Col lg={8} className="text-white">
-                            <h1 className="main-heading">{course.title}</h1>
+                            <h1 className="main-heading">{getLocalizedContent(course, 'title', language)}</h1>
                             <p className="lead">{t.welcomeBack}</p>
                             <div className="mt-4">
-                               <h5 className="font-weight-bold">{t.yourProgress}</h5>
-                               <ProgressBar now={progress} label={`${Math.round(progress)}%`} className="mb-2" style={{height: '20px'}} />
-                               <small>{t.accessExpires} {timeLeft.weeks} {t.weeks} and {timeLeft.days} {t.days}.</small>
+                                <h5 className="font-weight-bold">{t.yourProgress}</h5>
+                                <ProgressBar now={progress} label={`${Math.round(progress)}%`} className="mb-2" style={{ height: '20px' }} />
+                                <small>{t.accessExpires} {timeLeft.weeks} {t.weeks} and {timeLeft.days} {t.days}.</small>
                             </div>
                         </Col>
                         <Col lg={4}>
                             <Card className="course-action-card">
                                 {introVideo && (
-                                    <div className="player-wrapper"><iframe className="video-iframe" src={getEmbedUrl(introVideo.vimeo_url)} frameBorder="0" allow="fullscreen" title={`Intro to ${course.title}`}></iframe></div>
+                                    <div className="player-wrapper"><iframe className="video-iframe" src={getEmbedUrl(introVideo.vimeo_url)} frameBorder="0" allow="fullscreen" title={`Intro to ${getLocalizedContent(course, 'title', language)}`}></iframe></div>
                                 )}
                                 <Card.Body>
                                     <Form.Group className="mb-3">
                                         <Form.Label className="font-weight-bold">{t.selectPhase}</Form.Label>
                                         <Form.Select value={selectedPhase} onChange={e => setSelectedPhase(e.target.value)}>
                                             {course.phases && course.phases.map(phase => (
-                                                <option key={phase.id} value={phase.id}>{phase.title}</option>
+                                                <option key={phase.id} value={phase.id}>{getLocalizedContent(phase, 'title', language)}</option>
                                             ))}
                                         </Form.Select>
                                     </Form.Group>
@@ -119,7 +127,7 @@ const CourseHomePage = ({ course, userCourse, language }) => {
             </header>
             <Container className="py-5">
                 <h2 className="main-heading">{t.aboutCourse}</h2>
-                <p className="sub-heading">{t.description}</p>
+                <p className="sub-heading">{getLocalizedContent(course, 'super_course_description', language) || t.description}</p>
             </Container>
         </div>
     );

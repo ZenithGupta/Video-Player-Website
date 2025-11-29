@@ -38,16 +38,11 @@ class User(AbstractUser):
     user_permissions = models.ManyToManyField(Permission, verbose_name='user permissions', blank=True, related_name="api_user_permissions_set", related_query_name="user")
 
 class Video(models.Model):
-    CATEGORY_CHOICES = [
-        ('Pain Relief', 'Pain Relief'),
-        ('Strength Training', 'Strength Training'),
-        ('Mobility & Flexibility', 'Mobility & Flexibility'),
-        ('Posture Correction', 'Posture Correction'),
-        ('Sports Injury', 'Sports Injury'),
-    ]
     title = models.CharField(max_length=200, default='')
+    title_ta = models.CharField(max_length=200, null=True, blank=True)
     # instructor removed (moved away from Video)
     description = models.TextField(blank=True)
+    description_ta = models.TextField(blank=True, null=True)
     vimeo_url = models.URLField(max_length=500)
     image = models.URLField(max_length=500)
     # category removed (videos no longer have categories)
@@ -57,7 +52,10 @@ class Video(models.Model):
 
 class SuperCourse(models.Model):
     title = models.CharField(max_length=200, default='')
+    title_ta = models.CharField(max_length=200, null=True, blank=True)
     bestseller = models.BooleanField(default=False)
+    description = models.TextField(blank=True)
+    description_ta = models.TextField(blank=True, null=True)
     # Move rating to SuperCourse level (aggregate/course-level rating)
     rating = models.DecimalField(max_digits=3, decimal_places=2, default=0.0)
 
@@ -67,6 +65,7 @@ class SuperCourse(models.Model):
 class Course(models.Model):
     super_course = models.ForeignKey(SuperCourse, related_name='courses', on_delete=models.CASCADE, null=True, blank=True)
     title = models.CharField(max_length=200, default='')
+    title_ta = models.CharField(max_length=200, null=True, blank=True)
     validity_weeks = models.IntegerField(default=5)
     bestseller = models.BooleanField(default=False)
     price = models.CharField(max_length=20, default="0")
@@ -105,6 +104,7 @@ class Week(models.Model):
 
 class Phase(models.Model):
     title = models.CharField(max_length=200, default='')
+    title_ta = models.CharField(max_length=200, null=True, blank=True)
     course = models.ForeignKey(Course, related_name='phases', on_delete=models.CASCADE)
     weeks = models.ManyToManyField(Week)
     phase_number = models.IntegerField(default=1)
