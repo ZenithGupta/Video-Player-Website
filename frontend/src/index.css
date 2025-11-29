@@ -71,6 +71,10 @@ body {
   font-size: 0.875rem !important;
   border-radius: 8px !important;
   transition: all 0.3s ease !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-decoration: none !important;
 }
 .header-btn:hover {
   transform: translateY(-2px);
