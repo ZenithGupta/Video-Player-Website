@@ -29,6 +29,7 @@ gsap.registerPlugin(useGSAP, ScrollTrigger, SplitText, ScrambleTextPlugin);
 const content = {
     en: {
         brand: "One Last Move",
+        home: "Home",
         myCourses: "My Courses",
         searchPlaceholder: "Search for anything",
         forBusiness: "For Business",
@@ -71,6 +72,7 @@ const content = {
     },
     ta: {
         brand: "ஒரு கடைசி நகர்வு",
+        home: "முகப்பு",
         myCourses: "எனது படிப்புகள்",
         searchPlaceholder: "எதையும் தேடுங்கள்",
         forBusiness: "வணிகத்திற்காக",
@@ -284,6 +286,7 @@ const Header = ({ language, setLanguage, user, onLogout, onShowLogin, onShowSign
                     <Nav className="me-auto"></Nav>
 
                     <Nav className="align-items-center">
+                        <Button as={Link} to="/" variant="outline-dark" className="header-btn mx-2 my-1 my-lg-0" onClick={() => setExpanded(false)}>{t.home}</Button>
                         {/* --- NAVBAR COLLAPSE FIX: Use wrapped handler --- */}
                         <Button variant="outline-dark" className="header-btn mx-2 my-1 my-lg-0" onClick={handleMyCoursesClick}>
                             {t.myCourses}
@@ -867,7 +870,7 @@ const ReplicatedSection = ({ language }) => {
                 <div className="row">
                     <div className="col-12 col-md-5">
                         <div className="block">
-                            <img src="/logo/photo.jpg" alt="Profile" className="lifelong-image" />
+                            <img src="/logo/Aravinth_image.jpeg" alt="Profile" className="lifelong-image" />
                         </div>
                     </div>
                     <div className="col-12 col-md-7">
