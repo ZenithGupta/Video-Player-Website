@@ -26,7 +26,7 @@ const CoursePage = ({ user, token, showLogin, language }) => {
                 const url = isSuperCourse ? `${API_URL}/super-courses/${courseId}/?lang=${language}` : `${API_URL}/courses/${courseId}/?lang=${language}`;
                 const response = await axios.get(url);
                 const courseData = response.data;
-                
+
 
                 if (user) {
                     let enrollment = null;
@@ -72,12 +72,12 @@ const CoursePage = ({ user, token, showLogin, language }) => {
     if (loading) return <Container className="main-content py-5 text-center"><h2>Loading...</h2></Container>;
     if (error) return <Container className="main-content py-5"><Alert variant="danger">{error}</Alert></Container>;
     if (!course) return null;
-    
+
     // Pass the language prop down to the child components
     return userCourse ? (
         <CourseHomePage course={course} userCourse={userCourse} language={language} />
     ) : (
-        <CoursePaymentPage course={course} onPurchase={handlePurchase} isSuperCourse={isSuperCourse} language={language} />
+        <CoursePaymentPage course={course} onPurchase={handlePurchase} isSuperCourse={isSuperCourse} language={language} user={user} token={token} />
     );
 };
 
