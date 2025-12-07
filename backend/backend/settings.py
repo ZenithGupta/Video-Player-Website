@@ -145,3 +145,7 @@ REST_FRAMEWORK = {
 AUTH_USER_MODEL = 'api.User'
 
 GOOGLE_APPS_SCRIPT_SECRET = 'ThisIsMySecureKeyForGoogleForms123'
+
+# Razorpay Configuration
+RAZORPAY_KEY_ID = os.environ.get('RAZORPAY_KEY_ID')
+RAZORPAY_KEY_SECRET = os.environ.get('RAZORPAY_KEY_SECRET')

@@ -31,4 +31,6 @@ urlpatterns = [
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('health/', views.health_check, name='health_check'),
     path('enroll-free-trial/', views.enroll_free_trial, name='enroll_free_trial'),
+    path('create-order/', views.create_order, name='create_order'),
+    path('verify-payment/', views.verify_payment, name='verify_payment'),
 ]

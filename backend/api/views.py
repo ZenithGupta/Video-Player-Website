@@ -149,6 +149,96 @@ def enroll_free_trial(request):
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
+import razorpay
+from django.conf import settings
+
+
+# --- Razorpay Payment Views ---
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def create_order(request):
+    """
+    Creates a Razorpay order.
+    Expects 'course_id'.
+    """
+    user = request.user
+    data = request.data
+    course_id = data.get('course_id')
+
+    if not course_id:
+        return Response({'error': 'Course ID required'}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        course = Course.objects.get(pk=course_id)
+        # Assuming price is stored as string/integer in rupees. Convert to paise.
+        amount = int(float(course.price) * 100)
+    except Course.DoesNotExist:
+        return Response({'error': 'Course not found'}, status=status.HTTP_404_NOT_FOUND)
+    except ValueError:
+        return Response({'error': 'Invalid Course Price'}, status=status.HTTP_400_BAD_REQUEST)
+
+    client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+    
+    payment_data = {
+        'amount': amount,
+        'currency': 'INR',
+        'receipt': f'receipt_{user.id}_{course_id}',
+        'notes': {
+            'user_id': user.id,
+            'course_id': course_id
+        }
+    }
+    
+    try:
+        order = client.order.create(data=payment_data)
+        # Return key_id as well for frontend
+        response_data = order
+        response_data['key_id'] = settings.RAZORPAY_KEY_ID
+        return Response(response_data)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def verify_payment(request):
+    """
+    Verifies Razorpay payment signature and enrolls user.
+    """
+    data = request.data
+    razorpay_order_id = data.get('razorpay_order_id')
+    razorpay_payment_id = data.get('razorpay_payment_id')
+    razorpay_signature = data.get('razorpay_signature')
+    course_id = data.get('course_id')
+
+    client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+
+    try:
+        # Verify signature
+        params_dict = {
+            'razorpay_order_id': razorpay_order_id,
+            'razorpay_payment_id': razorpay_payment_id,
+            'razorpay_signature': razorpay_signature
+        }
+        client.utility.verify_payment_signature(params_dict)
+
+        # Enrollment Logic
+        user = request.user
+        course = Course.objects.get(pk=course_id)
+        
+        if not UserCourse.objects.filter(user=user, course=course).exists():
+            UserCourse.objects.create(user=user, course=course)
+            
+        return Response({'message': 'Payment successful', 'course_id': course.id}, status=status.HTTP_200_OK)
+
+    except razorpay.errors.SignatureVerificationError:
+        return Response({'error': 'Payment verification failed'}, status=status.HTTP_400_BAD_REQUEST)
+    except Course.DoesNotExist:
+         return Response({'error': 'Course not found'}, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
 # --- Pain Assessment View ---
 # This view remains the same.
 
