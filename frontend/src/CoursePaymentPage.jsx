@@ -1,5 +1,7 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Container, Row, Col, Card, Button, Form, Nav } from 'react-bootstrap';
+import axios from 'axios';
+import API_URL from './config/api.js';
 
 // Define content for this component
 const content = {
@@ -39,12 +41,20 @@ const getEmbedUrl = (url) => {
     }
 };
 
-const CoursePaymentPage = ({ course, onPurchase, isSuperCourse, language }) => {
+const getLocalizedContent = (obj, field, language) => {
+    if (!obj) return '';
+    if (language === 'ta' && obj[`${field}_ta`]) {
+        return obj[`${field}_ta`];
+    }
+    return obj[field] || '';
+};
+
+const CoursePaymentPage = ({ course, onPurchase, isSuperCourse, language, user, token }) => {
     const [selectedCourse, setSelectedCourse] = React.useState(null);
     const [paymentMethod, setPaymentMethod] = React.useState('credit-card');
     const t = content[language]; // Translation object
 
-    React.useEffect(() => {
+    useEffect(() => {
         if (isSuperCourse && course.courses.length > 0) {
             setSelectedCourse(course.courses[0]);
         } else {
@@ -52,21 +62,95 @@ const CoursePaymentPage = ({ course, onPurchase, isSuperCourse, language }) => {
         }
     }, [course, isSuperCourse]);
 
+    // Load Razorpay Script
+    useEffect(() => {
+        const script = document.createElement('script');
+        script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+        script.async = true;
+        document.body.appendChild(script);
+        return () => {
+            document.body.removeChild(script);
+        }
+    }, []);
+
     const handleValidityChange = (e) => {
         const courseId = parseInt(e.target.value);
         const newSelectedCourse = course.courses.find(c => c.id === courseId);
         setSelectedCourse(newSelectedCourse);
     };
-    
+
+    const handleBuyNow = async () => {
+        if (!token) {
+            onPurchase(); // Shows login modal
+            return;
+        }
+
+        try {
+            const courseId = selectedCourse ? selectedCourse.id : course.id;
+            // Create Order
+            const orderResponse = await axios.post(`${API_URL}/create-order/`,
+                { course_id: courseId },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+
+            const { id: order_id, amount, currency, key_id } = orderResponse.data;
+
+            // Open Razorpay Checkout
+            const options = {
+                key: key_id,
+                amount: amount.toString(),
+                currency: currency,
+                name: "PhysioFlex", // You might want to make this dynamic or configured
+                description: `Purchase ${getLocalizedContent(course, 'title', language)}`,
+                // image: "/logo.png", // Add logo if available
+                order_id: order_id,
+                handler: async function (response) {
+                    try {
+                        await axios.post(`${API_URL}/verify-payment/`, {
+                            razorpay_order_id: response.razorpay_order_id,
+                            razorpay_payment_id: response.razorpay_payment_id,
+                            razorpay_signature: response.razorpay_signature,
+                            course_id: courseId
+                        }, { headers: { Authorization: `Bearer ${token}` } });
+
+                        alert("Payment Successful!");
+                        window.location.reload(); // Reload to update access
+                    } catch (error) {
+                        alert("Payment verification failed. Please contact support.");
+                        console.error(error);
+                    }
+                },
+                prefill: {
+                    name: user ? `${user.first_name} ${user.last_name}` : "",
+                    email: user ? user.email : "",
+                    contact: ""
+                },
+                theme: {
+                    color: "#3399cc"
+                }
+            };
+
+            const rzp1 = new window.Razorpay(options);
+            rzp1.on('payment.failed', function (response) {
+                alert("Payment Failed: " + response.error.description);
+            });
+            rzp1.open();
+
+        } catch (error) {
+            console.error("Payment initiation failed:", error);
+            alert("Failed to initiate payment. Please try again.");
+        }
+    };
+
     const introVideo = isSuperCourse ? course.courses?.[0]?.phases?.[0]?.weeks?.[0]?.playlist?.videos?.[0] : course.phases?.[0]?.weeks?.[0]?.playlist?.videos?.[0];
-    
+
     return (
         <div className="course-page-wrapper">
             <header className="course-header-dark py-5">
                 <Container>
                     <Row>
                         <Col lg={8} className="text-white">
-                            <h1 className="main-heading">{course.title}</h1>
+                            <h1 className="main-heading">{getLocalizedContent(course, 'title', language)}</h1>
                             <p className="lead">{t.lead}</p>
                             {course.bestseller && <span className="badge bg-warning text-dark me-2 bestseller-badge">{t.bestseller}</span>}
                             <span>{t.createdBy} {introVideo?.instructor || 'PhysioFlex Team'}</span>
@@ -86,11 +170,11 @@ const CoursePaymentPage = ({ course, onPurchase, isSuperCourse, language }) => {
                                 <li>✔️ A supportive community to keep you motivated</li>
                             </ul>
                             <h2 className="explore-heading mt-4">{t.description}</h2>
-                            <p>{t.detailedDescription}</p>
+                            <p>{(isSuperCourse ? getLocalizedContent(course, 'description', language) : getLocalizedContent(course, 'super_course_description', language)) || t.detailedDescription}</p>
                         </div>
                     </Col>
                     <Col lg={4}>
-                         <Card className="course-action-card sticky-top">
+                        <Card className="course-action-card sticky-top">
                             {introVideo && (
                                 <div className="player-wrapper">
                                     <iframe
@@ -98,7 +182,7 @@ const CoursePaymentPage = ({ course, onPurchase, isSuperCourse, language }) => {
                                         src={getEmbedUrl(introVideo.vimeo_url)}
                                         frameBorder="0"
                                         allow="fullscreen"
-                                        title={`Intro to ${course.title}`}
+                                        title={`Intro to ${getLocalizedContent(course, 'title', language)}`}
                                     ></iframe>
                                 </div>
                             )}
@@ -132,14 +216,14 @@ const CoursePaymentPage = ({ course, onPurchase, isSuperCourse, language }) => {
                                     </Nav.Item>
                                 </Nav>
                                 <div className="payment-method-content mb-3">
-                                    {paymentMethod === 'credit-card' && <p>Credit Card form will be here.</p>}
-                                    {paymentMethod === 'debit-card' && <p>Debit Card form will be here.</p>}
-                                    {paymentMethod === 'upi' && <p>UPI payment instructions will be here.</p>}
-                                    {paymentMethod === 'net-banking' && <p>Net Banking options will be here.</p>}
+                                    {paymentMethod === 'credit-card' && <p>Pay securely with your Credit Card.</p>}
+                                    {paymentMethod === 'debit-card' && <p>Pay securely with your Debit Card.</p>}
+                                    {paymentMethod === 'upi' && <p>Pay using UPI (GPay, PhonePe, Paytm).</p>}
+                                    {paymentMethod === 'net-banking' && <p>Select your bank for Net Banking.</p>}
                                 </div>
 
 
-                                <Button variant="primary" size="lg" className="w-100 header-btn" onClick={onPurchase}>
+                                <Button variant="primary" size="lg" className="w-100 header-btn" onClick={handleBuyNow}>
                                     {t.buyNow}
                                 </Button>
                                 <Card.Text className="text-muted text-center mt-2 small">

@@ -14,6 +14,8 @@ import VideoPlayerPage from './VideoPlayerPage.jsx';
 import CoursePage from './CoursePage.jsx';
 import MyCoursesPage from './MyCoursesPage.jsx';
 import ProtectedRoute from './ProtectedRoute.jsx';
+import TermsPage from './TermsPage.jsx';
+
 import API_URL, { GOOGLE_FORM_ENTRY_IDS } from './config/api.js';
 import './index.css';
 
@@ -27,6 +29,7 @@ gsap.registerPlugin(useGSAP, ScrollTrigger, SplitText, ScrambleTextPlugin);
 const content = {
     en: {
         brand: "One Last Move",
+        home: "Home",
         myCourses: "My Courses",
         searchPlaceholder: "Search for anything",
         forBusiness: "For Business",
@@ -40,7 +43,7 @@ const content = {
         subHeading: "This program is designed to help you overcome problems such as osteoarthritis, muscle tightness, muscle weakness, and spinal instability, allowing you to do what you love again—without limitations.",
         suffering: "Are you suffering from joint degeneration or osteoarthritis? You're not alone—and surgery is not the only solution.",
         journey: "This program helps restore your movement, kickstart a healthier, happier old age, and regain your confidence in life. I am happy to be part of your joyful journey. How can the One Last Move program help you overcome joint issues and move with ease in daily life?",
-        
+
         // --- TRANSLATION ADDED HERE ---
         principlesTitle: "Our Core Principles",
         principle1Title: "1. Understanding the Root Cause",
@@ -49,24 +52,36 @@ const content = {
         principle2Text: "Will you continue to focus only on your X-rays and MRI reports? Or will you focus on the real cause of your joint and hip pain? If you can fix the other underlying issues—not just the degeneration—you can regain pain-free movements.",
         principle3Title: "3. Dedication is Key",
         principle3Text: "With the right understanding and the correct plan in hand, staying dedicated to your recovery becomes easier. Let go of fear, past failed attempts, and limiting beliefs. Start rebuilding your joints to a pain-free, empowered life.",
-        
+
         howItWorksTitle: "How Does the Program Work?",
-    howItWorksStep1: "Sign up for the 14-day free trial by submitting your details.",
+        howItWorksStep1: "Sign up for the 14-day free trial by submitting your details.",
         howItWorksStep2: "Answer a few questions to help us understand your pain levels and limitations.",
         howItWorksStep3: "Get customized exercises tailored to your condition.",
-    howItWorksStep4: "After 14 days, continue your journey with a membership.",
+        howItWorksStep4: "After 14 days, continue your journey with a membership.",
         reclaimLifeTitle: "Reclaim Your Life",
         reclaimLifeText: "Our members are now performing movements they once thought impossible. This program helps reduce pain, improve strength, enhance balance, and boost confidence in your body's ability.",
         ctaTitle: "Don’t Wait Any Longer",
-    ctaText: "Get started with your free 14-day trial worth ₹1000 today.",
-    ctaButton: "Start Your 14-Day Free Trial Now",
+        ctaText: "Get started with your free 14-day trial worth ₹1000 today.",
+        ctaButton: "Start Your 14-Day Free Trial Now",
         explore: "Explore",
         courseSectionTitle: "A broad selection of courses",
         assessmentTitle: "Pain Assessment Questions",
         assessmentIntro: "Once you begin, answer the following questions honestly to help us guide you on the right path:",
+        terms: "Terms",
+        about: "About",
+        aboutTitle: "About Us",
+        aboutSubtitle: "A Journey to Mobility",
+        aboutDescription: [
+            "Aravinth E is a dedicated physiotherapist, nutritionist, and YouTube creator who specializes in helping people over the age of 50 with arthritis and mobility issues.",
+            "After discovering a passion for helping people regain mobility and independence, Aravinth started his own physiotherapy center, Physio Pride, in 2020. Quickly building a fantastic reputation in the local area, Aravinth decided to share the same expert guidance he provided to his in-person clients with the wider community. This led to the creation of his YouTube channel, which has since amassed more than 1 lakh (100,000) subscribers worldwide, with his videos gaining millions of views every month.",
+            "In 2024, seeing the immense need, he started live online exercise sessions for clients across India and globally, deciding to take his outreach to the next level.",
+            "The following year, in 2025, Aravinth opened his second branch of Physio Pride. He also began working on a prerecorded online exercise program called \"One Last Move,\" specifically designed for elders and individuals who suffer from knee arthritis and back pain in their daily lives.",
+            "Today, Aravinth focuses his time on building and training his highly-skilled, specialist team at Physio Pride. Together, they help countless elders and arthritic people all over the world through online programs, while Aravinth continues creating content for his YouTube channel and treating patients in his centers."
+        ],
     },
     ta: {
         brand: "ஒரு கடைசி நகர்வு",
+        home: "முகப்பு",
         myCourses: "எனது படிப்புகள்",
         searchPlaceholder: "எதையும் தேடுங்கள்",
         forBusiness: "வணிகத்திற்காக",
@@ -80,7 +95,7 @@ const content = {
         subHeading: "இந்தத் திட்டம் ஆஸ்டியோஆர்த்ரைடிஸ், தசை இறுக்கம், தசை பலவீனம் மற்றும் முதுகெலும்பு உறுதியற்றன்மை போன்ற பிரச்சனைகளைச் சமாளிக்க உதவும் வகையில் வடிவமைக்கப்பட்டுள்ளது, இது நீங்கள் விரும்பியதை மீண்டும் வரம்புகள் இல்லாமல் செய்ய அனுமதிக்கிறது.",
         suffering: "நீங்கள் மூட்டு தேய்மானம் அல்லது கீல்வாதத்தால் பாதிக்கப்படுகிறீர்களா? நீங்கள் தனியாக இல்லை - அறுவை சிகிச்சை மட்டுமே தீர்வு அல்ல.",
         journey: "இந்தத் திட்டம் உங்கள் இயக்கத்தை மீட்டெடுக்கவும், ஆரோக்கியமான, மகிழ்ச்சியான முதுமையைத் தொடங்கவும், வாழ்க்கையில் உங்கள் நம்பிக்கையை மீண்டும் பெறவும் உதவுகிறது. உங்கள் மகிழ்ச்சியான பயணத்தின் ஒரு பகுதியாக இருப்பதில் நான் மகிழ்ச்சியடைகிறேன். மூட்டுப் பிரச்சனைகளைச் சமாளித்து, அன்றாட வாழ்வில் எளிதாக நடமாட, 'தி ஒன் லாஸ்ட் மூவ்' திட்டம் உங்களுக்கு எப்படி உதவும்?",
-        
+
         // --- TRANSLATION ADDED HERE ---
         principlesTitle: "எங்கள் முக்கிய கொள்கைகள்",
         principle1Title: "1. மூல காரணத்தைப் புரிந்துகொள்வது",
@@ -89,26 +104,37 @@ const content = {
         principle2Text: "உங்கள் எக்ஸ்-ரே மற்றும் எம்ஆர்ஐ அறிக்கைகளில் மட்டுமே கவனம் செலுத்துவீர்களா? அல்லது உங்கள் மூட்டு மற்றும் இடுப்பு வலியின் உண்மையான காரணத்தில் கவனம் செலுத்துவீர்களா? தேய்மானத்தை மட்டுமல்ல, மற்ற அடிப்படைப் பிரச்சனைகளையும் சரிசெய்தால், வலியற்ற இயக்கங்களை மீண்டும் பெறலாம்.",
         principle3Title: "3. அர்ப்பணிப்பு முக்கியம்",
         principle3Text: "சரியான புரிதலுடனும், சரியான திட்டத்துடனும், உங்கள் மீட்புக்கு அர்ப்பணிப்புடன் இருப்பது எளிதாகிறது. பயம், கடந்தகால தோல்வியுற்ற முயற்சிகள் மற்றும் கட்டுப்படுத்தும் நம்பிக்கைகளை விட்டுவிடுங்கள். வலியற்ற, அதிகாரம் பெற்ற வாழ்க்கைக்கு உங்கள் மூட்டுகளை மீண்டும் உருவாக்கத் தொடங்குங்கள்.",
-        
+
         howItWorksTitle: "இந்தத் திட்டம் எப்படி வேலை செய்கிறது?",
-    howItWorksStep1: "உங்கள் விவரங்களைச் சமர்ப்பித்து 14 நாள் இலவச சோதனைக்கு பதிவு செய்யவும்.",
+        howItWorksStep1: "உங்கள் விவரங்களைச் சமர்ப்பித்து 14 நாள் இலவச சோதனைக்கு பதிவு செய்யவும்.",
         howItWorksStep2: "உங்கள் வலி நிலைகள் மற்றும் வரம்புகளைப் புரிந்துகொள்ள எங்களுக்கு உதவும் சில கேள்விகளுக்குப் பதிலளிக்கவும்.",
         howItWorksStep3: "உங்கள் நிலைக்கு ஏற்ப தனிப்பயனாக்கப்பட்ட பயிற்சிகளைப் பெறுங்கள்.",
-    howItWorksStep4: "14 நாட்களுக்குப் பிறகு, உறுப்பினர் சந்தாவுடன் உங்கள் பயணத்தைத் தொடரவும்.",
+        howItWorksStep4: "14 நாட்களுக்குப் பிறகு, உறுப்பினர் சந்தாவுடன் உங்கள் பயணத்தைத் தொடரவும்.",
         reclaimLifeTitle: "உங்கள் வாழ்க்கையை மீட்டெடுங்கள்",
         reclaimLifeText: "எங்கள் உறுப்பினர்கள் ஒரு காலத்தில் சாத்தியமற்றது என்று நினைத்த இயக்கங்களை இப்போது செய்கிறார்கள். இந்தத் திட்டம் வலியைக் குறைக்கவும், வலிமையை மேம்படுத்தவும், சமநிலையை அதிகரிக்கவும், உங்கள் உடலின் திறனில் நம்பிக்கையை அதிகரிக்கவும் உதவுகிறது.",
         ctaTitle: "இனி காத்திருக்க வேண்டாம்",
-    ctaText: "இன்றே உங்கள் ₹1000 மதிப்புள்ள இலவச 14-நாள் சோதனையைத் தொடங்குங்கள்.",
-    ctaButton: "உங்கள் 14-நாள் இலவச சோதனையை இப்போது தொடங்குங்கள்",
+        ctaText: "இன்றே உங்கள் ₹1000 மதிப்புள்ள இலவச 14-நாள் சோதனையைத் தொடங்குங்கள்.",
+        ctaButton: "உங்கள் 14-நாள் இலவச சோதனையை இப்போது தொடங்குங்கள்",
         explore: "ஆராயுங்கள்",
         courseSectionTitle: "பாடங்களின் பரந்த தேர்வு",
         assessmentTitle: "வலி மதிப்பீட்டுக் கேள்விகள்",
         assessmentIntro: "நீங்கள் தொடங்கியதும், சரியான பாதையில் உங்களுக்கு வழிகாட்ட எங்களுக்கு உதவ பின்வரும் கேள்விகளுக்கு நேர்மையாக பதிலளிக்கவும்:",
+        terms: "விதிமுறைகள்",
+        about: "எங்களைப் பற்றி",
+        aboutTitle: "எங்களைப் பற்றி",
+        aboutSubtitle: "இயக்கம் நோக்கிய ஒரு பயணம்",
+        aboutDescription: [
+            "அரவிந்த் அவர்கள் ஒரு அர்ப்பணிப்புள்ள பிசியோதெரபிஸ்ட், ஊட்டச்சத்து நிபுணர், மற்றும் யூடியூப் படைப்பாளி ஆவார். இவர் 50 வயதிற்கு மேற்பட்டவர்கள், மூட்டுவலி மற்றும் இயக்கம் தொடர்பான பிரச்சனைகளால் பாதிக்கப்பட்டவர்களுக்கு உதவுவதில் நிபுணத்துவம் பெற்றவர்.",
+            "மக்களின் இயக்கத்தை மீட்டெடுப்பதிலும், அவர்கள் சுதந்திரமாகச் செயல்பட உதவுவதிலும் தனக்கிருந்த ஆர்வத்தைக் கண்டறிந்த பிறகு, அரவிந்த் அவர்கள் 2020 ஆம் ஆண்டில், பிசியோ ப்ரைடு என்ற தனது சொந்த பிசியோதெரபி மையத்தைத் தொடங்கினார். குறுகிய காலத்திலேயே உள்ளூர் அளவில் ஒரு சிறப்பான நற்பெயரைக் கட்டியெழுப்பிய அரவிந்த், தான் நேரடியாகச் சந்திக்கும் நோயாளிகளுக்கு வழங்கும் அதே சிறப்பு வாய்ந்த ஆலோசனைகளை பரந்த சமூகத்துடனும் பகிர்ந்து கொள்ள முடிவு செய்தார். இதன் விளைவாகவே அவரது யூடியூப் சேனல் உருவாக்கப்பட்டது. இந்த சேனல் உலகளவில் ஒரு லட்சம் (100,000) சந்தாதாரர்களுக்கு மேல் பெற்றுள்ளதுடன், அவரது வீடியோக்கள் ஒவ்வொரு மாதமும் பல மில்லியன் பார்வைகளைப் பெறுகின்றன.",
+            "2024 ஆம் ஆண்டில், இத்தகைய தேவையின் தீவிரத்தை உணர்ந்த அவர், இந்தியா மற்றும் உலகெங்கிலும் உள்ள நோயாளிகளுக்காக நேரடி ஆன்லைன் உடற்பயிற்சிக் கூட்டங்களைத் (live online exercise sessions) தொடங்கினார். இது அவரது சேவையை அடுத்த கட்டத்திற்கு எடுத்துச் செல்லும் முடிவாக இருந்தது.",
+            "அடுத்த ஆண்டு, 2025 இல், அரவிந்த் அவர்கள் பிசியோ ப்ரைடு மையத்தின் இரண்டாவது கிளையைத் திறந்தார். மேலும், முதியவர்கள் மற்றும் அன்றாட வாழ்வில் மூட்டுவலி (knee arthritis), முதுகு வலியால் (back pain) பாதிக்கப்படுபவர்களுக்காகவே சிறப்பாக வடிவமைக்கப்பட்ட \"ஒரு கடைசி நகர்வு\" என்ற பெயரில், முன் பதிவு செய்யப்பட்ட இணையவழி உடற்பயிற்சி திட்டத்திலும் அவர் பணியாற்றத் தொடங்கினார்.",
+            "இன்று, அரவிந்த் அவர்கள் பிசியோ ப்ரைடு மையத்தில் தனது உயர் திறமை வாய்ந்த, சிறப்பு நிபுணர் குழுவை உருவாக்குவதிலும், பயிற்சி அளிப்பதிலும் தனது நேரத்தைச் செலுத்துகிறார். இக்குழுவினர், ஆன்லைன் திட்டங்கள் மூலம் உலகெங்கிலும் உள்ள எண்ணற்ற முதியோர்களுக்கும், மூட்டுவலியால் பாதிக்கப்பட்டவர்களுக்கும் உதவுகின்றனர். அத்துடன், அரவிந்த் அவர்கள் தொடர்ந்து தனது யூடியூப் சேனலுக்கான உள்ளடக்கத்தை உருவாக்கி வருவதுடன், தனது மையங்களில் நோயாளிகளுக்கும் சிகிச்சை அளித்து வருகிறார்."
+        ],
     }
 };
 
 // --- SVG Icons ---
-const StarIcon = ({ filled }) => ( <svg className="star-icon" style={{ color: filled ? '#F5A623' : '#d1d7dc' }} fill="currentColor" viewBox="0 0 20 20"> <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.957a1 1 0 00.95.69h4.162c.969 0 1.371 1.24.588 1.81l-3.368 2.448a1 1 0 00-.364 1.118l1.287 3.957c.3.921-.755 1.688-1.54 1.118l-3.368-2.448a1 1 0 00-1.175 0l-3.368 2.448c-.784.57-1.838-.197-1.539-1.118l1.287-3.957a1 1 0 00-.364-1.118L2.25 9.384c-.783-.57-.38-1.81.588-1.81h4.162a1 1 0 00.95-.69L9.049 2.927z" /> </svg> );
+const StarIcon = ({ filled }) => (<svg className="star-icon" style={{ color: filled ? '#F5A623' : '#d1d7dc' }} fill="currentColor" viewBox="0 0 20 20"> <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.957a1 1 0 00.95.69h4.162c.969 0 1.371 1.24.588 1.81l-3.368 2.448a1 1 0 00-.364 1.118l1.287 3.957c.3.921-.755 1.688-1.54 1.118l-3.368-2.448a1 1 0 00-1.175 0l-3.368 2.448c-.784.57-1.838-.197-1.539-1.118l1.287-3.957a1 1 0 00-.364-1.118L2.25 9.384c-.783-.57-.38-1.81.588-1.81h4.162a1 1 0 00.95-.69L9.049 2.927z" /> </svg>);
 const SearchIcon = () => <svg className="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>;
 const ChevronLeftIcon = () => <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" /></svg>;
 const ChevronRightIcon = () => <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" /></svg>;
@@ -255,20 +281,20 @@ const Header = ({ language, setLanguage, user, onLogout, onShowLogin, onShowSign
         onLogout();
         setExpanded(false); // Close menu
     };
-    
+
     const handleBrandClick = () => {
         // We don't need to navigate if we are already on '/', but closing the menu is important
         setExpanded(false);
     }
-    
+
     return (
         // --- NAVBAR COLLAPSE FIX: Add expanded and onToggle props ---
         <Navbar bg="white" expand="lg" className="app-header shadow-sm sticky-top" expanded={expanded} onToggle={setExpanded}>
             <Container fluid="xl">
                 {/* --- NAVBAR COLLAPSE FIX: Use Link component and add onClick --- */}
                 <Navbar.Brand as={Link} to="/" onClick={handleBrandClick} className="header-brand">
-                    <img 
-                        src="/logo/WebsiteLogo.png" 
+                    <img
+                        src="/logo/WebsiteLogo.png"
                         alt={t.brand}
                         style={{ height: '50px', width: 'auto' }}
                     />
@@ -276,13 +302,17 @@ const Header = ({ language, setLanguage, user, onLogout, onShowLogin, onShowSign
                 <Navbar.Toggle aria-controls="basic-navbar-nav" />
                 <Navbar.Collapse id="basic-navbar-nav">
                     <Nav className="me-auto"></Nav>
-                    
+
                     <Nav className="align-items-center">
+                        <Button as={Link} to="/" variant="outline-dark" className="header-btn mx-2 my-1 my-lg-0" onClick={() => setExpanded(false)}>{t.home}</Button>
                         {/* --- NAVBAR COLLAPSE FIX: Use wrapped handler --- */}
                         <Button variant="outline-dark" className="header-btn mx-2 my-1 my-lg-0" onClick={handleMyCoursesClick}>
                             {t.myCourses}
                         </Button>
-                        
+
+
+                        <Button as={Link} to="/terms" variant="outline-dark" className="header-btn mx-2 my-1 my-lg-0" onClick={() => setExpanded(false)}>{t.terms}</Button>
+
                         {/* --- NAVBAR COLLAPSE FIX: Use wrapped handler --- */}
                         <Button variant="outline-dark" className="header-btn mx-2 my-1 my-lg-0" onClick={handleToggleLanguage}>{language === 'en' ? 'தமிழ்' : 'English'}</Button>
                         {user ? (
@@ -316,10 +346,10 @@ const CourseCard = ({ course, isSuperCourse }) => {
         <Link to={linkTo} className="course-card-link text-decoration-none">
             <div className="course-card">
                 <Card className="border-0 h-100 bg-transparent">
-                    <Card.Img 
-                        variant="top" 
-                        src={firstVideo?.image || 'https://placehold.co/240x135/749BC2/FFFFFF?text=Course'} 
-                        className="course-card-img" 
+                    <Card.Img
+                        variant="top"
+                        src={firstVideo?.image || 'https://placehold.co/240x135/749BC2/FFFFFF?text=Course'}
+                        className="course-card-img"
                     />
                     <Card.Body className="p-3">
                         <Card.Title className="course-card-title">{course.title}</Card.Title>
@@ -369,17 +399,17 @@ const HeroSection = ({ language }) => {
     return (
         <div className="hero-section" ref={heroRef}>
             <div className="hero-background">
-                <img 
-                    src="/logo/NatureBackground.jpg" 
-                    alt="Nature Background" 
+                <img
+                    src="/logo/NatureBackground.jpg"
+                    alt="Nature Background"
                     className="hero-bg-image"
                 />
             </div>
             <Container fluid="xl" className="hero-content">
                 <div className="hero-quote-box" ref={quoteBoxRef}>
-                    <img 
-                        src="/logo/WebsiteQuote.png" 
-                        alt="Website Quote" 
+                    <img
+                        src="/logo/WebsiteQuote.png"
+                        alt="Website Quote"
                         className="hero-quote-image"
                     />
                 </div>
@@ -456,7 +486,7 @@ const PrinciplesSection = ({ language }) => {
                 start: "bottom 80%",
             }
         });
-    }, { scope: principlesRef, dependencies: [language], revertOnUpdate: true});
+    }, { scope: principlesRef, dependencies: [language], revertOnUpdate: true });
 
     return (
         <Container fluid="xl" className="py-5 bg-white" ref={principlesRef}>
@@ -505,7 +535,7 @@ const HowItWorksSection = ({ language }) => {
                 start: "bottom 90%"
             }
         });
-    }, { scope: howItWorksRef, dependencies: [language], revertOnUpdate: true});
+    }, { scope: howItWorksRef, dependencies: [language], revertOnUpdate: true });
 
     return (
         <Container fluid="xl" className="py-5" ref={howItWorksRef}>
@@ -574,7 +604,7 @@ const PainAssessmentSection = ({ language, showForm, formRef, onFormSubmit, curr
                             const text = (body.innerText || body.textContent || '').toLowerCase();
                             // Google Forms shows "Submit another response" after successful submission
                             // Also check for other indicators
-                            if (text.includes('submit another response') || 
+                            if (text.includes('submit another response') ||
                                 text.includes('your response has been recorded') ||
                                 text.includes('response was recorded') ||
                                 (text.includes('thank you') && (text.includes('response') || text.includes('submitted'))) ||
@@ -614,13 +644,13 @@ const PainAssessmentSection = ({ language, showForm, formRef, onFormSubmit, curr
 
         // Check every 2 seconds for form submission
         interval = setInterval(checkFormSubmission, 2000);
-        
+
         // Also listen for postMessage events from Google Forms
         const handleMessage = (event) => {
             // Google Forms may send messages on submission
             if (event.data) {
                 const dataStr = typeof event.data === 'string' ? event.data : JSON.stringify(event.data || {});
-                if (dataStr.includes('formSubmitted') || 
+                if (dataStr.includes('formSubmitted') ||
                     dataStr.includes('submit-success') ||
                     dataStr.includes('form-submit') ||
                     dataStr.includes('submit') ||
@@ -634,7 +664,7 @@ const PainAssessmentSection = ({ language, showForm, formRef, onFormSubmit, curr
         };
 
         window.addEventListener('message', handleMessage);
-        
+
         return () => {
             if (interval) clearInterval(interval);
             window.removeEventListener('message', handleMessage);
@@ -713,7 +743,7 @@ const CtaSection = ({ language, onFreeTrialClick }) => {
         return () => {
             gsap.set(".cta-fade-in", { opacity: 1 });
         };
-    }, { scope: ctaRef, dependencies: [language], revertOnUpdate: true});
+    }, { scope: ctaRef, dependencies: [language], revertOnUpdate: true });
 
     const handleButtonClick = () => {
         if (onFreeTrialClick) {
@@ -723,13 +753,13 @@ const CtaSection = ({ language, onFreeTrialClick }) => {
 
     return (
         <div className="cta-section my-5" ref={ctaRef}>
-          <Container fluid="xl" className="text-center">
-            <h3 className="cta-title-split">{t.reclaimLifeTitle}</h3>
-            <p className="lead mx-auto cta-fade-in" style={{ maxWidth: '700px' }}>{t.reclaimLifeText}</p>
-            <h4 className="mt-4 cta-fade-in">{t.ctaTitle}</h4>
-            <p className="cta-fade-in">{t.ctaText}</p>
-            <Button variant="light" size="lg" className="header-btn mt-2 cta-fade-in" onClick={handleButtonClick}>{t.ctaButton}</Button>
-          </Container>
+            <Container fluid="xl" className="text-center">
+                <h3 className="cta-title-split">{t.reclaimLifeTitle}</h3>
+                <p className="lead mx-auto cta-fade-in" style={{ maxWidth: '700px' }}>{t.reclaimLifeText}</p>
+                <h4 className="mt-4 cta-fade-in">{t.ctaTitle}</h4>
+                <p className="cta-fade-in">{t.ctaText}</p>
+                <Button variant="light" size="lg" className="header-btn mt-2 cta-fade-in" onClick={handleButtonClick}>{t.ctaButton}</Button>
+            </Container>
         </div>
     );
 };
@@ -793,14 +823,14 @@ const CoursesSection = ({ language }) => {
                 <h3 className="explore-heading">{t.explore} {activeTab}</h3>
                 <p>Discover top-rated programs in {activeTab} led by certified physiotherapists.</p>
                 <Button variant="outline-dark" className="explore-btn">{t.explore} {activeTab}</Button>
-                
+
                 <div className="carousel-wrapper mt-4">
-                   <Button onClick={() => scroll('left')} variant="light" className="scroll-btn scroll-btn-left"><ChevronLeftIcon/></Button>
+                    <Button onClick={() => scroll('left')} variant="light" className="scroll-btn scroll-btn-left"><ChevronLeftIcon /></Button>
                     <div ref={scrollContainerRef} className="course-carousel">
                         {superCourses.map(course => <CourseCard key={course.id} course={course} isSuperCourse={true} />)}
                         {courses.map(course => <CourseCard key={course.id} course={course} />)}
                     </div>
-                   <Button onClick={() => scroll('right')} variant="light" className="scroll-btn scroll-btn-right"><ChevronRightIcon/></Button>
+                    <Button onClick={() => scroll('right')} variant="light" className="scroll-btn scroll-btn-right"><ChevronRightIcon /></Button>
                 </div>
             </div>
         </Container>
@@ -808,11 +838,12 @@ const CoursesSection = ({ language }) => {
 };
 
 // Replicated section copied from Lifelong Mobility (layout + text + image)
-const ReplicatedSection = ({ language }) => {
-        const t = content[language];
-        return (
-                <div className="full-gradient-bg intro-section-gradient" style={{overflow: 'hidden'}}>
-                        <style>{`
+const AboutSection = ({ language }) => {
+    const t = content[language];
+    // console.log("AboutSection rendering", { title: t.aboutTitle, subtitle: t.aboutSubtitle });
+    return (
+        <div className="full-gradient-bg intro-section-gradient" style={{ overflow: 'hidden' }}>
+            <style>{`
     /* Replicated block styles (kept scoped by #lifelong-block) */
     .full-gradient-bg {
         width: 100%;
@@ -854,27 +885,27 @@ const ReplicatedSection = ({ language }) => {
     }
 `}</style>
 
-                        <Container fluid="xl" className="py-5" id="lifelong-block">
-                        <div className="row">
-                                <div className="col-12 col-md-5">
-                                        <div className="block">
-                                                <img src="/logo/photo.jpg" alt="Profile" className="lifelong-image" />
-                                        </div>
-                                </div>
-                                <div className="col-12 col-md-7">
-                                        <div className="lifelong-content">
-                                                <h2 className="main-heading">You Don’t Have to “Slow Down” with Age – Here’s How to Stay Strong, Mobile, and Pain-Free for Life</h2>
-                                                <h5 className="mb-3">Discover the proven system trusted by people over 50 who refuse to let age or pain slow them down</h5>
-                                                <p className="lead">Join 1,700+ others reclaiming their strength & confidence over 50. Access a library of exercises & guidance specifically for people over age 50, taught by an over-50s specialist physiotherapist.</p>
-                                                <div className="mt-3">
-                                                        <button className="btn btn-primary">JOIN LIFELONG MOBILITY TODAY</button>
-                                                </div>
-                                        </div>
-                                </div>
+            <Container fluid="xl" className="py-5" id="lifelong-block">
+                <div className="row">
+                    <div className="col-12 col-md-3">
+                        <div className="block">
+                            <img src="/logo/Aravinth's Image.png" alt="Profile" className="lifelong-image" />
                         </div>
-                        </Container>
+                    </div>
+                    <div className="col-12 col-md-9">
+                        <div className="lifelong-content">
+                            <h2 className="main-heading">{t.aboutSubtitle}</h2>
+                            <div className="lead">
+                                {t.aboutDescription.map((paragraph, index) => (
+                                    <p key={index}>{paragraph}</p>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
                 </div>
-        );
+            </Container>
+        </div>
+    );
 };
 
 // --- FINAL App Component ---
@@ -1014,7 +1045,7 @@ export default function App() {
                 try {
                     const userResponse = await axios.get(`${API_URL}/user/`);
                     setCurrentUser(userResponse.data);
-                } catch (er) {}
+                } catch (er) { }
             }
         })();
     };
@@ -1066,7 +1097,7 @@ export default function App() {
         setShowFormPending(false);
         navigate('/');
     };
-    
+
     return (
         <div className="app-container">
             <Header
@@ -1092,25 +1123,27 @@ export default function App() {
                             <IntroSection language={language} />
                             <PrinciplesSection language={language} />
                             {/* Replicated Lifelong Mobility section (inserted between Principles and How It Works) */}
-                            <ReplicatedSection language={language} />
+                            <AboutSection language={language} />
                             <HowItWorksSection language={language} />
                             <CoursesSection language={language} />
                             {!currentUser?.assessment_submitted && <CtaSection language={language} onFreeTrialClick={handleFreeTrialClick} />}
                             <PainAssessmentSection language={language} showForm={showForm} formRef={formRef} onFormSubmit={handleFormSubmit} currentUser={currentUser} googleFormEntryId={GOOGLE_FORM_ENTRY_IDS[language]} />
                         </>
                     } />
-                    
-                    <Route 
-                        path="/course/:courseId" 
-                        element={<CoursePage user={currentUser} token={authToken} showLogin={handleShowLogin} language={language} />} 
+
+                    <Route
+                        path="/course/:courseId"
+                        element={<CoursePage user={currentUser} token={authToken} showLogin={handleShowLogin} language={language} />}
                     />
-                    
+
                     <Route path="/player/:courseId/phase/:phaseId" element={
                         <ProtectedRoute user={currentUser} token={authToken}>
                             <VideoPlayerPage language={language} />
                         </ProtectedRoute>
                     } />
-                    
+                    <Route path="/terms" element={<TermsPage language={language} />} />
+
+
                     <Route path="/my-courses" element={
                         <ProtectedRoute user={currentUser} token={authToken}>
                             <MyCoursesPage language={language} />

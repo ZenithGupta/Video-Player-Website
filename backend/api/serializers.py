@@ -37,7 +37,7 @@ class VideoSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class PlaylistSerializer(serializers.ModelSerializer):
-    videos = VideoSerializer(many=True, read_only=True)
+    videos = serializers.SerializerMethodField()  # Change this line
     class Meta:
         model = Playlist
         fields = '__all__'
@@ -62,6 +62,7 @@ class PhaseSerializer(serializers.ModelSerializer):
 
 class CourseSerializer(serializers.ModelSerializer):
     phases = PhaseSerializer(many=True, read_only=True)
+    super_course_description = serializers.ReadOnlyField(source='super_course.description')
     class Meta:
         model = Course
         fields = '__all__'
