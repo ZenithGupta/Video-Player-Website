@@ -78,5 +78,13 @@ jobs:
             sudo docker image prune -af
             sudo docker system prune --all --force
 
+            # Create .env file from GitHub Secrets
+            echo "Creating .env file..."
+            cat <<EOF > .env
+            RAZORPAY_KEY_ID=${{ secrets.RAZORPAY_KEY_ID }}
+            RAZORPAY_KEY_SECRET=${{ secrets.RAZORPAY_KEY_SECRET }}
+            # Add other secrets here if needed
+            EOF
+
             # echo "Building and deploying services..."
             sudo docker compose up --build -d

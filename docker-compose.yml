@@ -8,6 +8,8 @@ services:
       - ./backend:/app
       - sqlite_db:/app/db
       - static_files:/app/staticfiles # Add this
+    env_file:
+      - .env
     networks:
       - app-network
     # Use the new Gunicorn command from backend/Dockerfile
