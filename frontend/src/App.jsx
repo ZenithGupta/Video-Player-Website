@@ -1137,7 +1137,7 @@ export default function App() {
                     />
 
                     <Route path="/player/:courseId/phase/:phaseId" element={
-                        <ProtectedRoute user={currentUser} token={authToken}>
+                        <ProtectedRoute>
                             <VideoPlayerPage language={language} />
                         </ProtectedRoute>
                     } />
