@@ -63,7 +63,7 @@ def get_courses(request):
     """
     Fetches and returns the list of all courses that are not part of a super course.
     """
-    courses = Course.objects.filter(super_course__isnull=True)
+    courses = Course.objects.filter(super_course__isnull=True, is_free_trial=False)
     serializer = CourseSerializer(courses, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -296,12 +296,40 @@ def submit_assessment(request):
                 user_obj.assessment_submitted = True
                 user_obj.save()
 
-                # Enroll user into Knee Pain Recovery Program (first child course of the super course)
-                sc = SuperCourse.objects.filter(title__icontains='Knee Pain Recovery Program').first()
-                if sc and sc.courses.exists():
-                    course = sc.courses.first()
-                else:
-                    course = Course.objects.first()
+                # Calculate average pain score
+                fields = [
+                    'pain_level', 'rising_pain', 'standing_duration', 'can_climb_stairs',
+                    'descending_stairs_pain', 'walking_distance', 'knee_bend_ability',
+                    'can_sit_on_floor', 'stand_from_chair_ability', 'joint_stiffness',
+                    'limp_while_walking', 'can_bend_fully', 'stand_on_one_leg_duration'
+                ]
+                total_score = 0
+                count = 0
+                for field in fields:
+                    val = data.get(field)
+                    if val is not None:
+                        try:
+                            total_score += int(val)
+                            count += 1
+                        except (ValueError, TypeError):
+                            pass
+                
+                avg_score = total_score / count if count > 0 else 1.0
+                rounded_avg = round(avg_score)
+
+                # Find the specific free trial course based on Average Score
+                # Logic: If avg is 1, take course with average_pain_score=1, etc.
+                # If rounded_avg > 3, we cap it at 3 (or whatever max phase we have)
+                search_score = rounded_avg
+                if search_score > 3:
+                     search_score = 3
+                if search_score < 1:
+                     search_score = 1
+                
+                course = Course.objects.filter(is_free_trial=True, average_pain_score=search_score).first()
+                if not course:
+                    # Fallback: try to find any free trial course, preferably lowest score
+                    course = Course.objects.filter(is_free_trial=True).order_by('average_pain_score').first()
 
                 if course:
                     # create UserCourse if not exists

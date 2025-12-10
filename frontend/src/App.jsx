@@ -887,12 +887,12 @@ const AboutSection = ({ language }) => {
 
             <Container fluid="xl" className="py-5" id="lifelong-block">
                 <div className="row">
-                    <div className="col-12 col-md-3">
+                    <div className="col-12 col-md-4">
                         <div className="block">
                             <img src="/logo/Aravinth's Image.png" alt="Profile" className="lifelong-image" />
                         </div>
                     </div>
-                    <div className="col-12 col-md-9">
+                    <div className="col-12 col-md-8">
                         <div className="lifelong-content">
                             <h2 className="main-heading">{t.aboutSubtitle}</h2>
                             <div className="lead">
@@ -996,7 +996,7 @@ export default function App() {
         // Hide form after submission
         setShowForm(false);
         setShowFormPending(false);
-        // If user is logged in, call backend to enroll them in the free trial Knee program
+        // If user is logged in, find the free trial course they were enrolled in and redirect
         (async () => {
             try {
                 if (!currentUser) return;
@@ -1006,34 +1006,30 @@ export default function App() {
                     axios.defaults.headers.common['Authorization'] = `Bearer ${authToken}`;
                 }
 
-                // Try to enroll (idempotent) and get course id
-                let courseId = null;
-                try {
-                    const enrollResp = await axios.post(`${API_URL}/enroll-free-trial/`);
-                    courseId = enrollResp.data.course_id;
-                } catch (err) {
-                    // ignore - we'll try to refresh user and find course
-                }
+                // NOTE: We do NOT call /enroll-free-trial/ anymore. 
+                // The backend automatically enrolls the user in the correct "Free Trial - Phase X" course
+                // when the Google Form submission is processed (submit_assessment view).
 
-                // Refresh current user data so frontend knows they've submitted/enrolled
-                let userResponse = null;
+                // Refresh current user data so frontend knows they've submitted
                 try {
-                    userResponse = await axios.get(`${API_URL}/user/`);
+                    const userResponse = await axios.get(`${API_URL}/user/`);
                     setCurrentUser(userResponse.data);
                 } catch (e) {
                     // If we couldn't refresh user, still try to proceed
                 }
 
-                // If we don't have a course id yet, fetch my-courses and look for Knee program
-                if (!courseId) {
-                    try {
-                        const myCourses = await axios.get(`${API_URL}/my-courses/`);
-                        // find a course that contains 'Knee Pain Recovery Program' in the title
-                        const kneeCourse = (myCourses.data || []).find(c => (c.title || '').toLowerCase().includes('knee pain recovery program'));
-                        if (kneeCourse) courseId = kneeCourse.id;
-                    } catch (e) {
-                        // ignore
-                    }
+                // Fetch my-courses and look for the dynamically assigned Free Trial course
+                let courseId = null;
+                try {
+                    const myCourses = await axios.get(`${API_URL}/my-courses/`);
+                    // find a course that is marked as free trial OR has 'Free Trial' in the title
+                    const freeTrialCourse = (myCourses.data || []).find(c =>
+                        c.is_free_trial === true ||
+                        (c.title || '').toLowerCase().includes('free trial')
+                    );
+                    if (freeTrialCourse) courseId = freeTrialCourse.id;
+                } catch (e) {
+                    // ignore
                 }
 
                 if (courseId) {
