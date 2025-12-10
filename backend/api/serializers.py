@@ -68,7 +68,11 @@ class CourseSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class SuperCourseSerializer(serializers.ModelSerializer):
-    courses = CourseSerializer(many=True, read_only=True)
+    courses = serializers.SerializerMethodField()
+
+    def get_courses(self, obj):
+        courses = obj.courses.filter(is_free_trial=False)
+        return CourseSerializer(courses, many=True).data
     class Meta:
         model = SuperCourse
         fields = '__all__'

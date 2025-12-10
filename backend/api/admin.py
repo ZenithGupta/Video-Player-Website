@@ -49,7 +49,15 @@ admin.site.register(Video)
 admin.site.register(Playlist, PlaylistAdmin)
 admin.site.register(Week, WeekAdmin)
 admin.site.register(Phase, PhaseAdmin)
-admin.site.register(Course)
+class CourseAdmin(admin.ModelAdmin):
+    list_display = ('title', 'is_free_trial', 'average_pain_score', 'price')
+    list_filter = ('is_free_trial',)
+    search_fields = ('title',)
+    
+    class Media:
+        js = ('js/course_admin.js',)
+
+admin.site.register(Course, CourseAdmin)
 admin.site.register(SuperCourse)
 admin.site.register(UserCourse, UserCourseAdmin)
 admin.site.register(User)

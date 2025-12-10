@@ -68,6 +68,8 @@ class Course(models.Model):
     title_ta = models.CharField(max_length=200, null=True, blank=True)
     validity_weeks = models.IntegerField(default=5)
     bestseller = models.BooleanField(default=False)
+    is_free_trial = models.BooleanField(default=False)
+    average_pain_score = models.IntegerField(null=True, blank=True)
     price = models.CharField(max_length=20, default="0")
     def __str__(self):
         return self.title
