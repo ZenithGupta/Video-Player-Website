@@ -895,7 +895,7 @@ const AboutSection = ({ language }) => {
                     <div className="col-12 col-md-8">
                         <div className="lifelong-content">
                             <h2 className="main-heading">{t.aboutSubtitle}</h2>
-                            <div className="lead">
+                            <div>
                                 {t.aboutDescription.map((paragraph, index) => (
                                     <p key={index}>{paragraph}</p>
                                 ))}

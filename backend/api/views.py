@@ -296,31 +296,38 @@ def submit_assessment(request):
                 user_obj.assessment_submitted = True
                 user_obj.save()
 
-                # Calculate average pain score
+                # Calculate Mode pain score (most frequent value)
                 fields = [
                     'pain_level', 'rising_pain', 'standing_duration', 'can_climb_stairs',
                     'descending_stairs_pain', 'walking_distance', 'knee_bend_ability',
                     'can_sit_on_floor', 'stand_from_chair_ability', 'joint_stiffness',
                     'limp_while_walking', 'can_bend_fully', 'stand_on_one_leg_duration'
                 ]
-                total_score = 0
-                count = 0
+                
+                valid_scores = []
                 for field in fields:
                     val = data.get(field)
                     if val is not None:
                         try:
-                            total_score += int(val)
-                            count += 1
+                            valid_scores.append(int(val))
                         except (ValueError, TypeError):
                             pass
                 
-                avg_score = total_score / count if count > 0 else 1.0
-                rounded_avg = round(avg_score)
+                # Calculate Mode
+                if not valid_scores:
+                    mode_score = 1
+                else:
+                    from collections import Counter
+                    c = Counter(valid_scores)
+                    # c.most_common() returns a list of (value, count) sorted by count descending.
+                    # If multiple have the same count, we want to pick the highest score (conservative approach for pain)
+                    # So we get all max frequency items
+                    max_freq = c.most_common(1)[0][1]
+                    modes = [val for val, count in c.items() if count == max_freq]
+                    mode_score = max(modes) # Pick highest value among modes
 
-                # Find the specific free trial course based on Average Score
-                # Logic: If avg is 1, take course with average_pain_score=1, etc.
-                # If rounded_avg > 3, we cap it at 3 (or whatever max phase we have)
-                search_score = rounded_avg
+                # Use the mode for course assignment
+                search_score = mode_score
                 if search_score > 3:
                      search_score = 3
                 if search_score < 1:
