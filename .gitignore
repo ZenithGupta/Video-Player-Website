@@ -23,4 +23,5 @@ yarn-error.log*
 .DS_Store
 
 webroot
-local-certs
+local-certs/
+locustfile.py
