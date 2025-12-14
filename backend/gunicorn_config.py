@@ -1,14 +1,11 @@
 # Worker Settings
-import multiprocessing
-
-workers = 2 * multiprocessing.cpu_count() + 1  # Dynamically determine the optimal workers
-
-worker_class = 'gevent' 
-worker_connections = 2000 
+workers = 2  # Hardcoded for 1GB RAM VM to prevent OOM
+worker_class = 'gevent'
+worker_connections = 100  # Reduced from 2000 to save memory per worker
 
 # Server Settings
-bind = "0.0.0.0:8000" 
+bind = "0.0.0.0:8000"
 
 # Timeout Settings
-timeout = 30  # Automatically restart workers if they take too long
-graceful_timeout = 30  # Graceful shutdown for workers
+timeout = 60  # Increased to prevent timeouts on slow CPU
+graceful_timeout = 30
