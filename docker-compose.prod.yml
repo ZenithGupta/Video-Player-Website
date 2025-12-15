@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  backend:
+    logging:
+      driver: "syslog"
+      options:
+        tag: "backend"
+
+  frontend:
+    logging:
+      driver: "syslog"
+      options:
+        tag: "frontend"
