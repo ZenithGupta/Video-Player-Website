@@ -43,8 +43,15 @@ class PlaylistSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def get_videos(self, obj):
-        # Get videos in the correct order using the through model
-        playlist_videos = PlaylistVideo.objects.filter(playlist=obj).select_related('video').order_by('order')
+        # Optimizing N+1: Use prefetched data if available
+        if hasattr(obj, '_prefetched_objects_cache') and 'playlistvideo_set' in obj._prefetched_objects_cache:
+             # If prefetched, the queryset is already evaluated and cached.
+             # We assume the prefetch in the view handled the ordering.
+             playlist_videos = obj.playlistvideo_set.all()
+        else:
+             # Fallback for when not prefetched (e.g. simple ID lookup)
+             playlist_videos = PlaylistVideo.objects.filter(playlist=obj).select_related('video').order_by('order')
+        
         return VideoSerializer([pv.video for pv in playlist_videos], many=True).data
 
 
@@ -71,7 +78,11 @@ class SuperCourseSerializer(serializers.ModelSerializer):
     courses = serializers.SerializerMethodField()
 
     def get_courses(self, obj):
-        courses = obj.courses.filter(is_free_trial=False)
+        # Optimization: Use the 'to_attr' cache from the view if available.
+        if hasattr(obj, 'paid_courses_cache'):
+            courses = obj.paid_courses_cache
+        else:
+            courses = obj.courses.filter(is_free_trial=False)
         return CourseSerializer(courses, many=True).data
     class Meta:
         model = SuperCourse

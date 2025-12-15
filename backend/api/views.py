@@ -67,6 +67,10 @@ def get_courses(request):
     serializer = CourseSerializer(courses, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
 
+from .models import Course, SuperCourse, PlaylistVideo
+from .serializers import CourseSerializer, SuperCourseSerializer
+from django.db.models import Prefetch
+
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def get_course_detail(request, pk):
@@ -74,7 +78,17 @@ def get_course_detail(request, pk):
     Fetches and returns a single course by its ID.
     """
     try:
-        course = Course.objects.get(pk=pk)
+        # Optimization: Prefetch deeply nested relationships to prevent N+1 queries.
+        playlist_video_prefetch = Prefetch(
+            'phases__weeks__playlist__playlistvideo_set',
+            queryset=PlaylistVideo.objects.select_related('video').order_by('order')
+        )
+        
+        course = Course.objects.prefetch_related(
+            'phases__weeks__playlist',
+            playlist_video_prefetch
+        ).get(pk=pk)
+
         serializer = CourseSerializer(course)
         return Response(serializer.data)
     except Course.DoesNotExist:
@@ -86,7 +100,26 @@ def get_super_courses(request):
     """
     Fetches and returns the list of all super courses.
     """
-    super_courses = SuperCourse.objects.all()
+    # Optimization: Prefetch deeply nested relationships
+    # 1. Prefetch PlaylistVideos (lowest level)
+    playlist_video_prefetch = Prefetch(
+        'playlistvideo_set',
+        queryset=PlaylistVideo.objects.select_related('video').order_by('order')
+    )
+
+    # 2. Prefetch 'courses' that are NOT free trials.
+    # We use 'to_attr' to store this specific list in memory to avoid re-filtering which kills the prefetch.
+    courses_prefetch = Prefetch(
+        'courses',
+        queryset=Course.objects.filter(is_free_trial=False).prefetch_related(
+            'phases__weeks__playlist',
+            Prefetch('phases__weeks__playlist__playlistvideo_set', queryset=PlaylistVideo.objects.select_related('video').order_by('order'))
+        ),
+        to_attr='paid_courses_cache'
+    )
+
+    super_courses = SuperCourse.objects.prefetch_related(courses_prefetch).all()
+
     serializer = SuperCourseSerializer(super_courses, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -97,7 +130,17 @@ def get_super_course_detail(request, pk):
     Fetches and returns a single super course by its ID.
     """
     try:
-        super_course = SuperCourse.objects.get(pk=pk)
+        # Optimization: Same logical structure as above
+        courses_prefetch = Prefetch(
+            'courses',
+            queryset=Course.objects.filter(is_free_trial=False).prefetch_related(
+                'phases__weeks__playlist',
+                 Prefetch('phases__weeks__playlist__playlistvideo_set', queryset=PlaylistVideo.objects.select_related('video').order_by('order'))
+            ),
+            to_attr='paid_courses_cache'
+        )
+
+        super_course = SuperCourse.objects.prefetch_related(courses_prefetch).get(pk=pk)
         serializer = SuperCourseSerializer(super_course)
         return Response(serializer.data)
     except SuperCourse.DoesNotExist:
