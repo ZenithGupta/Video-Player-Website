@@ -121,6 +121,7 @@ def get_course_detail(request, pk):
 
     try:
 
+
         # Optimization: Prefetch deeply nested relationships to prevent N+1 queries.
         playlist_video_prefetch = Prefetch(
             'phases__weeks__playlist__playlistvideo_set',
