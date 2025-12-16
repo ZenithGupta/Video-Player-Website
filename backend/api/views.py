@@ -3,7 +3,9 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated # Import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
-from .models import PainAssessmentSubmission, Course, Video, UserCourse, SuperCourse, User
+from .models import PainAssessmentSubmission, Course, Video, UserCourse, SuperCourse, User, PlaylistVideo
+from django.utils import timezone
+
 from .serializers import UserSerializer, CourseSerializer, SuperCourseSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.db import IntegrityError
@@ -13,6 +15,39 @@ from .permissions import HasGoogleAppsScriptSecret
 
 class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
+
+    def post(self, request, *args, **kwargs):
+        response = super().post(request, *args, **kwargs)
+        try:
+            # If login was successful, access token is present
+            if 'access' in response.data:
+                # We can't easily get the user object from the response directly without decoding,
+                # but we can resolve the user from the serializer's validation if we were doing custom logic.
+                # Simpler approach: Resolve user from the request data (email) OR just decoding the token is overkill here.
+                # BETTER APPROACH: rely on the username/email sent in request.data to find the user
+                # and run the check.
+                email = request.data.get('email') or request.data.get('username')
+                if email:
+                    user = User.objects.filter(email=email).first()
+                    if user:
+                        check_course_expiry(user)
+        except Exception as e:
+            print(f"Error checking expiry on login: {e}")
+        return response
+
+def check_course_expiry(user):
+    """
+    Checks for courses that have passed their validity period and deletes them.
+    Time of comparison is timezone.now().
+    """
+    now = timezone.now()
+    # clean up expired courses
+    expired_courses = UserCourse.objects.filter(user=user, end_time__lt=now)
+    count = expired_courses.count()
+    if count > 0:
+        print(f"Deleting {count} expired courses for user {user.email}")
+        expired_courses.delete()
+
 
 # --- User Authentication Views ---
 
@@ -77,7 +112,15 @@ def get_course_detail(request, pk):
     """
     Fetches and returns a single course by its ID.
     """
+    """
+    Fetches and returns a single course by its ID.
+    Optional: Check expiry if user is authenticated to ensure they don't see content they shouldn't.
+    """
+    if request.user.is_authenticated:
+        check_course_expiry(request.user)
+
     try:
+
         # Optimization: Prefetch deeply nested relationships to prevent N+1 queries.
         playlist_video_prefetch = Prefetch(
             'phases__weeks__playlist__playlistvideo_set',
@@ -153,8 +196,16 @@ def get_my_courses(request):
     """
     Fetches and returns a list of courses the current user is enrolled in.
     """
+    """
+    Fetches and returns a list of courses the current user is enrolled in.
+    """
     user = request.user
+    
+    # Check for expired courses before returning the list
+    check_course_expiry(user)
+
     # Find all UserCourse entries for this user
+
     user_courses = UserCourse.objects.filter(user=user)
     # Extract the actual Course objects from those entries
     courses = [uc.course for uc in user_courses]
