@@ -192,7 +192,11 @@ const AuthModal = ({ show, handleClose, mode, onLoginSuccess, language }) => {
                 const response = await axios.post(`${API_URL}/token/`, { email: email, password });
                 onLoginSuccess(response.data);
             } catch (err) {
-                setError('Login failed. Please check your email and password.');
+                if (err.response && err.response.data && err.response.data.error) {
+                    setError(err.response.data.error);
+                } else {
+                    setError('Login failed. Please check your email and password.');
+                }
             }
         }
     };
@@ -930,12 +934,73 @@ export default function App() {
                     const userResponse = await axios.get(`${API_URL}/user/`);
                     setCurrentUser(userResponse.data);
                 } catch (error) {
-                    handleLogout();
+                    // We don't logout here anymore, because the interceptor below will handle 401s
+                    console.log("User fetch failed, but waiting for interceptor...", error);
                 }
             }
         };
+
         fetchUser();
     }, [authToken]);
+
+    // AXIOS INTERCEPTOR FOR TOKEN REFRESH
+    // This ensures that if the access token expires (401), we try to refresh it
+    // using the refresh token before logging the user out.
+    useEffect(() => {
+        const interceptor = axios.interceptors.response.use(
+            (response) => response, // Return success responses as is
+            async (error) => {
+                const originalRequest = error.config;
+
+                // Check if error is 401 (Unauthorized) and we haven't tried refreshing yet
+                if (error.response && error.response.status === 401 && !originalRequest._retry) {
+                    originalRequest._retry = true; // Mark request as retried
+                    const refreshToken = localStorage.getItem('refreshToken');
+
+                    if (refreshToken) {
+                        try {
+                            // Attempt to get a new access token
+                            const response = await axios.post(`${API_URL}/token/refresh/`, {
+                                refresh: refreshToken
+                            });
+
+                            if (response.status === 200) {
+                                const newAccessToken = response.data.access;
+
+                                // Update storage and state
+                                localStorage.setItem('authToken', newAccessToken);
+                                if (response.data.refresh) {
+                                    localStorage.setItem('refreshToken', response.data.refresh);
+                                }
+                                setAuthToken(newAccessToken);
+
+                                // Update default header and retry the original request
+                                axios.defaults.headers.common['Authorization'] = `Bearer ${newAccessToken}`;
+                                originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;
+
+                                return axios(originalRequest);
+                            }
+                        } catch (refreshError) {
+                            // If refresh fails (e.g., refresh token also expired), logout
+                            console.error("Token refresh failed:", refreshError);
+                            handleLogout();
+                        }
+                    } else {
+                        // No refresh token available, logout
+                        handleLogout();
+                    }
+                }
+
+                // If not 401 or retry failed, reject the promise
+                return Promise.reject(error);
+            }
+        );
+
+        // Cleanup interceptor on unmount
+        return () => {
+            axios.interceptors.response.eject(interceptor);
+        };
+    }, []); // Run once on mount
 
     const handleShowLogin = () => { setModalMode('login'); setShowModal(true); };
     const handleShowSignup = () => { setModalMode('signup'); setShowModal(true); };
@@ -949,6 +1014,9 @@ export default function App() {
     const handleLoginSuccess = async (data) => {
         localStorage.setItem('authToken', data.access);
         setAuthToken(data.access);
+        if (data.refresh) {
+            localStorage.setItem('refreshToken', data.refresh);
+        }
         handleCloseModal();
 
         // Fetch fresh user data immediately so we know whether they already submitted
@@ -1083,15 +1151,31 @@ export default function App() {
         };
     }, [showForm, authToken, currentUser]);
 
-    const handleLogout = () => {
-        localStorage.removeItem('authToken');
-        delete axios.defaults.headers.common['Authorization'];
-        setAuthToken(null);
-        setCurrentUser(null);
-        // Hide any visible form if the user logs out immediately after login
-        setShowForm(false);
-        setShowFormPending(false);
-        navigate('/');
+    const handleLogout = async () => {
+        try {
+            // Attempt to blacklist token on server
+            const refresh = localStorage.getItem('refreshToken');
+            if (refresh) {
+                // Ensure we have the auth header set for this request if it's required (LogoutView is IsAuthenticated)
+                if (authToken) {
+                    axios.defaults.headers.common['Authorization'] = `Bearer ${authToken}`;
+                }
+                await axios.post(`${API_URL}/logout/`, { refresh: refresh });
+            }
+        } catch (e) {
+            console.error("Logout failed on server", e);
+        } finally {
+            // Always clean up cliend-side
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('refreshToken');
+            delete axios.defaults.headers.common['Authorization'];
+            setAuthToken(null);
+            setCurrentUser(null);
+            // Hide any visible form if the user logs out immediately after login
+            setShowForm(false);
+            setShowFormPending(false);
+            navigate('/');
+        }
     };
 
     return (

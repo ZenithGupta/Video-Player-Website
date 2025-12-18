@@ -61,3 +61,10 @@ admin.site.register(Course, CourseAdmin)
 admin.site.register(SuperCourse)
 admin.site.register(UserCourse, UserCourseAdmin)
 admin.site.register(User)
+
+# Unregister the BlacklistedToken model since we don't use it anymore
+from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken
+try:
+    admin.site.unregister(BlacklistedToken)
+except admin.sites.NotRegistered:
+    pass
