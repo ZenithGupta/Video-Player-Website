@@ -74,8 +74,6 @@ class LogoutView(APIView):
             return Response(status=status.HTTP_205_RESET_CONTENT)
         except Exception as e:
             return Response(status=status.HTTP_400_BAD_REQUEST)
-
-
 def check_course_expiry(user):
     """
     Checks for courses that have passed their validity period and deletes them.
