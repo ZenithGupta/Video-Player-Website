@@ -29,6 +29,7 @@ urlpatterns = [
     path('assessment-submitted/', views.get_current_user, name='get_current_user'),
     path('token/', MyTokenObtainPairView.as_view(), name='token_obtain_pair'), # Use your custom view
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('logout/', views.LogoutView.as_view(), name='auth_logout'),
     path('health/', views.health_check, name='health_check'),
     path('enroll-free-trial/', views.enroll_free_trial, name='enroll_free_trial'),
     path('create-order/', views.create_order, name='create_order'),

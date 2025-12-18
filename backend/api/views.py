@@ -1,6 +1,7 @@
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny, IsAuthenticated # Import IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated 
+from rest_framework.views import APIView # Added APIView
 from rest_framework.response import Response
 from rest_framework import status
 from .models import PainAssessmentSubmission, Course, Video, UserCourse, SuperCourse, User, PlaylistVideo
@@ -13,27 +14,67 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from .serializers import MyTokenObtainPairSerializer # Import your new serializer
 from .permissions import HasGoogleAppsScriptSecret
 
+from rest_framework_simplejwt.token_blacklist.models import OutstandingToken, BlacklistedToken
+
 class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
 
     def post(self, request, *args, **kwargs):
+        # 1. Resolve User from request data
+        email = request.data.get('email') or request.data.get('username')
+        user = None
+        if email:
+            user = User.objects.filter(email=email).first()
+
+        # 2. Check Active Sessions (Strict Limit)
+        if user:
+            now = timezone.now()
+            
+            # --- LAZY CLEANUP ---
+            # Delete this specific user's expired tokens.
+            # This keeps the database size manageable without needing a Cron Job.
+            OutstandingToken.objects.filter(user=user, expires_at__lte=now).delete()
+
+            # Count valid tokens for this user
+            active_tokens_count = OutstandingToken.objects.filter(
+                user=user,
+                expires_at__gt=now
+            ).exclude(
+                blacklistedtoken__isnull=False
+            ).count()
+
+            if active_tokens_count >= 2:
+                return Response(
+                    {'error': 'Maximum active sessions (2) reached. Please logout from another device to continue.'},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+
+        # 3. Proceed with Login
         response = super().post(request, *args, **kwargs)
         try:
-            # If login was successful, access token is present
-            if 'access' in response.data:
-                # We can't easily get the user object from the response directly without decoding,
-                # but we can resolve the user from the serializer's validation if we were doing custom logic.
-                # Simpler approach: Resolve user from the request data (email) OR just decoding the token is overkill here.
-                # BETTER APPROACH: rely on the username/email sent in request.data to find the user
-                # and run the check.
-                email = request.data.get('email') or request.data.get('username')
-                if email:
-                    user = User.objects.filter(email=email).first()
-                    if user:
-                        check_course_expiry(user)
+            if 'access' in response.data and user:
+                 check_course_expiry(user)
         except Exception as e:
             print(f"Error checking expiry on login: {e}")
         return response
+
+class LogoutView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
+        try:
+            refresh_token = request.data["refresh"]
+            token = RefreshToken(refresh_token)
+            
+            # Standard Blacklist Strategy
+            # We blacklist the token so it cannot be used again.
+            # Lazy Cleanup or Cron Job will handle removing it eventually.
+            token.blacklist()
+            
+            return Response(status=status.HTTP_205_RESET_CONTENT)
+        except Exception as e:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
 
 def check_course_expiry(user):
     """
