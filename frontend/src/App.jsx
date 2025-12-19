@@ -1156,11 +1156,16 @@ export default function App() {
             // Attempt to blacklist token on server
             const refresh = localStorage.getItem('refreshToken');
             if (refresh) {
-                // Ensure we have the auth header set for this request if it's required (LogoutView is IsAuthenticated)
-                if (authToken) {
-                    axios.defaults.headers.common['Authorization'] = `Bearer ${authToken}`;
-                }
-                await axios.post(`${API_URL}/logout/`, { refresh: refresh });
+                // We explicitly DO NOT send the Authorization header here.
+                // Why? Because if the Access Token is expired, sending it triggers a 401.
+                // That 401 triggers the Interceptor -> Token Refresh -> Rotation.
+                // The Rotation invalidates the 'refresh' token we are trying to blacklist here!
+                // Result: The old token dies (good), but a NEW token is birth (bad) and stays active.
+                // Fix: Call logout anonymously. The view only needs the refresh token body.
+                await axios.post(`${API_URL}/logout/`,
+                    { refresh: refresh },
+                    { headers: { 'Authorization': '' } } // Override header to empty
+                );
             }
         } catch (e) {
             console.error("Logout failed on server", e);
