@@ -62,9 +62,37 @@ admin.site.register(SuperCourse)
 admin.site.register(UserCourse, UserCourseAdmin)
 admin.site.register(User)
 
-# Unregister the BlacklistedToken model since we don't use it anymore
-from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken
+# Enable Token Management in Admin
+from rest_framework_simplejwt.token_blacklist.models import OutstandingToken, BlacklistedToken
+
+class OutstandingTokenAdmin(admin.ModelAdmin):
+    list_display = ('user', 'jti', 'created_at', 'expires_at')
+    search_fields = ('user__email', 'jti')
+    list_filter = ('user',)
+
+class BlacklistedTokenAdmin(admin.ModelAdmin):
+    list_display = ('token', 'blacklisted_at')
+
+admin.site.register(OutstandingToken, OutstandingTokenAdmin)
+# We might need to unregister first if it's already registered by default, but typically it is NOT registered by default in simplejwt unless we add it ourselves or use their admin class.
+# However, simplejwt DOES register them if 'rest_framework_simplejwt.token_blacklist' is in INSTALLED_APPS.
+# So we should try to unregister then re-register with our custom class, OR just let the default be if we don't care about custom columns.
+# But the user explicitly asked for access, and the default admin is usually fine.
+# Let's just Removing the 'unregister' block is enough to Bring Back BlacklistedToken.
+# AND we should manually register OutstandingToken if it's not showing up.
+# Actually, simplejwt's token_blacklist admin.py DOES register OutstandingToken.
+# So simply REMOVING lines 65-70 should be enough to restore default behavior.
+# BUT, to be safe and ensure they are visible, I will try to unregister (ignoring errors) and then register them.
+
+try:
+    admin.site.unregister(OutstandingToken)
+except admin.sites.NotRegistered:
+    pass
+
 try:
     admin.site.unregister(BlacklistedToken)
 except admin.sites.NotRegistered:
     pass
+
+admin.site.register(OutstandingToken, OutstandingTokenAdmin)
+admin.site.register(BlacklistedToken, BlacklistedTokenAdmin)
