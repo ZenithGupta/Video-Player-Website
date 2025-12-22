@@ -7,10 +7,10 @@ import API_URL from './config/api.js';
 const CourseCard = ({ course }) => {
     const firstVideo = course.phases?.[0]?.weeks?.[0]?.playlist?.videos?.[0];
     return (
-         <Link to={`/course/${course.id}`} className="text-decoration-none">
+        <Link to={`/course/${course.id}`} className="text-decoration-none">
             <div className="course-card h-100">
                 <Card className="border-0 h-100 bg-transparent">
-                    <Card.Img variant="top" src={firstVideo?.image || 'https://placehold.co/240x135/749BC2/FFFFFF?text=Course'} className="course-card-img" />
+                    <Card.Img variant="top" src={course.super_course_image || 'https://placehold.co/240x135/749BC2/FFFFFF?text=Course'} className="course-card-img" />
                     <Card.Body className="p-3">
                         <Card.Title className="course-card-title text-dark">{course.title}</Card.Title>
                         {/* <Card.Text className="course-card-instructor">{firstVideo?.instructor || 'Dr. Physio'}</Card.Text> */}

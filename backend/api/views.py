@@ -4,7 +4,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.views import APIView # Added APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .models import PainAssessmentSubmission, Course, Video, UserCourse, SuperCourse, User, PlaylistVideo
+from .models import PainAssessmentSubmission, Course, Video, UserCourse, SuperCourse, User, PlaylistVideo, Coupon, CouponUsage
 from django.utils import timezone
 
 from .serializers import UserSerializer, CourseSerializer, SuperCourseSerializer
@@ -291,45 +291,117 @@ from django.conf import settings
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
+def validate_coupon(request):
+    """
+    Validates a coupon code.
+    Expects 'code'.
+    """
+    code = request.data.get('code')
+    course_id = request.data.get('course_id')
+    
+    if not code:
+        return Response({'error': 'Coupon code is required'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    try:
+        coupon = Coupon.objects.get(code=code.upper())
+    except Coupon.DoesNotExist:
+        return Response({'error': 'Invalid coupon code'}, status=status.HTTP_404_NOT_FOUND)
+        
+    if not coupon.is_active:
+        return Response({'error': 'Coupon is inactive'}, status=status.HTTP_400_BAD_REQUEST)
+        
+    if coupon.expiry_date < timezone.now():
+        return Response({'error': 'Coupon has expired'}, status=status.HTTP_400_BAD_REQUEST)
+        
+    # Check if user already used this coupon FOR THIS COURSE
+    if course_id:
+        if CouponUsage.objects.filter(user=request.user, coupon=coupon, course_id=course_id).exists():
+             return Response({'error': 'You have already used this coupon for this course'}, status=status.HTTP_400_BAD_REQUEST)
+         
+    return Response({
+        'valid': True, 
+        'code': coupon.code,
+        'discount_percentage': coupon.discount_percentage,
+        'message': f'Coupon applied! {coupon.discount_percentage}% off.'
+    })
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def create_order(request):
     """
     Creates a Razorpay order.
-    Expects 'course_id'.
+    Expects 'course_id' and optional 'coupon_code'.
     """
     user = request.user
     data = request.data
     course_id = data.get('course_id')
+    coupon_code = data.get('coupon_code')
 
     if not course_id:
         return Response({'error': 'Course ID required'}, status=status.HTTP_400_BAD_REQUEST)
 
     try:
         course = Course.objects.get(pk=course_id)
-        # Assuming price is stored as string/integer in rupees. Convert to paise.
-        amount = int(float(course.price) * 100)
+        original_price = float(course.price)
+        final_price = original_price
+        discount_amount = 0
+        coupon = None
+        
+        if coupon_code:
+            try:
+                coupon = Coupon.objects.get(code=coupon_code.upper())
+                if coupon.is_active and coupon.expiry_date >= timezone.now():
+                     # Check usage for this course
+                     if not CouponUsage.objects.filter(user=user, coupon=coupon, course=course).exists():
+                         discount_amount = (original_price * coupon.discount_percentage) / 100
+                         final_price = original_price - discount_amount
+            except Coupon.DoesNotExist:
+                pass # Ignore invalid coupons silently or handle as needed, currently just ignoring
+        
+        # 100% Discount logic
+        if final_price <= 0:
+             # Create order immediately
+             if not UserCourse.objects.filter(user=user, course=course).exists():
+                  UserCourse.objects.create(user=user, course=course)
+             
+             if coupon:
+                 # Record usage
+                 CouponUsage.objects.create(user=user, coupon=coupon, course=course)
+                 
+             return Response({'status': 'captured', 'message': 'Condition treated. Enrolled successfully!'}, status=status.HTTP_200_OK)
+
+        # Minimum amount check for Razorpay (1 INR = 100 paise)
+        # If finalized price is positive but very small, standard Razorpay might require min 1 INR.
+        # Assuming final_price is in INR.
+        amount_paise = int(final_price * 100)
+        if amount_paise < 100: 
+             amount_paise = 100 # Reset to 1 INR minimum if it somehow falls below, though logic should handle 0 case separately.
+             # Or better, just enforce minimum payable check if not free.
+
+        client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+    
+        payment_data = {
+            'amount': amount_paise,
+            'currency': 'INR',
+            'receipt': f'receipt_{user.id}_{course_id}',
+            'notes': {
+                'user_id': user.id,
+                'course_id': course_id,
+                'coupon_code': coupon.code if coupon else '',
+                'discount_percentage': coupon.discount_percentage if coupon else 0
+            }
+        }
+    
+        order = client.order.create(data=payment_data)
+        response_data = order
+        response_data['key_id'] = settings.RAZORPAY_KEY_ID
+        return Response(response_data)
+        
     except Course.DoesNotExist:
         return Response({'error': 'Course not found'}, status=status.HTTP_404_NOT_FOUND)
     except ValueError:
         return Response({'error': 'Invalid Course Price'}, status=status.HTTP_400_BAD_REQUEST)
-
-    client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
-    
-    payment_data = {
-        'amount': amount,
-        'currency': 'INR',
-        'receipt': f'receipt_{user.id}_{course_id}',
-        'notes': {
-            'user_id': user.id,
-            'course_id': course_id
-        }
-    }
-    
-    try:
-        order = client.order.create(data=payment_data)
-        # Return key_id as well for frontend
-        response_data = order
-        response_data['key_id'] = settings.RAZORPAY_KEY_ID
-        return Response(response_data)
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -345,7 +417,12 @@ def verify_payment(request):
     razorpay_payment_id = data.get('razorpay_payment_id')
     razorpay_signature = data.get('razorpay_signature')
     course_id = data.get('course_id')
-
+    # Coupon code passed from frontend just for record if needed, but safer to trust backend check or notes
+    # Better: fetch from razorpay order notes if we really want to be secure, or just trust the flow if signature valid.
+    # However, create_order saves notes. We can retrieve order details from Razorpay to get notes.
+    # For simplicity, we can trust the creation if payment valid, but storing coupon usage needs the code.
+    # Let's fetch order from Razorpay to get the coupon used in notes.
+    
     client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
 
     try:
@@ -356,6 +433,11 @@ def verify_payment(request):
             'razorpay_signature': razorpay_signature
         }
         client.utility.verify_payment_signature(params_dict)
+        
+        # Get Order Details to find coupon
+        order_details = client.order.fetch(razorpay_order_id)
+        notes = order_details.get('notes', {})
+        coupon_code = notes.get('coupon_code')
 
         # Enrollment Logic
         user = request.user
@@ -363,6 +445,16 @@ def verify_payment(request):
         
         if not UserCourse.objects.filter(user=user, course=course).exists():
             UserCourse.objects.create(user=user, course=course)
+            
+        # Record Coupon Usage
+        if coupon_code:
+            try:
+                coupon = Coupon.objects.get(code=coupon_code)
+                # Check uniqueness again to be safe? 
+                if not CouponUsage.objects.filter(user=user, coupon=coupon, course=course).exists():
+                     CouponUsage.objects.create(user=user, coupon=coupon, course=course)
+            except Coupon.DoesNotExist:
+                pass
             
         return Response({'message': 'Payment successful', 'course_id': course.id}, status=status.HTTP_200_OK)
 

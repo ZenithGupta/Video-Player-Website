@@ -22,18 +22,15 @@ class Command(BaseCommand):
         # 1. Create Videos
         video1 = Video.objects.create(
             title="Intro to Pain Relief",
-            vimeo_url="https://vimeo.com/1111049635/235a23f8a0",
-            image="https://i.vimeocdn.com/video/2048942115-33354f071e7cfd0317e3c2947b4448891dcda6ae01dcb41d67e8ae1d2ca8a86d-d?mw=900&q=70"
+            vimeo_url="https://vimeo.com/1111049635/235a23f8a0"
         )
         video2 = Video.objects.create(
             title="Core Strengthening",
-            vimeo_url="https://vimeo.com/1111050393/ec9e054769",
-            image="https://i.vimeocdn.com/video/2048942766-c2534fc3567ba084e69ffdf3173223d547540089c29be491e965ad64959a7c4e-d?mw=900&q=70"
+            vimeo_url="https://vimeo.com/1111050393/ec9e054769"
         )
         video3 = Video.objects.create(
             title="Mobility Drills",
-            vimeo_url="https://vimeo.com/1111049635/235a23f8a0",
-            image="https://i.vimeocdn.com/video/2048942115-33354f071e7cfd0317e3c2947b4448891dcda6ae01dcb41d67e8ae1d2ca8a86d-d?mw=900&q=70"
+            vimeo_url="https://vimeo.com/1111049635/235a23f8a0"
         )
         
         # 2. Create Playlists
@@ -69,7 +66,8 @@ class Command(BaseCommand):
         super_course1 = SuperCourse.objects.create(
             title="Knee Pain Recovery Program",
             bestseller=True,
-            rating=4.8
+            rating=4.8,
+            image="https://i.vimeocdn.com/video/2048942115-33354f071e7cfd0317e3c2947b4448891dcda6ae01dcb41d67e8ae1d2ca8a86d-d?mw=900&q=70"
         )
         course1_4_weeks = Course.objects.create(
             super_course=super_course1,
@@ -86,7 +84,8 @@ class Command(BaseCommand):
         
         super_course2 = SuperCourse.objects.create(
             title="Back Pain Relief Program",
-            rating=4.6
+            rating=4.6,
+            image="https://i.vimeocdn.com/video/2048942766-c2534fc3567ba084e69ffdf3173223d547540089c29be491e965ad64959a7c4e-d?mw=900&q=70"
         )
         course2_4_weeks = Course.objects.create(
             super_course=super_course2,

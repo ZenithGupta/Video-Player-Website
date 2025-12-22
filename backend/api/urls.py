@@ -34,4 +34,5 @@ urlpatterns = [
     path('enroll-free-trial/', views.enroll_free_trial, name='enroll_free_trial'),
     path('create-order/', views.create_order, name='create_order'),
     path('verify-payment/', views.verify_payment, name='verify_payment'),
+    path('validate-coupon/', views.validate_coupon, name='validate_coupon'),
 ]

@@ -1,181 +1,117 @@
 # Physiotherapy Course & Video Website
 
-A full-stack web application for selling and viewing physiotherapy video courses, built with a Django REST API backend and React frontend.
+A full-stack web application for purchasing and viewing physiotherapy video courses. Built with a robust Django REST API backend, a modern React + Vite frontend, and secured with Nginx and Docker.
 
 ## 🏗️ Project Structure
 
-```
+```text
 video-player-website/
-├── api/                   # Django REST Framework API app
-├── backend/               # Django project settings
-├── frontend/              # React application
-│   ├── src/
-│   ├── public/
-│   └── package.json
-├── .gitignore
-└── manage.py              # Django management script
+├── backend/               # Django backend application
+│   ├── api/               # API endpoints, models, and serializers
+│   ├── backend/           # Project settings and configuration
+│   └── requirements.txt   # Python dependencies
+├── frontend/              # React + Vite frontend application
+│   ├── src/               # Source code
+│   └── nginx.conf         # Nginx configuration for the frontend container
+├── docker-compose.yml     # Docker Compose configuration (Development with local SSL)
+├── docker-compose.prod.yml# Docker Compose overrides for Production (Syslog logging)
+└── setup-local-ssl.py     # Script to generate local self-signed SSL certificates
 ```
 
-## 🚀 Quick Start
+## 🛠️ Technology Stack
+
+- **Frontend**: React 19, Vite, Bootstrap, GSAP (Animations)
+- **Backend**: Django 5, Django REST Framework, SimpleJWT
+- **Database**: SQLite (Development), PostgreSQL (Recommended for Production)
+- **Infrastructure**: Docker, Nginx (Reverse Proxy & Rate Limiting), Gunicorn
+
+## 🚀 Quick Start (Recommended)
+
+The easiest way to run the application is using Docker Compose. Since the application uses Nginx to handle SSL and subdomains locally, you need to generate local certificates first.
 
 ### Prerequisites
-- Python 3.8+
-- Node.js 16+
-- Git
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+- Python 3.8+ (to run the SSL generation script)
 
-### 1. Clone Repository
+### 1. SSL Setup
+Generate local self-signed SSL certificates and the necessary `.env` file.
 ```bash
-git clone https://github.com/ZenithGupta/Video-Player-Website.git
-cd Video-Player-Website
+python setup-local-ssl.py
+```
+*This command creates a `local-certs/` directory and a `.env` file pointing to it.*
+
+### 2. Configuration for Local Development
+To ensure the app runs correctly on `https://localhost`, you may need to update a few configuration files:
+
+**Backend (`backend/backend/settings.py`)**
+Ensure `https://localhost` is trusted for CSRF:
+```python
+CSRF_TRUSTED_ORIGINS = ['https://onelastmove.com', 'https://localhost']
 ```
 
-### 2. Backend Setup
-```bash
-cd backend
-
-# Create and activate virtual environment
-python -m venv venv
-
-# Windows
-venv\Scripts\activate
-# macOS/Linux
-source venv/bin/activate
-
-# Install dependencies (assuming requirements.txt is in the backend folder)
-pip install -r requirements.txt
-
-# Run migrations
-python ../manage.py makemigrations
-python ../manage.py migrate
-
-# Create superuser (optional)
-python ../manage.py createsuperuser
-
-# Start backend server
-python ../manage.py runserver
-```
-**Backend runs at:** `http://localhost:8000`
-
-### 3. Frontend Setup
-```bash
-# In a new terminal
-cd frontend
-
-# Install dependencies
-npm install
-
-# Start frontend development server (check package.json for the exact script)
-npm start
-```
-**Frontend runs at:** `http://localhost:3000`
-
-## 📋 Features
-
-### Backend API
-- **User Authentication**: Secure user registration and login.
-- **Course Management**: API for creating, retrieving, and managing physiotherapy courses.
-- **Video Management**: Endpoints for uploading and streaming course videos.
-- **Admin Interface**: Django admin for data management.
-
-### Frontend Application
-- **Modern React UI**: Responsive design for browsing and viewing courses.
-- **User Authentication**: Login and registration forms.
-- **Course Catalog**: View available physiotherapy courses.
-- **Video Player**: Secure video player for enrolled users to watch course content.
-- **User Dashboard**: Manage purchased courses and user profile.
-
-## 🔗 API Endpoints
-
-### Authentication
-- `POST /api/token/` - Obtain JWT token (Login)
-- `POST /api/token/refresh/` - Refresh JWT token
-- `POST /api/register/` - User registration
-
-### Users
-- `GET /api/user/` - Retrieve the current authenticated user's data
-
-### Courses
-- `GET /api/courses/` - List all available courses
-
-### Pain Assessment
-- `POST /api/submit-assessment/` - Submit pain assessment data
-
-## 🛠️ Development
-
-### Backend Development
-```bash
-cd backend
-
-# Activate virtual environment
-# Windows: venv\Scripts\activate | macOS/Linux: source venv/bin/activate
-
-# Run tests
-python ../manage.py test
-
-# Create migrations
-python ../manage.py makemigrations
+**Frontend (`frontend/src/config/api.js`)**
+Point the API to your local instance (or use the relative path if serving strictly via Nginx):
+```javascript
+// For local Docker development:
+const API_URL = 'https://localhost/api'; 
 ```
 
-### Frontend Development
+### 3. Run with Docker Compose
+Build and start the services:
 ```bash
-cd frontend
-
-# Development server with hot reload
-npm start
-
-# Build for production
-npm run build
+docker-compose up --build -d
 ```
 
-## 🚀 Deployment
+### 4. Access the Application
+Open your browser and navigate to:
+- **Frontend**: [https://localhost](https://localhost) (Accept the self-signed certificate warning)
+- **Backend API**: `https://localhost/api/`
+- **Django Admin**: `https://localhost/admin/`
 
-### Backend (Django)
-1.  Set environment variables for production (SECRET_KEY, DATABASE_URL).
-2.  Configure a production database (e.g., PostgreSQL).
-3.  Set `DEBUG = False` in `backend/settings.py`.
-4.  Configure static files serving.
-5.  Deploy to a platform like Heroku, Vercel, or AWS.
+---
 
-### Frontend (React)
-1.  Update your code with the production API URL.
-2.  Build the static files: `npm run build`.
-3.  Deploy the `build` folder to a static hosting service like Netlify, Vercel, or GitHub Pages.
+## 💻 Manual Setup (Development)
 
-## 🧪 Testing
-
-### Backend Tests
-```bash
-cd backend
-python ../manage.py test
-```
-
-### Frontend Tests
-```bash
-cd frontend
-npm test
-```
-
-## 📁 Key Files
+If you prefer running services individually without Docker:
 
 ### Backend
-- `api/views.py` - API view logic
-- `api/serializers.py` - Data serialization
-- `backend/settings.py` - Django project configuration
-- `backend/urls.py` - Root URL configuration
+1. **Navigate to backend**: `cd backend`
+2. **Create virtual env**: `python -m venv venv`
+3. **Activate env**:
+   - Windows: `venv\Scripts\activate`
+   - Mac/Linux: `source venv/bin/activate`
+4. **Install deps**: `pip install -r requirements.txt`
+5. **Run migrations**: `python manage.py migrate`
+6. **Start server**: `python manage.py runserver`
+   - *Runs at http://localhost:8000*
 
 ### Frontend
-- `frontend/src/App.js` - Main React component
-- `frontend/src/index.js` - Application entry point
-- `frontend/package.json` - Dependencies and scripts
+1. **Navigate to frontend**: `cd frontend`
+2. **Install deps**: `npm install`
+3. **Start dev server**: `npm run dev`
+   - *Runs at http://localhost:5173 (usually)*
+   - *Note: You'll need to configure CORS in backend settings to allow requests from the Vite port.*
 
-## 🤝 Contributing
+---
 
-1.  Fork the repository
-2.  Create a feature branch: `git checkout -b feature/new-feature`
-3.  Commit your changes: `git commit -m 'Add some new feature'`
-4.  Push to the branch: `git push origin feature/new-feature`
-5.  Open a Pull Request
+## 📦 Deployment
 
-## 🏥 About
+### Production vs. Development
+- **Development**: Uses `docker-compose.yml`. Configures local SSL and mounts code as volumes for hot-reloading.
+- **Production**: Use `docker-compose.yml` + `docker-compose.prod.yml`.
+  - Enables Syslog logging.
+  - Expects real SSL certificates (from LetsEncrypt) mounted at `/etc/letsencrypt`.
 
-This project provides a platform for users to purchase and view physiotherapy video courses. It is built with a robust Django backend and a responsive React frontend, offering a seamless user experience.
+### Deployment Steps
+1. **Environment Config**: Ensure `.env` contains secure values (SECRET_KEY, DB credentials).
+2. **SSL**: Obtain valid certificates (e.g., via Certbot) and ensure paths in `docker-compose.yml` match.
+3. **Run**:
+   ```bash
+   docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+   ```
+
+## 🔗 Key API Endpoints
+
+- `POST /api/token/` - Login (Get JWT)
+- `GET /api/courses/` - List Courses
+- `GET /api/user/` - User Profile
