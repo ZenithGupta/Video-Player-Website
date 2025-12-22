@@ -70,6 +70,7 @@ class PhaseSerializer(serializers.ModelSerializer):
 class CourseSerializer(serializers.ModelSerializer):
     phases = PhaseSerializer(many=True, read_only=True)
     super_course_description = serializers.ReadOnlyField(source='super_course.description')
+    super_course_image = serializers.ReadOnlyField(source='super_course.image')
     class Meta:
         model = Course
         fields = '__all__'

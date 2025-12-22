@@ -15,6 +15,7 @@ import CoursePage from './CoursePage.jsx';
 import MyCoursesPage from './MyCoursesPage.jsx';
 import ProtectedRoute from './ProtectedRoute.jsx';
 import TermsPage from './TermsPage.jsx';
+import SocialMediaSidebar from './SocialMediaSidebar.jsx';
 
 import API_URL, { GOOGLE_FORM_ENTRY_IDS } from './config/api.js';
 import './index.css';
@@ -346,13 +347,18 @@ const CourseCard = ({ course, isSuperCourse }) => {
     const price = isSuperCourse ? course.courses?.[0]?.price : course.price;
     // Use course.rating if present, else fallback to 4.5
     const rating = course.rating || '4.5';
+    // Use proper image source based on whether it is a SuperCourse or Course
+    const imageUrl = isSuperCourse
+        ? (course.image || 'https://placehold.co/240x135/749BC2/FFFFFF?text=Course')
+        : (course.super_course_image || 'https://placehold.co/240x135/749BC2/FFFFFF?text=Course');
+
     return (
         <Link to={linkTo} className="course-card-link text-decoration-none">
             <div className="course-card">
                 <Card className="border-0 h-100 bg-transparent">
                     <Card.Img
                         variant="top"
-                        src={firstVideo?.image || 'https://placehold.co/240x135/749BC2/FFFFFF?text=Course'}
+                        src={imageUrl}
                         className="course-card-img"
                     />
                     <Card.Body className="p-3">
@@ -891,12 +897,12 @@ const AboutSection = ({ language }) => {
 
             <Container fluid="xl" className="py-5" id="lifelong-block">
                 <div className="row">
-                    <div className="col-12 col-md-4">
+                    <div className="col-12 col-md-5">
                         <div className="block">
                             <img src="/logo/Aravinth's Image.png" alt="Profile" className="lifelong-image" />
                         </div>
                     </div>
-                    <div className="col-12 col-md-8">
+                    <div className="col-12 col-md-7">
                         <div className="lifelong-content">
                             <h2 className="main-heading">{t.aboutSubtitle}</h2>
                             <div>
@@ -1236,6 +1242,7 @@ export default function App() {
                     } />
                 </Routes>
             </main>
+            <SocialMediaSidebar />
         </div>
     );
 }

@@ -44,7 +44,7 @@ class Video(models.Model):
     description = models.TextField(blank=True)
     description_ta = models.TextField(blank=True, null=True)
     vimeo_url = models.URLField(max_length=500)
-    image = models.URLField(max_length=500)
+    # image removed from Video; moved to SuperCourse
     # category removed (videos no longer have categories)
     # rating removed from Video; rating belongs on SuperCourse
     def __str__(self):
@@ -58,6 +58,7 @@ class SuperCourse(models.Model):
     description_ta = models.TextField(blank=True, null=True)
     # Move rating to SuperCourse level (aggregate/course-level rating)
     rating = models.DecimalField(max_digits=3, decimal_places=2, default=0.0)
+    image = models.URLField(max_length=500, default="https://placehold.co/240x135/749BC2/FFFFFF?text=Course")
 
     def __str__(self):
         return self.title
