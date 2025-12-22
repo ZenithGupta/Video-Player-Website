@@ -52,6 +52,9 @@ const getLocalizedContent = (obj, field, language) => {
 const CoursePaymentPage = ({ course, onPurchase, isSuperCourse, language, user, token }) => {
     const [selectedCourse, setSelectedCourse] = React.useState(null);
     const [paymentMethod, setPaymentMethod] = React.useState('credit-card');
+    const [couponCode, setCouponCode] = React.useState('');
+    const [couponMessage, setCouponMessage] = React.useState('');
+    const [discountData, setDiscountData] = React.useState(null); // { amount, percentage, final_price, valid }
     const t = content[language]; // Translation object
 
     useEffect(() => {
@@ -77,6 +80,41 @@ const CoursePaymentPage = ({ course, onPurchase, isSuperCourse, language, user, 
         const courseId = parseInt(e.target.value);
         const newSelectedCourse = course.courses.find(c => c.id === courseId);
         setSelectedCourse(newSelectedCourse);
+        // Reset coupon when course changes
+        setDiscountData(null);
+        setCouponMessage('');
+        setCouponCode('');
+    };
+
+    const handleApplyCoupon = async () => {
+        if (!couponCode) return;
+        setCouponMessage('Validating...');
+        try {
+            const courseId = selectedCourse ? selectedCourse.id : course.id;
+            const res = await axios.post(`${API_URL}/validate-coupon/`,
+                { code: couponCode, course_id: courseId },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+
+            if (res.data.valid) {
+                const percentage = res.data.discount_percentage;
+                const price = parseFloat(selectedCourse ? selectedCourse.price : course.price);
+                const discount = (price * percentage) / 100;
+                const finalPrice = price - discount;
+
+                setDiscountData({
+                    percentage,
+                    discount,
+                    finalPrice: finalPrice > 0 ? finalPrice : 0,
+                    valid: true
+                });
+                setCouponMessage(`Success! ${percentage}% discount applied.`);
+            }
+        } catch (error) {
+            console.error(error);
+            setDiscountData(null);
+            setCouponMessage(error.response?.data?.error || 'Invalid Coupon');
+        }
     };
 
     const handleBuyNow = async () => {
@@ -88,12 +126,26 @@ const CoursePaymentPage = ({ course, onPurchase, isSuperCourse, language, user, 
         try {
             const courseId = selectedCourse ? selectedCourse.id : course.id;
             // Create Order
+            const orderPayload = { course_id: courseId };
+            if (discountData && discountData.valid) {
+                orderPayload.coupon_code = couponCode;
+            }
+
             const orderResponse = await axios.post(`${API_URL}/create-order/`,
-                { course_id: courseId },
+                orderPayload,
                 { headers: { Authorization: `Bearer ${token}` } }
             );
 
+            // Check for 100% discount / immediate success
+            if (orderResponse.data.status === 'captured') {
+                alert("Enrolled successfully! Redirecting...");
+                window.location.reload();
+                return;
+            }
+
             const { id: order_id, amount, currency, key_id } = orderResponse.data;
+
+
 
             // Open Razorpay Checkout
             const options = {
@@ -201,6 +253,20 @@ const CoursePaymentPage = ({ course, onPurchase, isSuperCourse, language, user, 
                                     </Form.Group>
                                 }
 
+                                <AppCustomCouponInput
+                                    couponCode={couponCode}
+                                    setCouponCode={setCouponCode}
+                                    handleApplyCoupon={handleApplyCoupon}
+                                    couponMessage={couponMessage}
+                                    discountData={discountData}
+                                />
+                                {discountData && (
+                                    <div className="alert alert-success mt-2 p-2 small">
+                                        Original: <span className="text-decoration-line-through">₹{selectedCourse?.price}</span> <br />
+                                        New Price: <strong>₹{discountData.finalPrice.toFixed(2)}</strong>
+                                    </div>
+                                )}
+
                                 <Nav variant="tabs" activeKey={paymentMethod} onSelect={(k) => setPaymentMethod(k)} className="mb-3 payment-methods">
                                     <Nav.Item>
                                         <Nav.Link eventKey="credit-card">Credit Card</Nav.Link>
@@ -237,5 +303,26 @@ const CoursePaymentPage = ({ course, onPurchase, isSuperCourse, language, user, 
         </div>
     );
 };
+
+
+
+const AppCustomCouponInput = ({ couponCode, setCouponCode, handleApplyCoupon, couponMessage, discountData }) => (
+    <div className="mb-3">
+        <Form.Label>Coupon Code</Form.Label>
+        <div className="d-flex gap-2">
+            <Form.Control
+                type="text"
+                placeholder="Enter Code"
+                value={couponCode}
+                onChange={(e) => setCouponCode(e.target.value)}
+                disabled={discountData?.valid}
+            />
+            <Button variant="outline-primary" onClick={handleApplyCoupon} disabled={discountData?.valid}>
+                Apply
+            </Button>
+        </div>
+        {couponMessage && <div className={`small mt-1 ${discountData?.valid ? 'text-success' : 'text-danger'}`}>{couponMessage}</div>}
+    </div>
+);
 
 export default CoursePaymentPage;

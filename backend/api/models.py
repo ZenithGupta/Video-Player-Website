@@ -152,3 +152,35 @@ class PainAssessmentSubmission(models.Model):
         if self.user:
             return f"Submission from {self.user.email} at {self.submitted_at.strftime('%Y-%m-%d %H:%M')}"
         return f"Submission from {self.submitted_at.strftime('%Y-%m-%d %H:%M')}"
+
+from django.core.exceptions import ValidationError
+import re
+
+class Coupon(models.Model):
+    code = models.CharField(max_length=50, unique=True)
+    discount_percentage = models.IntegerField(help_text="Percentage discount (1-100)")
+    expiry_date = models.DateTimeField()
+    is_active = models.BooleanField(default=True)
+    
+    def clean(self):
+        if not (1 <= self.discount_percentage <= 100):
+            raise ValidationError("Discount percentage must be between 1 and 100.")
+        
+    def save(self, *args, **kwargs):
+        self.code = self.code.upper() # Standardize codes to uppercase
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.code} ({self.discount_percentage}%)"
+
+class CouponUsage(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    coupon = models.ForeignKey(Coupon, on_delete=models.CASCADE)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    used_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'coupon', 'course')
+
+    def __str__(self):
+        return f"{self.user.email} used {self.coupon.code} on {self.course.title}"
