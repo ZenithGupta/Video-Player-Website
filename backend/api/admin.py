@@ -61,6 +61,18 @@ admin.site.register(Course, CourseAdmin)
 admin.site.register(SuperCourse)
 admin.site.register(UserCourse, UserCourseAdmin)
 admin.site.register(User)
+from .models import Coupon, CouponUsage
+class CouponAdmin(admin.ModelAdmin):
+    list_display = ('code', 'discount_percentage', 'expiry_date', 'is_active')
+    search_fields = ('code',)
+    list_filter = ('is_active', 'expiry_date')
+
+class CouponUsageAdmin(admin.ModelAdmin):
+    list_display = ('user', 'coupon', 'used_at')
+    search_fields = ('user__email', 'coupon__code')
+
+admin.site.register(Coupon, CouponAdmin)
+admin.site.register(CouponUsage, CouponUsageAdmin)
 
 # Enable Token Management in Admin
 from rest_framework_simplejwt.token_blacklist.models import OutstandingToken, BlacklistedToken
