@@ -13,6 +13,7 @@ import { ScrambleTextPlugin } from 'gsap/ScrambleTextPlugin';
 import VideoPlayerPage from './VideoPlayerPage.jsx';
 import CoursePage from './CoursePage.jsx';
 import MyCoursesPage from './MyCoursesPage.jsx';
+import PurchaseHistoryPage from './PurchaseHistoryPage.jsx';
 import ProtectedRoute from './ProtectedRoute.jsx';
 import TermsPage from './TermsPage.jsx';
 import SocialMediaSidebar from './SocialMediaSidebar.jsx';
@@ -315,6 +316,11 @@ const Header = ({ language, setLanguage, user, onLogout, onShowLogin, onShowSign
                             {t.myCourses}
                         </Button>
 
+                        {user && (
+                            <Button as={Link} to="/purchase-history" variant="outline-dark" className="header-btn mx-2 my-1 my-lg-0" onClick={() => setExpanded(false)}>
+                                History
+                            </Button>
+                        )}
 
                         <Button as={Link} to="/terms" variant="outline-dark" className="header-btn mx-2 my-1 my-lg-0" onClick={() => setExpanded(false)}>{t.terms}</Button>
 
@@ -1238,6 +1244,11 @@ export default function App() {
                     <Route path="/my-courses" element={
                         <ProtectedRoute user={currentUser} token={authToken}>
                             <MyCoursesPage language={language} />
+                        </ProtectedRoute>
+                    } />
+                    <Route path="/purchase-history" element={
+                        <ProtectedRoute user={currentUser} token={authToken}>
+                            <PurchaseHistoryPage />
                         </ProtectedRoute>
                     } />
                 </Routes>

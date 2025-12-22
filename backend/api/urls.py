@@ -19,9 +19,7 @@ urlpatterns = [
 
     # --- NEW: URL for fetching user's enrolled courses ---
     path('my-courses/', views.get_my_courses, name='my_courses'),
-
-    # --- NEW: URL for fetching user's enrolled courses ---
-    path('my-courses/', views.get_my_courses, name='my_courses'),
+    path('purchase-history/', views.get_purchase_history, name='get_purchase_history'),
 
     # User Authentication Endpoints
     path('register/', views.register_user, name='register_user'),
