@@ -87,6 +87,10 @@ const CoursePaymentPage = ({ course, onPurchase, isSuperCourse, language, user, 
     };
 
     const handleApplyCoupon = async () => {
+        if (!token) {
+            onPurchase(); // Shows login modal
+            return;
+        }
         if (!couponCode) return;
         setCouponMessage('Validating...');
         try {

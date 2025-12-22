@@ -765,6 +765,16 @@ body {
   color: #0088cc;
 }
 
+.social-link.phone:hover {
+  background-color: #E7F1FF;
+  color: #0d6efd;
+}
+
+.social-link.email:hover {
+  background-color: #FCE8E6;
+  color: #db4437;
+}
+
 
 .social-text {
   margin-left: 15px;

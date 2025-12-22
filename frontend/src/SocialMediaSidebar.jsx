@@ -26,9 +26,21 @@ const NavIcon = () => (
     </svg>
 )
 
-const AttariIcon = () => (
+const ArattaiIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="#0088cc">
         <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z" />
+    </svg>
+);
+
+const PhoneIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="#0d6efd">
+        <path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56a.977.977 0 0 0-1.01.24l-1.57 1.97c-2.83-1.44-5.15-3.75-6.59-6.59l1.97-1.57c.22-.22.32-.56.24-1.01A11.36 11.36 0 0 1 8.59 4c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1c0 9.39 7.61 17 17 17c.55 0 1-.45 1-1v-3.59c0-.55-.45-1-1-1z" />
+    </svg>
+);
+
+const EmailIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="#db4437">
+        <path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
     </svg>
 );
 
@@ -62,9 +74,17 @@ const SocialMediaSidebar = () => {
                     <YoutubeIcon />
                     <span className="social-text">Youtube</span>
                 </a>
-                <a href="https://aratt.ai/@physio_pride_official" className="social-link attari" title="Attari" target="_blank" rel="noopener noreferrer">
-                    <AttariIcon />
-                    <span className="social-text">Attari</span>
+                <a href="https://aratt.ai/@physio_pride_official" className="social-link Arattai" title="Arattai" target="_blank" rel="noopener noreferrer">
+                    <ArattaiIcon />
+                    <span className="social-text">Arattai</span>
+                </a>
+                <a href="tel:+919176231053" className="social-link phone" title="Call Us">
+                    <PhoneIcon />
+                    <span className="social-text">Call</span>
+                </a>
+                <a href="mailto:contact@physiopride.com" className="social-link email" title="Email Us">
+                    <EmailIcon />
+                    <span className="social-text">Email</span>
                 </a>
             </div>
         </div>
