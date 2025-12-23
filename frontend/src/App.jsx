@@ -143,31 +143,38 @@ const ChevronRightIcon = () => <svg fill="none" stroke="currentColor" viewBox="0
 
 // --- Components ---
 const AuthModal = ({ show, handleClose, mode, onLoginSuccess, language }) => {
+    const [currentMode, setCurrentMode] = useState(mode);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [otp, setOtp] = useState('');
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
     const [dob, setDob] = useState('');
     const [gender, setGender] = useState('');
     const [error, setError] = useState('');
+    const [message, setMessage] = useState('');
 
     useEffect(() => {
         if (show) {
+            setCurrentMode(mode);
             setEmail('');
             setPassword('');
+            setOtp('');
             setFirstName('');
             setLastName('');
             setDob('');
             setGender('');
             setError('');
+            setMessage('');
         }
-    }, [show]);
+    }, [show, mode]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
+        setMessage('');
 
-        if (mode === 'signup') {
+        if (currentMode === 'signup') {
             try {
                 const response = await axios.post(`${API_URL}/register/`, {
                     first_name: firstName,
@@ -177,17 +184,48 @@ const AuthModal = ({ show, handleClose, mode, onLoginSuccess, language }) => {
                     date_of_birth: dob,
                     gender: gender,
                 });
-                onLoginSuccess(response.data);
+                setMessage(response.data.message);
+                setCurrentMode('verify'); // Switch to verify mode
             } catch (err) {
                 const errorData = err.response?.data;
                 if (errorData && errorData.email) {
                     setError(errorData.email[0]);
                 } else if (errorData) {
                     const messages = Object.values(errorData).flat().join(' ');
-                    setError(messages || 'Registration failed. Please check your details.');
+                    setError(messages || 'Registration failed.');
                 } else {
                     setError('An unknown error occurred.');
                 }
+            }
+        } else if (currentMode === 'verify') {
+            try {
+                const response = await axios.post(`${API_URL}/verify-email/`, {
+                    email: email,
+                    otp: otp
+                });
+                onLoginSuccess(response.data); // Login automatically
+            } catch (err) {
+                setError(err.response?.data?.error || 'Verification failed.');
+            }
+        } else if (currentMode === 'forgot') {
+            try {
+                const response = await axios.post(`${API_URL}/forgot-password/`, { email: email });
+                setMessage(response.data.message);
+                setCurrentMode('reset');
+            } catch (err) {
+                setError(err.response?.data?.error || 'Failed to send OTP.');
+            }
+        } else if (currentMode === 'reset') {
+            try {
+                const response = await axios.post(`${API_URL}/reset-password/`, {
+                    email: email,
+                    otp: otp,
+                    new_password: password
+                });
+                setMessage(response.data.message);
+                setTimeout(() => setCurrentMode('login'), 2000);
+            } catch (err) {
+                setError(err.response?.data?.error || 'Password reset failed.');
             }
         } else { // Login mode
             try {
@@ -203,15 +241,25 @@ const AuthModal = ({ show, handleClose, mode, onLoginSuccess, language }) => {
         }
     };
 
+    const getTitle = () => {
+        if (currentMode === 'signup') return content[language].signup;
+        if (currentMode === 'login') return content[language].login;
+        if (currentMode === 'verify') return "Verify Email";
+        if (currentMode === 'forgot') return "Forgot Password";
+        if (currentMode === 'reset') return "Reset Password";
+    };
+
     return (
         <Modal show={show} onHide={handleClose} centered>
             <Modal.Header closeButton>
-                <Modal.Title>{mode === 'signup' ? content[language].signup : content[language].login}</Modal.Title>
+                <Modal.Title>{getTitle()}</Modal.Title>
             </Modal.Header>
             <Modal.Body>
                 {error && <Alert variant="danger">{error}</Alert>}
+                {message && <Alert variant="success">{message}</Alert>}
+
                 <Form onSubmit={handleSubmit}>
-                    {mode === 'signup' && (
+                    {currentMode === 'signup' && (
                         <>
                             <Form.Group className="mb-3">
                                 <Form.Label>First Name</Form.Label>
@@ -236,17 +284,58 @@ const AuthModal = ({ show, handleClose, mode, onLoginSuccess, language }) => {
                             </Form.Group>
                         </>
                     )}
-                    <Form.Group className="mb-3">
-                        <Form.Label>Email</Form.Label>
-                        <Form.Control type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-                    </Form.Group>
-                    <Form.Group className="mb-3">
-                        <Form.Label>Password</Form.Label>
-                        <Form.Control type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
-                    </Form.Group>
+
+                    {/* Email Field - Always visible except maybe reset? No, need email for reset too */}
+                    {(currentMode !== 'verify' || !email) && (
+                        <Form.Group className="mb-3">
+                            <Form.Label>Email</Form.Label>
+                            <Form.Control
+                                type="email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                required
+                                disabled={currentMode === 'verify' || currentMode === 'reset'}
+                            />
+                        </Form.Group>
+                    )}
+
+                    {/* Password Field */}
+                    {(currentMode === 'signup' || currentMode === 'login' || currentMode === 'reset') && (
+                        <Form.Group className="mb-3">
+                            <Form.Label>{currentMode === 'reset' ? 'New Password' : 'Password'}</Form.Label>
+                            <Form.Control type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+                        </Form.Group>
+                    )}
+
+                    {/* OTP Field */}
+                    {(currentMode === 'verify' || currentMode === 'reset') && (
+                        <Form.Group className="mb-3">
+                            <Form.Label>OTP Code</Form.Label>
+                            <Form.Control type="text" value={otp} onChange={(e) => setOtp(e.target.value)} required placeholder="Enter 6-digit code" />
+                        </Form.Group>
+                    )}
+
                     <Button variant="primary" type="submit" className="w-100">
-                        {mode === 'signup' ? content[language].signup : content[language].login}
+                        {currentMode === 'signup' ? 'Submit' :
+                            currentMode === 'login' ? content[language].login :
+                                currentMode === 'forgot' ? 'Send OTP' : 'Submit'}
                     </Button>
+
+                    {currentMode === 'login' && (
+                        <div className="text-center mt-3">
+                            <a href="#" onClick={(e) => { e.preventDefault(); setCurrentMode('forgot'); setMessage(''); setError(''); }}>
+                                Forgot Password?
+                            </a>
+                        </div>
+                    )}
+
+                    {currentMode === 'forgot' && (
+                        <div className="text-center mt-3">
+                            <a href="#" onClick={(e) => { e.preventDefault(); setCurrentMode('login'); setMessage(''); setError(''); }}>
+                                Back to Login
+                            </a>
+                        </div>
+                    )}
                 </Form>
             </Modal.Body>
         </Modal>

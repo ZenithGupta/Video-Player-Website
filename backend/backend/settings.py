@@ -25,10 +25,11 @@ SECRET_KEY = 'django-insecure-_0_ef8fp(l(&y0_rr+m47qz&blu&%!deaj-gj6+rv_#-+qm3#m
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+# SECURITY WARNING: don't run with debug turned on in production!
+DEBUG = True
 
 # ALLOWED_HOSTS = ["0.0.0.0"]
-ALLOWED_HOSTS = ["onelastmove.com", "www.onelastmove.com", "localhost"]
+ALLOWED_HOSTS = ["onelastmove.com", "www.onelastmove.com", "localhost", "127.0.0.1"]
 
 # Application definition
 
@@ -140,19 +141,19 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # ]
 CORS_ALLOW_ALL_ORIGINS = True
 
-CSRF_TRUSTED_ORIGINS = ['https://onelastmove.com']
+CSRF_TRUSTED_ORIGINS = ['https://onelastmove.com', 'http://localhost', 'http://127.0.0.1', 'http://localhost:3000']
 
 
 
 # Security Settings for Production
-if not DEBUG:
-    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-    SECURE_HSTS_SECONDS = 31536000
-    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-    SECURE_HSTS_PRELOAD = True
-    SECURE_SSL_REDIRECT = True
-    SESSION_COOKIE_SECURE = True
-    CSRF_COOKIE_SECURE = True
+# if not DEBUG:
+#     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+#     SECURE_HSTS_SECONDS = 31536000
+#     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+#     SECURE_HSTS_PRELOAD = True
+#     SECURE_SSL_REDIRECT = True
+#     SESSION_COOKIE_SECURE = True
+#     CSRF_COOKIE_SECURE = True
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
@@ -175,3 +176,13 @@ GOOGLE_APPS_SCRIPT_SECRET = 'ThisIsMySecureKeyForGoogleForms123'
 # Razorpay Configuration
 RAZORPAY_KEY_ID = os.environ.get('RAZORPAY_KEY_ID')
 RAZORPAY_KEY_SECRET = os.environ.get('RAZORPAY_KEY_SECRET')
+
+# Email Configuration (Brevo)
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp-relay.brevo.com'
+EMAIL_USE_TLS = True
+EMAIL_PORT = 587
+EMAIL_HOST_USER = os.environ.get('BREVO_API_USER')
+EMAIL_HOST_PASSWORD = os.environ.get('BREVO_API_KEY')
+DEFAULT_FROM_EMAIL = 'noreply@onelastmove.com'
+

@@ -7,7 +7,16 @@ from rest_framework import status
 from .models import PainAssessmentSubmission, Course, Video, UserCourse, SuperCourse, User, PlaylistVideo, Coupon, CouponUsage, PurchaseHistory
 from django.utils import timezone
 
-from .serializers import UserSerializer, CourseSerializer, SuperCourseSerializer
+from .serializers import UserSerializer, CourseSerializer, SuperCourseSerializer, MyTokenObtainPairSerializer, OTPVerifySerializer, ForgotPasswordSerializer, ResetPasswordSerializer
+from .models import User, Course, Week, Video, UserCourse, Phase, Playlist, SuperCourse, PainAssessmentSubmission, Coupon, CouponUsage, OTP, PurchaseHistory
+import json
+from django.utils import timezone
+from datetime import timedelta
+import random
+# from django.core.mail import send_mail # Removed in favor of Brevo
+from django.contrib.auth.hashers import make_password
+from .brevo_service import send_brevo_otp
+from django.contrib.auth.hashers import make_password
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.db import IntegrityError
 from rest_framework_simplejwt.views import TokenObtainPairView
@@ -94,26 +103,139 @@ def check_course_expiry(user):
 @permission_classes([AllowAny])
 def register_user(request):
     """
-    Handles new user registration.
+    Handles new user registration with OTP.
     """
     serializer = UserSerializer(data=request.data)
     if serializer.is_valid():
         try:
+            # Create user but set as inactive until OTP verification
             user = serializer.save()
-            refresh = RefreshToken.for_user(user)
+            user.is_active = False 
+            user.save()
+
+            # Generate OTP
+            otp_code = str(random.randint(100000, 999999))
+            OTP.objects.update_or_create(user=user, defaults={'code': otp_code})
+
+            # Send OTP Email via Brevo
+            if not send_brevo_otp(user.email, otp_code, 'Verify your email - One Last Move'):
+                 raise Exception("Failed to send OTP email via Brevo.")
+
             return Response({
-                'refresh': str(refresh),
-                'access': str(refresh.access_token),
-                'user': serializer.data
+                'message': 'Registration successful. Please verify your email with the OTP sent.',
+                'email': user.email
             }, status=status.HTTP_201_CREATED)
+
         except IntegrityError:
             return Response(
                 {'email': ['An account with this email already exists.']},
                 status=status.HTTP_400_BAD_REQUEST
             )
+        except Exception as e:
+            # Cleanup user if email sending fails
+            if 'user' in locals():
+                user.delete()
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-# --- New view to get the current user ---
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def verify_email(request):
+    """
+    Verifies the email using OTP and activates the user.
+    """
+    serializer = OTPVerifySerializer(data=request.data)
+    if serializer.is_valid():
+        email = serializer.validated_data['email']
+        otp_code = serializer.validated_data['otp']
+        
+        try:
+            user = User.objects.get(email=email)
+            otp = OTP.objects.get(user=user)
+            
+            if otp.code == otp_code and otp.is_valid():
+                user.is_active = True
+                user.save()
+                otp.delete() # OTP used once
+
+                # Auto login (generate tokens)
+                refresh = RefreshToken.for_user(user)
+                return Response({
+                    'message': 'Email verified successfully!',
+                    'refresh': str(refresh),
+                    'access': str(refresh.access_token),
+                    'user': UserSerializer(user).data
+                }, status=status.HTTP_200_OK)
+            else:
+                 return Response({'error': 'Invalid or expired OTP.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        except User.DoesNotExist:
+             return Response({'error': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
+        except OTP.DoesNotExist:
+             return Response({'error': 'OTP not found. Please resend.'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def forgot_password(request):
+    """
+    Generates an OTP for password reset.
+    """
+    serializer = ForgotPasswordSerializer(data=request.data)
+    if serializer.is_valid():
+        email = serializer.validated_data['email']
+        try:
+            user = User.objects.get(email=email)
+            
+            # Generate OTP
+            otp_code = str(random.randint(100000, 999999))
+            OTP.objects.update_or_create(user=user, defaults={'code': otp_code})
+
+            # Send OTP Email via Brevo
+            if not send_brevo_otp(user.email, otp_code, 'Reset your password - One Last Move'):
+                return Response({'error': 'Failed to send OTP email.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({'message': 'OTP sent to your email.'}, status=status.HTTP_200_OK)
+
+        except User.DoesNotExist:
+            # For security, we might want to return 200 even if user not found, 
+            # but for this specific UX requirement let's be explicit or just 404
+            return Response({'error': 'User with this email does not exist.'}, status=status.HTTP_404_NOT_FOUND)
+            
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def reset_password(request):
+    """
+    Verifies OTP and resets the password.
+    """
+    serializer = ResetPasswordSerializer(data=request.data)
+    if serializer.is_valid():
+        email = serializer.validated_data['email']
+        otp_code = serializer.validated_data['otp']
+        new_password = serializer.validated_data['new_password']
+        
+        try:
+            user = User.objects.get(email=email)
+            otp = OTP.objects.get(user=user)
+            
+            if otp.code == otp_code and otp.is_valid():
+                user.set_password(new_password)
+                user.save()
+                otp.delete()
+                
+                return Response({'message': 'Password reset successfully. You can now login.'}, status=status.HTTP_200_OK)
+            else:
+                 return Response({'error': 'Invalid or expired OTP.'}, status=status.HTTP_400_BAD_REQUEST)
+                 
+        except User.DoesNotExist:
+             return Response({'error': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
+        except OTP.DoesNotExist:
+             return Response({'error': 'OTP not found.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_current_user(request):
