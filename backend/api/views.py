@@ -4,7 +4,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.views import APIView # Added APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .models import PainAssessmentSubmission, Course, Video, UserCourse, SuperCourse, User, PlaylistVideo, Coupon, CouponUsage
+from .models import PainAssessmentSubmission, Course, Video, UserCourse, SuperCourse, User, PlaylistVideo, Coupon, CouponUsage, PurchaseHistory
 from django.utils import timezone
 
 from .serializers import UserSerializer, CourseSerializer, SuperCourseSerializer
@@ -228,6 +228,18 @@ def get_super_course_detail(request, pk):
         return Response(serializer.data)
     except SuperCourse.DoesNotExist:
         return Response({'error': 'Super Course not found'}, status=status.HTTP_404_NOT_FOUND)
+
+from .serializers import PurchaseHistorySerializer
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_purchase_history(request):
+    """
+    Fetches and returns the purchase history for the current user.
+    """
+    history = PurchaseHistory.objects.filter(user=request.user)
+    serializer = PurchaseHistorySerializer(history, many=True)
+    return Response(serializer.data, status=status.HTTP_200_OK)
     
 # --- NEW: View to get enrolled courses for the current user ---
 @api_view(['GET'])
@@ -368,6 +380,15 @@ def create_order(request):
              if coupon:
                  # Record usage
                  CouponUsage.objects.create(user=user, coupon=coupon, course=course)
+            
+             # Create PurchaseHistory for free order
+             PurchaseHistory.objects.create(
+                 user=user,
+                 course=course,
+                 amount="0",
+                 status='SUCCESS',
+                 razorpay_order_id=f"FREE_{timezone.now().timestamp()}" # Dummy ID
+             )
                  
              return Response({'status': 'captured', 'message': 'Condition treated. Enrolled successfully!'}, status=status.HTTP_200_OK)
 
@@ -394,6 +415,16 @@ def create_order(request):
         }
     
         order = client.order.create(data=payment_data)
+        
+        # Create Initiated Purchase History
+        PurchaseHistory.objects.create(
+            user=user,
+            course=course,
+            amount=str(final_price),
+            razorpay_order_id=order['id'],
+            status='INITIATED'
+        )
+        
         response_data = order
         response_data['key_id'] = settings.RAZORPAY_KEY_ID
         return Response(response_data)
@@ -445,7 +476,17 @@ def verify_payment(request):
         
         if not UserCourse.objects.filter(user=user, course=course).exists():
             UserCourse.objects.create(user=user, course=course)
+        
+        # Update Purchase History to SUCCESS
+        try:
+            ph = PurchaseHistory.objects.get(razorpay_order_id=razorpay_order_id)
+            ph.status = 'SUCCESS'
+            ph.razorpay_payment_id = razorpay_payment_id
+            ph.save()
+        except PurchaseHistory.DoesNotExist:
+            pass # Should ideally exist, but don't break flow
             
+        # Record Coupon Usage
         # Record Coupon Usage
         if coupon_code:
             try:
@@ -459,6 +500,13 @@ def verify_payment(request):
         return Response({'message': 'Payment successful', 'course_id': course.id}, status=status.HTTP_200_OK)
 
     except razorpay.errors.SignatureVerificationError:
+        # Update Purchase History to FAILED
+        try:
+             ph = PurchaseHistory.objects.get(razorpay_order_id=razorpay_order_id)
+             ph.status = 'FAILED'
+             ph.save()
+        except PurchaseHistory.DoesNotExist:
+             pass
         return Response({'error': 'Payment verification failed'}, status=status.HTTP_400_BAD_REQUEST)
     except Course.DoesNotExist:
          return Response({'error': 'Course not found'}, status=status.HTTP_400_BAD_REQUEST)

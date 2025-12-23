@@ -184,3 +184,24 @@ class CouponUsage(models.Model):
 
     def __str__(self):
         return f"{self.user.email} used {self.coupon.code} on {self.course.title}"
+
+class PurchaseHistory(models.Model):
+    STATUS_CHOICES = [
+        ('INITIATED', 'Initiated'),
+        ('SUCCESS', 'Success'),
+        ('FAILED', 'Failed'),
+    ]
+    
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    amount = models.CharField(max_length=20, default="0")
+    purchase_date = models.DateTimeField(auto_now_add=True)
+    razorpay_order_id = models.CharField(max_length=100, blank=True, null=True)
+    razorpay_payment_id = models.CharField(max_length=100, blank=True, null=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='INITIATED')
+
+    class Meta:
+        ordering = ['-purchase_date']
+
+    def __str__(self):
+        return f"{self.user.email} - {self.course.title} - {self.status}"

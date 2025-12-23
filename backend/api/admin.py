@@ -2,8 +2,9 @@ from django.contrib import admin
 from adminsortable2.admin import SortableInlineAdminMixin, SortableAdminBase
 from .models import (
     PainAssessmentSubmission, Video, Course, UserCourse, User,
-    Phase, Week, Playlist, SuperCourse, PlaylistVideo
+    Phase, Week, Playlist, SuperCourse, PlaylistVideo, PurchaseHistory,
 )
+
 
 # Inline for the through model with drag-and-drop
 class PlaylistVideoInline(SortableInlineAdminMixin, admin.TabularInline):
@@ -73,6 +74,14 @@ class CouponUsageAdmin(admin.ModelAdmin):
 
 admin.site.register(Coupon, CouponAdmin)
 admin.site.register(CouponUsage, CouponUsageAdmin)
+
+class PurchaseHistoryAdmin(admin.ModelAdmin):
+    list_display = ('user', 'course', 'amount', 'status', 'purchase_date', 'razorpay_order_id')
+    search_fields = ('user__email', 'course__title', 'razorpay_order_id', 'razorpay_payment_id')
+    list_filter = ('status', 'purchase_date')
+    readonly_fields = ('purchase_date', 'razorpay_order_id', 'razorpay_payment_id')
+
+admin.site.register(PurchaseHistory, PurchaseHistoryAdmin)
 
 # Enable Token Management in Admin
 from rest_framework_simplejwt.token_blacklist.models import OutstandingToken, BlacklistedToken

@@ -1,5 +1,13 @@
 from rest_framework import serializers
-from .models import User, Course, Week, Video, UserCourse, Phase, Playlist, SuperCourse, PlaylistVideo
+from .models import User, Course, Week, Video, UserCourse, Phase, Playlist, SuperCourse, PlaylistVideo, PurchaseHistory
+
+class PurchaseHistorySerializer(serializers.ModelSerializer):
+    course_title = serializers.CharField(source='course.title', read_only=True)
+    
+    class Meta:
+        model = PurchaseHistory
+        fields = ['id', 'user', 'course', 'course_title', 'amount', 'purchase_date', 'razorpay_order_id', 'razorpay_payment_id', 'status']
+
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
