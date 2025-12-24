@@ -760,6 +760,11 @@ body {
   color: #FF0000;
 }
 
+.social-link.instagram:hover {
+  background-color: #FCEEF3;
+  color: #E1306C;
+}
+
 .social-link.attari:hover {
   background-color: #E0F2F1;
   color: #0088cc;

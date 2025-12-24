@@ -828,6 +828,7 @@ const CoursesSection = ({ language }) => {
                 <h2 className="main-heading course-section-title-split">{t.courseSectionTitle}</h2>
             </div>
 
+            {/* 
             <Nav variant="tabs" activeKey={activeTab} onSelect={(k) => setActiveTab(k)} className="course-tabs">
                 {["Pain Relief", "Strength Training", "Mobility & Flexibility", "Posture Correction", "Sports Injury"].map(category => (
                     <Nav.Item key={category}>
@@ -835,10 +836,13 @@ const CoursesSection = ({ language }) => {
                     </Nav.Item>
                 ))}
             </Nav>
+            */}
             <div className="course-tab-content">
+                {/* 
                 <h3 className="explore-heading">{t.explore} {activeTab}</h3>
                 <p>Discover top-rated programs in {activeTab} led by certified physiotherapists.</p>
                 <Button variant="outline-dark" className="explore-btn">{t.explore} {activeTab}</Button>
+                */}
 
                 <div className="carousel-wrapper mt-4">
                     <Button onClick={() => scroll('left')} variant="light" className="scroll-btn scroll-btn-left"><ChevronLeftIcon /></Button>
@@ -906,6 +910,7 @@ const AboutSection = ({ language }) => {
                     <div className="col-12 col-md-5">
                         <div className="block">
                             <img src="/logo/Aravinth's Image.png" alt="Profile" className="lifelong-image" />
+                            <p className="text-center mt-4 fw-bold" style={{ color: '#fff', fontSize: '1.4rem' }}>Dr Aravinth E BPTh/BPT</p>
                         </div>
                     </div>
                     <div className="col-12 col-md-7">
