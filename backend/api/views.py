@@ -635,6 +635,84 @@ def verify_payment(request):
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def razorpay_webhook(request):
+    """
+    Handles Razorpay Webhook events (Server-to-Server).
+    """
+    webhook_secret = settings.RAZORPAY_WEBHOOK_SECRET
+    webhook_signature = request.headers.get('X-Razorpay-Signature')
+
+    if not webhook_secret:
+         return Response({'error': 'Webhook secret not configured'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    # 1. Verify Signature
+    client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+    try:
+        # Razorpay expects the raw body for signature verification
+        # request.body is bytes in Django
+        client.utility.verify_webhook_signature(
+            request.body.decode('utf-8'),
+            webhook_signature,
+            webhook_secret
+        )
+    except Exception as e:
+        return Response({'error': 'Invalid Signature'}, status=status.HTTP_400_BAD_REQUEST)
+
+    # 2. Process Event
+    try:
+        data = request.data
+        if data.get('event') == 'payment.captured':
+            payment_entity = data['payload']['payment']['entity']
+            razorpay_order_id = payment_entity['order_id']
+            razorpay_payment_id = payment_entity['id']
+            notes = payment_entity.get('notes', {})
+            user_id = notes.get('user_id')
+            course_id = notes.get('course_id')
+
+            # 3. Idempotency Check
+            # Check if we already processed this order successfully
+            try:
+                ph = PurchaseHistory.objects.get(razorpay_order_id=razorpay_order_id)
+                if ph.status == 'SUCCESS':
+                    return Response({'status': 'Already Processed'}, status=status.HTTP_200_OK)
+                
+                # If found but not success (e.g. INITIATED/FAILED), update it
+                ph.status = 'SUCCESS'
+                ph.razorpay_payment_id = razorpay_payment_id
+                ph.save()
+            except PurchaseHistory.DoesNotExist:
+                # This is weird if we created it in create_order, but handle gracefully
+                # If user_id/course_id missing in notes, we can't do much
+                if user_id and course_id:
+                     user = User.objects.get(pk=user_id)
+                     course = Course.objects.get(pk=course_id)
+                     PurchaseHistory.objects.create(
+                         user=user,
+                         course=course,
+                         amount=str(payment_entity['amount'] / 100),
+                         razorpay_order_id=razorpay_order_id,
+                         razorpay_payment_id=razorpay_payment_id,
+                         status='SUCCESS'
+                     )
+
+            # 4. Enroll User
+            if user_id and course_id:
+                user = User.objects.get(pk=user_id)
+                course = Course.objects.get(pk=course_id)
+                if not UserCourse.objects.filter(user=user, course=course).exists():
+                    UserCourse.objects.create(user=user, course=course)
+            
+            return Response({'status': 'ok'}, status=status.HTTP_200_OK)
+        
+        return Response({'status': 'ignored'}, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        print(f"Webhook Error: {e}")
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 # --- Pain Assessment View ---
 # This view remains the same.
 

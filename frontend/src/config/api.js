@@ -2,8 +2,8 @@
 
 // VM backend (current production/test backend)
 // Set API_URL to your backend. For local dev/testing you can change this to the dev tunnel URL.
-// const API_URL = 'https://onelastmove.com/api';
-const API_URL = 'https://localhost/api';
+const API_URL = 'https://onelastmove.com/api';
+// const API_URL = 'https://localhost/api';
 
 // If you want the embedded Google Form to capture the logged-in user's email,
 // add the Google Form's prefill entry ids below for each language.
