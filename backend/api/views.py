@@ -7,7 +7,16 @@ from rest_framework import status
 from .models import PainAssessmentSubmission, Course, Video, UserCourse, SuperCourse, User, PlaylistVideo, Coupon, CouponUsage, PurchaseHistory
 from django.utils import timezone
 
-from .serializers import UserSerializer, CourseSerializer, SuperCourseSerializer
+from .serializers import UserSerializer, CourseSerializer, SuperCourseSerializer, MyTokenObtainPairSerializer, OTPVerifySerializer, ForgotPasswordSerializer, ResetPasswordSerializer
+from .models import User, Course, Week, Video, UserCourse, Phase, Playlist, SuperCourse, PainAssessmentSubmission, Coupon, CouponUsage, OTP, PurchaseHistory
+import json
+from django.utils import timezone
+from datetime import timedelta
+import random
+# from django.core.mail import send_mail # Removed in favor of Brevo
+from django.contrib.auth.hashers import make_password
+from .brevo_service import send_brevo_otp
+from django.contrib.auth.hashers import make_password
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.db import IntegrityError
 from rest_framework_simplejwt.views import TokenObtainPairView
@@ -94,26 +103,139 @@ def check_course_expiry(user):
 @permission_classes([AllowAny])
 def register_user(request):
     """
-    Handles new user registration.
+    Handles new user registration with OTP.
     """
     serializer = UserSerializer(data=request.data)
     if serializer.is_valid():
         try:
+            # Create user but set as inactive until OTP verification
             user = serializer.save()
-            refresh = RefreshToken.for_user(user)
+            user.is_active = False 
+            user.save()
+
+            # Generate OTP
+            otp_code = str(random.randint(100000, 999999))
+            OTP.objects.update_or_create(user=user, defaults={'code': otp_code})
+
+            # Send OTP Email via Brevo
+            if not send_brevo_otp(user.email, otp_code, 'Verify your email - One Last Move'):
+                 raise Exception("Failed to send OTP email via Brevo.")
+
             return Response({
-                'refresh': str(refresh),
-                'access': str(refresh.access_token),
-                'user': serializer.data
+                'message': 'Registration successful. Please verify your email with the OTP sent.',
+                'email': user.email
             }, status=status.HTTP_201_CREATED)
+
         except IntegrityError:
             return Response(
                 {'email': ['An account with this email already exists.']},
                 status=status.HTTP_400_BAD_REQUEST
             )
+        except Exception as e:
+            # Cleanup user if email sending fails
+            if 'user' in locals():
+                user.delete()
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-# --- New view to get the current user ---
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def verify_email(request):
+    """
+    Verifies the email using OTP and activates the user.
+    """
+    serializer = OTPVerifySerializer(data=request.data)
+    if serializer.is_valid():
+        email = serializer.validated_data['email']
+        otp_code = serializer.validated_data['otp']
+        
+        try:
+            user = User.objects.get(email=email)
+            otp = OTP.objects.get(user=user)
+            
+            if otp.code == otp_code and otp.is_valid():
+                user.is_active = True
+                user.save()
+                otp.delete() # OTP used once
+
+                # Auto login (generate tokens)
+                refresh = RefreshToken.for_user(user)
+                return Response({
+                    'message': 'Email verified successfully!',
+                    'refresh': str(refresh),
+                    'access': str(refresh.access_token),
+                    'user': UserSerializer(user).data
+                }, status=status.HTTP_200_OK)
+            else:
+                 return Response({'error': 'Invalid or expired OTP.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        except User.DoesNotExist:
+             return Response({'error': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
+        except OTP.DoesNotExist:
+             return Response({'error': 'OTP not found. Please resend.'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def forgot_password(request):
+    """
+    Generates an OTP for password reset.
+    """
+    serializer = ForgotPasswordSerializer(data=request.data)
+    if serializer.is_valid():
+        email = serializer.validated_data['email']
+        try:
+            user = User.objects.get(email=email)
+            
+            # Generate OTP
+            otp_code = str(random.randint(100000, 999999))
+            OTP.objects.update_or_create(user=user, defaults={'code': otp_code})
+
+            # Send OTP Email via Brevo
+            if not send_brevo_otp(user.email, otp_code, 'Reset your password - One Last Move'):
+                return Response({'error': 'Failed to send OTP email.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({'message': 'OTP sent to your email.'}, status=status.HTTP_200_OK)
+
+        except User.DoesNotExist:
+            # For security, we might want to return 200 even if user not found, 
+            # but for this specific UX requirement let's be explicit or just 404
+            return Response({'error': 'User with this email does not exist.'}, status=status.HTTP_404_NOT_FOUND)
+            
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def reset_password(request):
+    """
+    Verifies OTP and resets the password.
+    """
+    serializer = ResetPasswordSerializer(data=request.data)
+    if serializer.is_valid():
+        email = serializer.validated_data['email']
+        otp_code = serializer.validated_data['otp']
+        new_password = serializer.validated_data['new_password']
+        
+        try:
+            user = User.objects.get(email=email)
+            otp = OTP.objects.get(user=user)
+            
+            if otp.code == otp_code and otp.is_valid():
+                user.set_password(new_password)
+                user.save()
+                otp.delete()
+                
+                return Response({'message': 'Password reset successfully. You can now login.'}, status=status.HTTP_200_OK)
+            else:
+                 return Response({'error': 'Invalid or expired OTP.'}, status=status.HTTP_400_BAD_REQUEST)
+                 
+        except User.DoesNotExist:
+             return Response({'error': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
+        except OTP.DoesNotExist:
+             return Response({'error': 'OTP not found.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_current_user(request):
@@ -512,6 +634,84 @@ def verify_payment(request):
          return Response({'error': 'Course not found'}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def razorpay_webhook(request):
+    """
+    Handles Razorpay Webhook events (Server-to-Server).
+    """
+    webhook_secret = settings.RAZORPAY_WEBHOOK_SECRET
+    webhook_signature = request.headers.get('X-Razorpay-Signature')
+
+    if not webhook_secret:
+         return Response({'error': 'Webhook secret not configured'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    # 1. Verify Signature
+    client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+    try:
+        # Razorpay expects the raw body for signature verification
+        # request.body is bytes in Django
+        client.utility.verify_webhook_signature(
+            request.body.decode('utf-8'),
+            webhook_signature,
+            webhook_secret
+        )
+    except Exception as e:
+        return Response({'error': 'Invalid Signature'}, status=status.HTTP_400_BAD_REQUEST)
+
+    # 2. Process Event
+    try:
+        data = request.data
+        if data.get('event') == 'payment.captured':
+            payment_entity = data['payload']['payment']['entity']
+            razorpay_order_id = payment_entity['order_id']
+            razorpay_payment_id = payment_entity['id']
+            notes = payment_entity.get('notes', {})
+            user_id = notes.get('user_id')
+            course_id = notes.get('course_id')
+
+            # 3. Idempotency Check
+            # Check if we already processed this order successfully
+            try:
+                ph = PurchaseHistory.objects.get(razorpay_order_id=razorpay_order_id)
+                if ph.status == 'SUCCESS':
+                    return Response({'status': 'Already Processed'}, status=status.HTTP_200_OK)
+                
+                # If found but not success (e.g. INITIATED/FAILED), update it
+                ph.status = 'SUCCESS'
+                ph.razorpay_payment_id = razorpay_payment_id
+                ph.save()
+            except PurchaseHistory.DoesNotExist:
+                # This is weird if we created it in create_order, but handle gracefully
+                # If user_id/course_id missing in notes, we can't do much
+                if user_id and course_id:
+                     user = User.objects.get(pk=user_id)
+                     course = Course.objects.get(pk=course_id)
+                     PurchaseHistory.objects.create(
+                         user=user,
+                         course=course,
+                         amount=str(payment_entity['amount'] / 100),
+                         razorpay_order_id=razorpay_order_id,
+                         razorpay_payment_id=razorpay_payment_id,
+                         status='SUCCESS'
+                     )
+
+            # 4. Enroll User
+            if user_id and course_id:
+                user = User.objects.get(pk=user_id)
+                course = Course.objects.get(pk=course_id)
+                if not UserCourse.objects.filter(user=user, course=course).exists():
+                    UserCourse.objects.create(user=user, course=course)
+            
+            return Response({'status': 'ok'}, status=status.HTTP_200_OK)
+        
+        return Response({'status': 'ignored'}, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        print(f"Webhook Error: {e}")
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 # --- Pain Assessment View ---
 # This view remains the same.

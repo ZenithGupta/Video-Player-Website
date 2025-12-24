@@ -23,6 +23,9 @@ urlpatterns = [
 
     # User Authentication Endpoints
     path('register/', views.register_user, name='register_user'),
+    path('verify-email/', views.verify_email, name='verify_email'),
+    path('forgot-password/', views.forgot_password, name='forgot_password'),
+    path('reset-password/', views.reset_password, name='reset_password'),
     path('user/', views.get_current_user, name='get_current_user'),
     path('assessment-submitted/', views.get_current_user, name='get_current_user'),
     path('token/', MyTokenObtainPairView.as_view(), name='token_obtain_pair'), # Use your custom view
@@ -32,5 +35,6 @@ urlpatterns = [
     path('enroll-free-trial/', views.enroll_free_trial, name='enroll_free_trial'),
     path('create-order/', views.create_order, name='create_order'),
     path('verify-payment/', views.verify_payment, name='verify_payment'),
+    path('webhook/razorpay/', views.razorpay_webhook, name='razorpay_webhook'),
     path('validate-coupon/', views.validate_coupon, name='validate_coupon'),
 ]

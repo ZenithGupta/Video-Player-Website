@@ -24,7 +24,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-_0_ef8fp(l(&y0_rr+m47qz&blu&%!deaj-gj6+rv_#-+qm3#m'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
 # ALLOWED_HOSTS = ["0.0.0.0"]
@@ -135,10 +134,10 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Allow requests from your React development server
-# CORS_ALLOWED_ORIGINS = [
-#     "https://onelastmove.com",
-# ]
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOWED_ORIGINS = [
+    "https://onelastmove.com",
+]
+# CORS_ALLOW_ALL_ORIGINS = True
 
 CSRF_TRUSTED_ORIGINS = ['https://onelastmove.com']
 
@@ -175,3 +174,14 @@ GOOGLE_APPS_SCRIPT_SECRET = 'ThisIsMySecureKeyForGoogleForms123'
 # Razorpay Configuration
 RAZORPAY_KEY_ID = os.environ.get('RAZORPAY_KEY_ID')
 RAZORPAY_KEY_SECRET = os.environ.get('RAZORPAY_KEY_SECRET')
+RAZORPAY_WEBHOOK_SECRET = os.environ.get('RAZORPAY_WEBHOOK_SECRET')
+
+# Email Configuration (Brevo)
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp-relay.brevo.com'
+EMAIL_USE_TLS = True
+EMAIL_PORT = 587
+EMAIL_HOST_USER = os.environ.get('BREVO_API_USER')
+EMAIL_HOST_PASSWORD = os.environ.get('BREVO_API_KEY')
+DEFAULT_FROM_EMAIL = 'noreply@onelastmove.com'
+
