@@ -513,6 +513,66 @@ def verify_payment(request):
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
+
+# --- Razorpay Webhook View ---
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+@csrf_exempt
+def razorpay_webhook(request):
+    """
+    Handles Razorpay Webhooks.
+    """
+    webhook_secret = settings.RAZORPAY_WEBHOOK_SECRET
+    webhook_signature = request.headers.get('X-Razorpay-Signature')
+
+    if not webhook_signature:
+        return Response({'error': 'Missing Signature'}, status=status.HTTP_400_BAD_REQUEST)
+
+    client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+
+    try:
+        # Verify Webhook Signature
+        client.utility.verify_webhook_signature(request.body.decode('utf-8'), webhook_signature, webhook_secret)
+        
+        event = request.data.get('event')
+        payload = request.data.get('payload', {})
+        
+        if event == 'payment.captured':
+            payment = payload.get('payment', {}).get('entity', {})
+            razorpay_order_id = payment.get('order_id')
+            razorpay_payment_id = payment.get('id')
+            
+            if razorpay_order_id:
+                try:
+                    ph = PurchaseHistory.objects.get(razorpay_order_id=razorpay_order_id)
+                    
+                    # If already success, just return
+                    if ph.status == 'SUCCESS':
+                         return Response({'status': 'ok'}, status=status.HTTP_200_OK)
+
+                    ph.status = 'SUCCESS'
+                    ph.razorpay_payment_id = razorpay_payment_id
+                    ph.save()
+                    
+                    # Enroll User
+                    user = ph.user
+                    course = ph.course
+                    if not UserCourse.objects.filter(user=user, course=course).exists():
+                        UserCourse.objects.create(user=user, course=course)
+                        
+                except PurchaseHistory.DoesNotExist:
+                     print(f"Webhook: PurchaseHistory not found for order {razorpay_order_id}")
+                     pass
+        
+        return Response({'status': 'ok'}, status=status.HTTP_200_OK)
+
+    except razorpay.errors.SignatureVerificationError:
+        return Response({'error': 'Invalid Signature'}, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        print(f"Webhook Error: {e}")
+        return Response({'error': 'Internal Server Error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 # --- Pain Assessment View ---
 # This view remains the same.
 
