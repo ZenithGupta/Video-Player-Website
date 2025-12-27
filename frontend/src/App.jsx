@@ -910,7 +910,8 @@ const AboutSection = ({ language }) => {
                     <div className="col-12 col-md-5">
                         <div className="block">
                             <img src="/logo/Aravinth's Image.png" alt="Profile" className="lifelong-image" />
-                            <p className="text-center mt-4 fw-bold" style={{ color: '#fff', fontSize: '1.4rem' }}>Dr Aravinth E BPTh/BPT</p>
+                            <p className="text-center mt-4 fw-bold" style={{ color: '#fff', fontSize: '1.4rem' }}>Dr.E. Aravinth PT Bpt, Pgdfn
+                                <br />Founder of PHYSIOPRIDE</p>
                         </div>
                     </div>
                     <div className="col-12 col-md-7">
